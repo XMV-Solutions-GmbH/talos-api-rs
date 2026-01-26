@@ -30,8 +30,8 @@ DISMISS_STALE_REVIEWS="${DISMISS_STALE_REVIEWS:-true}"
 ENFORCE_ADMINS="${ENFORCE_ADMINS:-true}"
 
 # Required status checks (must match GitHub "checks" names exactly)
-# Default: workflow "ci" + job names: fmt/clippy/test
-STATUS_CHECKS_DEFAULT=("ci / fmt" "ci / clippy" "ci / test")
+# Default: Job names only: fmt, clippy, test
+STATUS_CHECKS_DEFAULT=("fmt" "clippy" "test")
 STATUS_CHECKS=("${STATUS_CHECKS_DEFAULT[@]}")
 
 # Optional: allow certain actors to push to main besides team
