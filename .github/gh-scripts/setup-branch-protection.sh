@@ -102,37 +102,48 @@ echo "${CHECKS_JSON}" | jq -r '.[]' | sed 's/^/   - /'
 # ---------------------------
 echo ">> Applying branch protection to ${FULL_REPO}:${BRANCH}"
 
-# Note: PUT replaces the configuration.
-gh api -X PUT "repos/${FULL_REPO}/branches/${BRANCH}/protection" \
-  -H "Accept: application/vnd.github+json" \
-  -F "enforce_admins=${ENFORCE_ADMINS}" \
-  -F "required_status_checks.strict=true" \
-  -F "required_status_checks.contexts=$(echo "${CHECKS_JSON}" | jq -r '. | join(",")')" \
-  -F "required_pull_request_reviews.required_approving_review_count=${REQUIRED_APPROVALS}" \
-  -F "required_pull_request_reviews.dismiss_stale_reviews=${DISMISS_STALE_REVIEWS}" \
-  -F "required_pull_request_reviews.require_code_owner_reviews=${REQUIRE_CODEOWNER_REVIEWS}" \
-  -F "restrictions.teams[]=${TEAM_SLUG}" \
-  $(jq -r '.[] | @sh' <<<"${USERS_JSON}" | sed -e "s/^/'restrictions.users[]=/;s/'$//" | xargs -I{} echo -F {}) \
-  $(jq -r '.[] | @sh' <<<"${APPS_JSON}"  | sed -e "s/^/'restrictions.apps[]=/;s/'$//"  | xargs -I{} echo -F {}) \
-  >/dev/null
+# Build the simplified JSON payload for the PUT request
+# Note: GitHub API strictness requires proper JSON types (booleans as true/false, not strings)
+PAYLOAD=$(jq -n \
+  --arg enforce_admins "$ENFORCE_ADMINS" \
+  --arg required_approvals "$REQUIRED_APPROVALS" \
+  --arg dismiss_stale "$DISMISS_STALE_REVIEWS" \
+  --arg code_owner "$REQUIRE_CODEOWNER_REVIEWS" \
+  --arg team_slug "$TEAM_SLUG" \
+  --argjson checks "$CHECKS_JSON" \
+  --argjson extra_users "$USERS_JSON" \
+  --argjson extra_apps "$APPS_JSON" \
+  '{
+    required_status_checks: {
+      strict: true,
+      contexts: $checks
+    },
+    enforce_admins: ($enforce_admins == "true"),
+    required_pull_request_reviews: {
+      dismiss_stale_reviews: ($dismiss_stale == "true"),
+      require_code_owner_reviews: ($code_owner == "true"),
+      required_approving_review_count: ($required_approvals | tonumber),
+      require_last_push_approval: true
+    },
+    restrictions: {
+      users: $extra_users,
+      teams: [$team_slug],
+      apps: $extra_apps
+    },
+    required_conversation_resolution: true,
+    allow_force_pushes: false,
+    allow_deletions: false
+  }'
+)
 
-echo ">> Requiring conversation resolution"
-gh api -X PATCH "repos/${FULL_REPO}/branches/${BRANCH}/protection/required_conversation_resolution" \
-  -H "Accept: application/vnd.github+json" \
-  -F "enabled=true" \
-  >/dev/null
+echo ">> Config Payload generated"
 
-echo ">> Disallowing force pushes"
-gh api -X POST "repos/${FULL_REPO}/branches/${BRANCH}/protection/allow_force_pushes" \
+# Send the request
+echo "$PAYLOAD" | gh api -X PUT "repos/${FULL_REPO}/branches/${BRANCH}/protection" \
   -H "Accept: application/vnd.github+json" \
-  -F "enabled=false" \
-  >/dev/null
-
-echo ">> Disallowing branch deletions"
-gh api -X POST "repos/${FULL_REPO}/branches/${BRANCH}/protection/allow_deletions" \
-  -H "Accept: application/vnd.github+json" \
-  -F "enabled=false" \
+  --input - \
   >/dev/null
 
 echo ">> Done."
+
 echo ">> NOTE: If checks don't exist yet, GitHub will not be able to enforce them until the workflow runs at least once."
