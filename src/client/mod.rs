@@ -2,8 +2,9 @@
 
 use crate::api::version::version_service_client::VersionServiceClient;
 use crate::error::Result;
+use hyper_util::rt::TokioIo;
 use std::sync::Arc;
-use tonic::transport::{Certificate, Channel, ClientTlsConfig, Identity};
+use tonic::transport::{Certificate, Channel, ClientTlsConfig, Endpoint, Identity};
 
 #[derive(Clone, Debug)]
 pub struct TalosClientConfig {
@@ -47,7 +48,7 @@ impl TalosClient {
 
         // TLS Configuration
         if config.insecure {
-            // Insecure mode: trust all certs
+            // Insecure mode: trust all certs via custom connector logic
             let mut tls_config = rustls::ClientConfig::builder()
                 .with_root_certificates(rustls::RootCertStore::empty())
                 .with_no_client_auth();
@@ -59,10 +60,40 @@ impl TalosClient {
 
             // Tonic requires ALPN for gRPC (h2)
             tls_config.alpn_protocols = vec![b"h2".to_vec()];
+            let tls_config = Arc::new(tls_config);
+            let connector = tokio_rustls::TlsConnector::from(tls_config);
 
-            let tls = ClientTlsConfig::new().rustls_client_config(tls_config);
+            let endpoint_str_clone = if config.endpoint.starts_with("http") {
+                config.endpoint.clone()
+            } else {
+                format!("https://{}", config.endpoint)
+            };
 
-            channel_builder = channel_builder.tls_config(tls)?;
+            let channel = Endpoint::from_shared(endpoint_str_clone)
+                .map_err(|e| crate::error::TalosError::Config(e.to_string()))?
+                .connect_with_connector(tower::service_fn(move |uri: tonic::transport::Uri| {
+                    let connector = connector.clone();
+                    async move {
+                        let host = uri.host().unwrap_or("127.0.0.1");
+                        let port = uri.port_u16().unwrap_or(50000);
+                        let addr = format!("{}:{}", host, port);
+
+                        let tcp = tokio::net::TcpStream::connect(addr).await?;
+
+                        // We use a dummy server name because verification is disabled anyway
+                        let server_name = rustls::pki_types::ServerName::try_from("any").unwrap();
+
+                        let tls_stream = connector.connect(server_name, tcp).await?;
+                        Ok::<_, std::io::Error>(TokioIo::new(tls_stream))
+                    }
+                }))
+                .await?;
+
+            return Ok(Self {
+                #[allow(dead_code)]
+                config,
+                channel,
+            });
         } else if config.endpoint.starts_with("https") {
             // Strict mode (mTLS)
             let mut tls = ClientTlsConfig::new();
@@ -113,7 +144,7 @@ impl rustls::client::danger::ServerCertVerifier for NoVerifier {
         _server_name: &rustls::pki_types::ServerName<'_>,
         _ocsp_response: &[u8],
         _now: rustls::pki_types::UnixTime,
-    ) -> Result<rustls::client::danger::ServerCertVerified, rustls::Error> {
+    ) -> std::result::Result<rustls::client::danger::ServerCertVerified, rustls::Error> {
         Ok(rustls::client::danger::ServerCertVerified::assertion())
     }
 
@@ -122,7 +153,7 @@ impl rustls::client::danger::ServerCertVerifier for NoVerifier {
         _message: &[u8],
         _cert: &rustls::pki_types::CertificateDer<'_>,
         _dss: &rustls::DigitallySignedStruct,
-    ) -> Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
+    ) -> std::result::Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
         Ok(rustls::client::danger::HandshakeSignatureValid::assertion())
     }
 
@@ -131,7 +162,7 @@ impl rustls::client::danger::ServerCertVerifier for NoVerifier {
         _message: &[u8],
         _cert: &rustls::pki_types::CertificateDer<'_>,
         _dss: &rustls::DigitallySignedStruct,
-    ) -> Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
+    ) -> std::result::Result<rustls::client::danger::HandshakeSignatureValid, rustls::Error> {
         Ok(rustls::client::danger::HandshakeSignatureValid::assertion())
     }
 
