@@ -1,6 +1,6 @@
 # TODO
 
-> **Updated**: 2025-01-26 - ApplyConfiguration implemented, ED25519 fixed.
+> **Updated**: 2025-01-26 - All Alpha-blocking features complete! Reset implemented.
 
 ## Phase 1: Core Foundation ✅ COMPLETE
 
@@ -15,7 +15,7 @@
 
 ---
 
-## Phase 2: Alpha Release (Cluster Lifecycle Core) 🔄 IN PROGRESS
+## Phase 2: Alpha Release (Cluster Lifecycle Core) ✅ COMPLETE
 
 ### ✅ Critical Blockers (RESOLVED)
 
@@ -25,7 +25,7 @@
   - ✅ Full mTLS working with Talos clusters
   - Merged: PR #7
 
-### Priority 1: Alpha-Blocking Features
+### ✅ Priority 1: Alpha-Blocking Features (ALL COMPLETE)
 
 - [x] **ApplyConfiguration**
   - ✅ Typed wrappers: `ApplyMode`, `ApplyConfigurationRequest`, `ApplyConfigurationResponse`
@@ -51,10 +51,13 @@
   - ✅ Unit tests (5 tests)
   - ✅ Integration test (retrieves kubeconfig, validates structure)
 
-- [ ] **Reset** (graceful)
-  - Graceful node shutdown/reset
-  - Options: graceful, reboot, system_disk_wiping
-  - Used for destroy and scale-down
+- [x] **Reset** (destructive)
+  - ✅ Typed wrappers: `WipeMode`, `ResetPartitionSpec`, `ResetRequest`, `ResetResponse`, `ResetResult`
+  - ✅ Builder pattern with presets: `graceful()`, `force()`, `halt()`
+  - ✅ High-level `TalosClient::reset()` method
+  - ✅ Convenience `reset_graceful()` method
+  - ✅ Unit tests (9 tests)
+  - ✅ Integration test (API verification only - destructive operation skipped)
 
 ### Priority 2: Beta Features
 

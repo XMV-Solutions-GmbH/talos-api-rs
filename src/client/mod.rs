@@ -3,11 +3,12 @@
 use crate::api::machine::machine_service_client::MachineServiceClient;
 use crate::api::machine::ApplyConfigurationRequest as ProtoApplyConfigRequest;
 use crate::api::machine::BootstrapRequest as ProtoBootstrapRequest;
+use crate::api::machine::ResetRequest as ProtoResetRequest;
 use crate::api::version::version_service_client::VersionServiceClient;
 use crate::error::Result;
 use crate::resources::{
     ApplyConfigurationRequest, ApplyConfigurationResponse, BootstrapRequest, BootstrapResponse,
-    KubeconfigResponse,
+    KubeconfigResponse, ResetRequest, ResetResponse,
 };
 use hyper_util::rt::TokioIo;
 use rustls::pki_types::{CertificateDer, PrivateKeyDer, ServerName};
@@ -481,6 +482,64 @@ impl TalosClient {
         }
 
         Ok(KubeconfigResponse::new(data, node))
+    }
+
+    /// Reset a Talos node, optionally wiping disks.
+    ///
+    /// # Warning
+    ///
+    /// This is a **destructive** operation. The node will be reset and may
+    /// lose all data depending on the wipe mode configured.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - The reset request configuration
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api::{TalosClient, TalosClientConfig, ResetRequest};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = TalosClientConfig::new("https://192.168.1.100:50000".parse()?);
+    /// let client = TalosClient::new(config).await?;
+    ///
+    /// // Graceful reset (leaves etcd cluster first)
+    /// let response = client.reset(ResetRequest::graceful()).await?;
+    ///
+    /// // Force reset with full disk wipe
+    /// let response = client.reset(ResetRequest::force()).await?;
+    ///
+    /// // Custom reset
+    /// let response = client.reset(
+    ///     ResetRequest::builder()
+    ///         .graceful(true)
+    ///         .reboot(true)
+    ///         .build()
+    /// ).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn reset(&self, request: ResetRequest) -> Result<ResetResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoResetRequest = request.into();
+        let response = client.reset(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(ResetResponse::from(inner))
+    }
+
+    /// Gracefully reset a Talos node.
+    ///
+    /// This is a convenience method that performs a graceful reset, which:
+    /// - Leaves the etcd cluster gracefully (for control plane nodes)
+    /// - Reboots after reset
+    /// - Does not wipe disks
+    ///
+    /// For more control, use [`reset`](Self::reset) with a custom [`ResetRequest`].
+    pub async fn reset_graceful(&self) -> Result<ResetResponse> {
+        self.reset(ResetRequest::graceful()).await
     }
 }
 
