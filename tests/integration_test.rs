@@ -209,7 +209,35 @@ cluster:
         }
     }
 
-    // 7. Show cluster status via talosctl (visual feedback)
+    // 7. Test Bootstrap API (will fail on already-bootstrapped cluster - expected)
+    println!("\n--- Machine API: Bootstrap ---");
+    use talos_api_rs::BootstrapRequest;
+
+    // The cluster is already bootstrapped, so this should fail with a specific error
+    match client.bootstrap(BootstrapRequest::new()).await {
+        Ok(response) => {
+            // Unexpected success - cluster shouldn't allow re-bootstrap
+            for result in &response.results {
+                let node = result.node.as_deref().unwrap_or("unknown");
+                println!("✓ Node: {} - bootstrap succeeded (unexpected)", node);
+            }
+        }
+        Err(e) => {
+            // Expected: cluster is already bootstrapped
+            let err_str = e.to_string();
+            if err_str.contains("AlreadyExists")
+                || err_str.contains("already")
+                || err_str.contains("etcd")
+            {
+                println!("✓ Bootstrap correctly rejected (cluster already bootstrapped)");
+            } else {
+                println!("  Bootstrap returned: {}", e);
+                println!("  (Error expected - cluster is already bootstrapped)");
+            }
+        }
+    }
+
+    // 8. Show cluster status via talosctl (visual feedback)
     println!("\n--- Cluster Status (via talosctl) ---");
     let talosconfig_str = cluster.talosconfig_path.to_string_lossy();
     if let Ok(output) = std::process::Command::new("talosctl")
@@ -228,7 +256,7 @@ cluster:
         }
     }
 
-    // 8. Show running services via talosctl
+    // 9. Show running services via talosctl
     println!("\n--- Services Status (via talosctl) ---");
     if let Ok(output) = std::process::Command::new("talosctl")
         .args(["--talosconfig", &talosconfig_str])

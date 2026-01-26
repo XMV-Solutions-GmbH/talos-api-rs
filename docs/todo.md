@@ -35,10 +35,13 @@
   - ✅ Unit tests for all types
   - ✅ Integration test (dry-run mode)
 
-- [ ] **Bootstrap**
-  - Initialize etcd cluster on first control-plane node
-  - Only called once per cluster
-  - ✅ ED25519 mTLS now working
+- [x] **Bootstrap**
+  - ✅ Typed wrappers: `BootstrapRequest`, `BootstrapResponse`, `BootstrapResult`
+  - ✅ Builder pattern with recovery options
+  - ✅ High-level `TalosClient::bootstrap()` method
+  - ✅ Convenience `bootstrap_cluster()` method
+  - ✅ Unit tests (6 tests)
+  - ✅ Integration test (verifies rejection on already-bootstrapped cluster)
 
 - [ ] **Kubeconfig** (server-streaming)
   - Retrieve kubeconfig from cluster

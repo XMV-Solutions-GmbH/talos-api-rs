@@ -2,9 +2,12 @@
 
 use crate::api::machine::machine_service_client::MachineServiceClient;
 use crate::api::machine::ApplyConfigurationRequest as ProtoApplyConfigRequest;
+use crate::api::machine::BootstrapRequest as ProtoBootstrapRequest;
 use crate::api::version::version_service_client::VersionServiceClient;
 use crate::error::Result;
-use crate::resources::{ApplyConfigurationRequest, ApplyConfigurationResponse};
+use crate::resources::{
+    ApplyConfigurationRequest, ApplyConfigurationResponse, BootstrapRequest, BootstrapResponse,
+};
 use hyper_util::rt::TokioIo;
 use rustls::pki_types::{CertificateDer, PrivateKeyDer, ServerName};
 use std::sync::Arc;
@@ -368,6 +371,59 @@ impl TalosClient {
             .dry_run(dry_run)
             .build();
         self.apply_configuration(request).await
+    }
+
+    /// Bootstrap the etcd cluster on this node.
+    ///
+    /// This initializes a new etcd cluster. **This should only be called ONCE**
+    /// on the first control-plane node when creating a new Talos cluster.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api::{TalosClient, TalosClientConfig, BootstrapRequest};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let client = TalosClient::new(TalosClientConfig::default()).await?;
+    ///
+    /// // Bootstrap a new cluster
+    /// let response = client.bootstrap(BootstrapRequest::new()).await?;
+    /// println!("Bootstrap complete: {:?}", response.first());
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// # Recovery
+    ///
+    /// To recover from an etcd snapshot (uploaded via `EtcdRecover` RPC):
+    ///
+    /// ```no_run
+    /// use talos_api::{TalosClient, TalosClientConfig, BootstrapRequest};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let client = TalosClient::new(TalosClientConfig::default()).await?;
+    /// let response = client.bootstrap(BootstrapRequest::recovery()).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// - The node is not a control-plane node
+    /// - etcd is already bootstrapped
+    /// - Network/connection issues
+    pub async fn bootstrap(&self, request: BootstrapRequest) -> Result<BootstrapResponse> {
+        let proto_request: ProtoBootstrapRequest = request.into();
+        let response = self.machine().bootstrap(proto_request).await?.into_inner();
+        Ok(response.into())
+    }
+
+    /// Bootstrap a new etcd cluster (convenience method).
+    ///
+    /// Equivalent to `bootstrap(BootstrapRequest::new())`.
+    pub async fn bootstrap_cluster(&self) -> Result<BootstrapResponse> {
+        self.bootstrap(BootstrapRequest::new()).await
     }
 }
 

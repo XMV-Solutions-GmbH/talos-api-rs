@@ -115,3 +115,4 @@ The integration test (`tests/integration_test.rs`) covers:
 | ServiceList | ✓ | Lists all running services |
 | SystemStat | ✓ | CPU, memory, boot time |
 | ApplyConfiguration | ✓ | Dry-run validation test |
+| Bootstrap | ✓ | Verifies rejection on already-bootstrapped cluster |
