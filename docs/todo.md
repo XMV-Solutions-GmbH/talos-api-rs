@@ -1,5 +1,7 @@
 # TODO
 
+> **Updated**: 2026-01-26 - Reprioritized based on cluster-lifecycle-manager requirements.
+
 ## Phase 1: Core Foundation ✅ COMPLETE
 
 - [x] Project scaffolding
@@ -13,74 +15,78 @@
 
 ---
 
-## Phase 2: Extended Machine Operations 🔄 IN PROGRESS
+## Phase 2: Alpha Release (Cluster Lifecycle Core) 🔄 IN PROGRESS
 
-### Critical Blockers
+### 🔴 Critical Blockers
 
-- [ ] **ED25519 Certificate Support** 🔴
+- [ ] **ED25519 Certificate Support**
   - Talos uses ED25519 for mTLS certificates
   - Current rustls config doesn't properly handle ED25519 client certs
   - Options: Configure CryptoProvider, switch to native-tls, or use ring
-  - Blocks: Full mTLS authentication
+  - **Blocks**: Bootstrap, Kubeconfig, Reset, all mTLS operations
+  - **Priority**: MUST resolve before Alpha
 
-### Machine Config
+### Priority 1: Alpha-Blocking Features
 
-- [ ] ApplyConfiguration - Apply machine config changes
-- [ ] Reset - Factory reset with options
-- [ ] Rollback - Revert to previous config
+- [ ] **ApplyConfiguration (insecure mode)**
+  - Apply machine config to nodes in maintenance mode
+  - Uses `--insecure` flag (no mTLS needed)
+  - Input: machineconfig YAML, node IP
 
-### System Information
+- [ ] **Bootstrap**
+  - Initialize etcd cluster on first control-plane node
+  - Requires mTLS (blocked by ED25519)
+  - Only called once per cluster
 
-- [ ] Memory - Detailed memory statistics
-- [ ] CPUInfo - CPU details
-- [ ] CPUFreqStats - CPU frequency info
-- [ ] LoadAvg - System load averages
-- [ ] DiskStats - Disk I/O statistics
-- [ ] Mounts - Mounted filesystems
-- [ ] NetworkDeviceStats - Network interface stats
-- [ ] Processes - Running process list
-- [ ] Containers - Container information
-- [ ] Stats - Container resource stats
+- [ ] **Kubeconfig** (server-streaming)
+  - Retrieve kubeconfig from cluster
+  - Requires mTLS
+  - Returns streaming response
 
-### Streaming APIs (requires special handling)
+- [ ] **Reset** (graceful)
+  - Graceful node shutdown/reset
+  - Options: graceful, reboot, system_disk_wiping
+  - Used for destroy and scale-down
 
-- [ ] Logs - Service log streaming (server-streaming)
-- [ ] LogsContainers - Container log streaming
-- [ ] Dmesg - Kernel messages (server-streaming)
-- [ ] Events - Event stream (server-streaming)
+### Priority 2: Beta Features
 
-### File Operations (streaming)
+- [ ] **Health Check API**
+  - Pre-flight checks before operations
+  - Node health monitoring
+  - Cluster-wide health status
 
-- [ ] List - Directory listing (server-streaming)
-- [ ] Read - File content (server-streaming)
-- [ ] Copy - Copy files (server-streaming)
-- [ ] DiskUsage - Disk usage info (server-streaming)
+- [ ] **EtcdRemoveMemberByID**
+  - Remove control-plane node from etcd
+  - Required for CP scale-down
+  - Must remove before node reset
 
-### Service Control
+- [ ] **Dmesg** (server-streaming)
+  - Kernel message buffer
+  - Diagnostics and troubleshooting
+  - Streaming API
 
-- [ ] ServiceStart - Start a service
-- [ ] ServiceStop - Stop a service
-- [ ] ServiceRestart - Restart a service
-- [ ] Restart - Restart machined
+### Priority 3: Production Features
 
-### Upgrade & Maintenance
+- [ ] **Upgrade**
+  - Trigger Talos version upgrade
+  - Rolling upgrade support
+  - Version verification
 
-- [ ] Upgrade - Trigger Talos upgrade
-- [ ] ImageList - List container images
-- [ ] ImagePull - Pull container images
+### Out of Scope (CLI-only, not gRPC)
+
+These are local CLI operations, NOT gRPC APIs:
+
+- `talosctl gen config` - Generates YAML locally
+- `talosctl config endpoint/node` - Local talosconfig manipulation  
+- `talosctl cluster create/destroy` - Docker provider (testkit only)
 
 ---
 
-## Phase 3: Cluster & etcd Operations
-
-### Bootstrap
-
-- [ ] Bootstrap - Initialize etcd cluster (critical for new clusters)
+## Phase 3: Extended APIs
 
 ### etcd Operations
 
 - [ ] EtcdMemberList - List etcd members
-- [ ] EtcdRemoveMemberByID - Remove member by ID
 - [ ] EtcdLeaveCluster - Gracefully leave cluster
 - [ ] EtcdForfeitLeadership - Transfer leadership
 - [ ] EtcdStatus - etcd health and stats
@@ -90,21 +96,42 @@
 - [ ] EtcdSnapshot - Backup etcd (server-streaming)
 - [ ] EtcdRecover - Restore etcd (client-streaming)
 
-### Cluster Configuration
+### Service & Logs
 
-- [ ] Kubeconfig - Generate kubeconfig (server-streaming)
+- [ ] ServiceStart - Start a service
+- [ ] ServiceStop - Stop a service
+- [ ] ServiceRestart - Restart a service
+- [ ] Logs - Service log streaming (server-streaming)
+- [ ] LogsContainers - Container log streaming
+- [ ] Events - Event stream (server-streaming)
+
+### System Information
+
+- [ ] Memory - Detailed memory statistics
+- [ ] CPUInfo - CPU details
+- [ ] DiskStats - Disk I/O statistics
+- [ ] Mounts - Mounted filesystems
+- [ ] NetworkDeviceStats - Network interface stats
+- [ ] Processes - Running process list
+- [ ] LoadAvg - System load averages
+
+### File Operations (streaming)
+
+- [ ] List - Directory listing (server-streaming)
+- [ ] Read - File content (server-streaming)
+- [ ] Copy - Copy files (server-streaming)
+- [ ] DiskUsage - Disk usage info (server-streaming)
+
+### Advanced
+
+- [ ] Rollback - Revert to previous config
 - [ ] GenerateClientConfiguration - Generate talosconfig
-
-### Advanced Diagnostics
-
 - [ ] PacketCapture - Network capture (server-streaming)
 - [ ] Netstat - Network connections
-- [ ] MetaWrite - Write metadata
-- [ ] MetaDelete - Delete metadata
 
 ---
 
-## Phase 4: Production Readiness (Future)
+## Phase 4: Production Readiness & crates.io
 
 ### Connection Management
 
@@ -134,12 +161,14 @@
 - [ ] Comprehensive documentation
 - [ ] More examples
 
-### Release
+### Release Preparation
 
 - [ ] crates.io publication
 - [ ] Semantic versioning
 - [ ] Changelog automation
 - [ ] API stability guarantees
+- [ ] MSRV (Minimum Supported Rust Version) policy
+- [ ] docs.rs documentation
 
 ---
 
@@ -148,12 +177,14 @@
 - [x] README with disclaimer
 - [x] LICENSE-MIT
 - [x] LICENSE-APACHE
-- [ ] CONTRIBUTING (needs expansion)
-- [ ] CODE_OF_CONDUCT (needs expansion)
-- [ ] SECURITY (needs expansion)
+- [x] CONTRIBUTING.md
+- [x] CODE_OF_CONDUCT.md
+- [x] SECURITY.md
 - [x] CI pipelines (Tests/Lint)
 - [ ] Release pipelines (Build/Publish)
 - [ ] Automated dependency updates (Dependabot)
+- [ ] CHANGELOG.md
+- [ ] Release checklist documentation
 
 ---
 
@@ -161,15 +192,15 @@
 
 ### 🔴 Critical
 
-| Issue | Description | Status |
-|-------|-------------|--------|
-| ED25519 mTLS | Talos ED25519 certs not working with rustls | Open |
+| Issue | Description | Status | Blocks |
+|-------|-------------|--------|--------|
+| ED25519 mTLS | Talos ED25519 certs not working with rustls | Open | Phase 2 Alpha |
 
 ### 🟡 Medium
 
 | Issue | Description | Status |
 |-------|-------------|--------|
-| Streaming APIs | Server-streaming gRPC not implemented | Open |
+| Server-streaming APIs | gRPC streaming not implemented | Open |
 | Client-streaming | EtcdRecover needs client streaming | Open |
 | Multi-node targeting | gRPC metadata for node selection | Open |
 
@@ -184,7 +215,7 @@
 
 ## Testing Checklist
 
-### Unit Tests
+### Unit Tests (Phase 1) ✅
 
 | Area | Tests | Status |
 |------|-------|--------|
@@ -194,22 +225,58 @@
 | Machine client type | compile-time check | ✅ |
 | Machine types | request/response construction | ✅ |
 
-### Integration Tests (Harness)
+### Integration Tests (Phase 1) ✅
 
 | Area | Tests | Status |
 |------|-------|--------|
 | Cluster lifecycle | create, connect, destroy | ✅ |
 | Version API | real cluster call | ✅ |
-| Hostname API | real cluster call | ✅ (blocked by mTLS) |
-| ServiceList API | real cluster call | ✅ (blocked by mTLS) |
-| SystemStat API | real cluster call | ✅ (blocked by mTLS) |
-| talosctl commands | visual verification | ✅ |
+| Hostname API | real cluster call | ⚠️ (mTLS blocked) |
+| ServiceList API | real cluster call | ⚠️ (mTLS blocked) |
+| SystemStat API | real cluster call | ⚠️ (mTLS blocked) |
 
-### Future Test Requirements
+### Phase 2 Test Requirements
 
-- [ ] Each Phase 2 API method needs unit test
-- [ ] Each Phase 2 API method needs integration test
-- [ ] Streaming API tests (mock + real)
-- [ ] Error handling tests
-- [ ] Timeout/retry tests
-- [ ] Multi-node targeting tests
+- [ ] ApplyConfiguration (insecure mode)
+- [ ] Bootstrap (after ED25519 fix)
+- [ ] Kubeconfig streaming
+- [ ] Reset graceful
+- [ ] Health check API
+- [ ] EtcdRemoveMember
+- [ ] Dmesg streaming
+- [ ] Upgrade API
+
+---
+
+## Release Milestones
+
+### v0.1.0 (Current) - Experimental
+
+- ✅ Basic connectivity
+- ✅ Version API
+- ✅ Basic Machine API
+- ⚠️ mTLS partially working
+
+### v0.2.0 (Target) - Alpha
+
+- [ ] ED25519 mTLS resolved
+- [ ] ApplyConfiguration (insecure)
+- [ ] Bootstrap API
+- [ ] Kubeconfig API
+- [ ] Reset API
+- [ ] Health API
+- [ ] Basic documentation
+
+### v0.3.0 - Beta
+
+- [ ] etcd operations
+- [ ] Streaming APIs
+- [ ] Service control
+- [ ] Full documentation
+
+### v1.0.0 - Stable
+
+- [ ] Production-grade error handling
+- [ ] Connection pooling
+- [ ] Retry policies
+- [ ] API stability commitment

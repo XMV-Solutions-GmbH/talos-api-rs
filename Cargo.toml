@@ -2,12 +2,27 @@
 name = "talos-api-rs"
 version = "0.1.0"
 edition = "2021"
-description = "A typed, async, idiomatic Rust client for the Talos Linux gRPC API."
+rust-version = "1.75"
+description = "A typed, async, idiomatic Rust client for the Talos Linux gRPC API"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/XMV-Solutions-GmbH/talos-api-rs"
-authors = ["Talos API Rust Contributors"]
-keywords = ["talos", "linux", "api", "client", "grpc"]
-categories = ["api-bindings", "infrastructure"]
+documentation = "https://docs.rs/talos-api-rs"
+homepage = "https://github.com/XMV-Solutions-GmbH/talos-api-rs"
+readme = "Readme.md"
+authors = ["XMV Solutions GmbH", "Talos API Rust Contributors"]
+keywords = ["talos", "linux", "grpc", "kubernetes", "async"]
+categories = ["api-bindings", "asynchronous", "network-programming"]
+exclude = [
+    ".github/",
+    "tests/",
+    "docs/",
+    "*.md",
+    "!Readme.md",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 tokio = { version = "1.0", features = ["full"] }

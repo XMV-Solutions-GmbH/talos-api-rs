@@ -28,6 +28,8 @@ The client supports:
 
 ## Development Phases
 
+> **Note**: Phases reprioritized based on cluster-lifecycle-manager requirements (2026-01-26).
+
 ### Phase 1: Core Foundation ✅ COMPLETE
 
 **Goal**: Establish a working client with basic connectivity and essential APIs.
@@ -43,49 +45,76 @@ The client supports:
 | Unit tests | ✅ | 6 tests covering core functionality |
 | Integration harness | ✅ | Docker-based Talos cluster |
 
-### Phase 2: Extended Machine Operations
+---
 
-**Goal**: Complete Machine API coverage and resolve authentication issues.
+### Phase 2: Alpha Release (Cluster Lifecycle Core) 🔄 IN PROGRESS
+
+**Goal**: Enable core cluster lifecycle operations for the Tauri app.
+
+> Based on `talosctl` commands analysis for cluster-lifecycle-manager.
+
+#### Priority 1: Absolute Core (Alpha-Blocking)
+
+| # | Feature | mTLS | Status | Description |
+|---|---------|------|--------|-------------|
+| 1 | `gen config` | ❌ | ❌ | Machine config generation (NOT gRPC - CLI only) |
+| 2 | `ApplyConfiguration --insecure` | ❌ | ❌ | Initial config in maintenance mode |
+| 3 | `Bootstrap` | ✅ | ❌ | Initialize etcd on first control-plane |
+| 4 | `Kubeconfig` (streaming) | ✅ | ❌ | Retrieve kubeconfig |
+| 5 | `Reset --graceful` | ✅ | ❌ | Graceful node teardown |
+
+**Critical Blocker**: ED25519 mTLS must work for Bootstrap, Kubeconfig, Reset.
+
+#### Priority 2: Beta Operations
+
+| # | Feature | mTLS | Status | Description |
+|---|---------|------|--------|-------------|
+| 6 | Health check API | ✅ | ❌ | Pre-flight checks, monitoring |
+| 7 | `EtcdRemoveMember` | ✅ | ❌ | Control-plane scale-down |
+| 8 | `Dmesg` (streaming) | ✅ | ❌ | Kernel logs for diagnostics |
+
+#### Priority 3: Production Day-2
+
+| # | Feature | mTLS | Status | Description |
+|---|---------|------|--------|-------------|
+| 9 | `Upgrade` | ✅ | ❌ | Talos version upgrades |
+| 10 | `Version` (remote) | ✅ | ✅ | Remote version check |
+
+#### Non-gRPC Operations (Out of Scope for Library)
+
+These are **local CLI operations**, not gRPC APIs:
+
+| Operation | Notes |
+|-----------|-------|
+| `gen config` | Generates YAML files locally (consider separate helper) |
+| `config endpoint` | Manipulates local talosconfig |
+| `config node` | Manipulates local talosconfig |
+| `cluster create/destroy` | Docker provider (test harness only) |
+
+---
+
+### Phase 3: Extended APIs
+
+**Goal**: Complete API coverage for advanced operations.
 
 | Feature | Priority | Description |
 |---------|----------|-------------|
-| **ED25519 Certificate Support** | 🔴 Critical | Talos uses ED25519 certs; rustls needs proper config |
-| Machine Config Get/Set | 🟡 High | Read and apply machine configuration |
-| Logs API | 🟡 High | Stream logs from services (server-streaming gRPC) |
-| Dmesg API | 🟡 High | Kernel message buffer |
-| Events API | 🟡 High | Event stream (server-streaming gRPC) |
-| Memory/CPU Info | 🟢 Medium | Detailed system information |
-| Disk/Mount Info | 🟢 Medium | Storage information |
-| Process List | 🟢 Medium | Running processes |
-| Network Stats | 🟢 Medium | Network device statistics |
+| Service Control | 🟡 High | Start, Stop, Restart services |
+| Logs API | 🟡 High | Service log streaming |
+| Events API | 🟡 High | Cluster event stream |
+| etcd Snapshot | 🟡 High | Backup etcd data |
+| etcd Recover | 🟡 High | Restore from snapshot |
 | File Operations | 🟢 Medium | Read, List, Copy, DiskUsage |
-| Service Control | 🟢 Medium | Start, Stop, Restart services |
-| Upgrade API | 🟢 Medium | Trigger Talos upgrades |
-| Reset API | 🟡 High | Factory reset functionality |
-| Rollback API | 🟢 Medium | Rollback to previous config |
-
-### Phase 3: Cluster & etcd Operations
-
-**Goal**: Full cluster lifecycle management.
-
-| Feature | Priority | Description |
-|---------|----------|-------------|
-| Bootstrap API | 🔴 Critical | Initialize new clusters |
-| etcd Member List | 🟡 High | List etcd cluster members |
-| etcd Remove Member | 🟡 High | Remove nodes from etcd |
-| etcd Leave Cluster | 🟡 High | Gracefully leave etcd cluster |
-| etcd Forfeit Leadership | 🟢 Medium | Transfer etcd leadership |
-| etcd Snapshot | 🟡 High | Backup etcd data (streaming) |
-| etcd Recover | 🟡 High | Restore from snapshot (streaming) |
-| etcd Alarm List/Disarm | 🟢 Medium | Manage etcd alarms |
-| etcd Defragment | 🟢 Medium | Maintenance operation |
-| etcd Status | 🟢 Medium | Health and stats |
-| Kubeconfig API | 🟡 High | Generate kubeconfig (streaming) |
-| Generate Client Config | 🟢 Medium | Generate talosconfig |
-| Packet Capture | 🟢 Low | Network debugging (streaming) |
+| System Info | 🟢 Medium | Memory, CPU, Disk, Network stats |
+| Process List | 🟢 Medium | Running processes |
+| Packet Capture | 🟢 Low | Network debugging |
 | Netstat | 🟢 Low | Network connections |
 
-### Phase 4: Production Readiness (Future)
+---
+
+### Phase 4: Production Readiness & crates.io
+
+**Goal**: Production-grade library with public release.
 
 | Feature | Description |
 |---------|-------------|
@@ -95,7 +124,29 @@ The client supports:
 | Interceptors | Logging, metrics, tracing hooks |
 | Resource wrappers | High-level Rust types over Protobuf |
 | Builder patterns | Fluent API for complex requests |
+| Full documentation | docs.rs ready, examples |
 | crates.io release | Public package publication |
+| MSRV policy | Minimum Supported Rust Version |
+
+---
+
+## mTLS Requirement Summary
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  mTLS NOT required (--insecure or local ops):              │
+│  • ApplyConfiguration (maintenance mode with --insecure)   │
+│  • gen config (local CLI, not gRPC)                        │
+│  • config endpoint/node (local talosconfig manipulation)   │
+│  • cluster create/destroy (Docker provider)                │
+│  • version --client (local CLI)                            │
+├─────────────────────────────────────────────────────────────┤
+│  mTLS REQUIRED (post-bootstrap operations):                │
+│  • Bootstrap, Kubeconfig, Reset, Health                    │
+│  • EtcdRemoveMember, Upgrade, Dmesg, Logs                 │
+│  • All remote API calls after bootstrap                    │
+└─────────────────────────────────────────────────────────────┘
+```
 
 ---
 
