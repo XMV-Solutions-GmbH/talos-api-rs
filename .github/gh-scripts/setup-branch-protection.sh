@@ -22,8 +22,8 @@ BRANCH="${BRANCH:-main}"
 TEAM_SLUG="${TEAM_SLUG:-open-source}"
 
 # PR review rules
-REQUIRED_APPROVALS="${REQUIRED_APPROVALS:-1}"
-REQUIRE_CODEOWNER_REVIEWS="${REQUIRE_CODEOWNER_REVIEWS:-true}"
+REQUIRED_APPROVALS="${REQUIRED_APPROVALS:-0}"
+REQUIRE_CODEOWNER_REVIEWS="${REQUIRE_CODEOWNER_REVIEWS:-false}"
 DISMISS_STALE_REVIEWS="${DISMISS_STALE_REVIEWS:-true}"
 
 # Admin enforcement
@@ -123,7 +123,7 @@ PAYLOAD=$(jq -n \
       dismiss_stale_reviews: ($dismiss_stale == "true"),
       require_code_owner_reviews: ($code_owner == "true"),
       required_approving_review_count: ($required_approvals | tonumber),
-      require_last_push_approval: true
+      require_last_push_approval: false
     },
     restrictions: {
       users: $extra_users,
