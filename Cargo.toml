@@ -20,6 +20,8 @@ http = "1.0"
 url = "2.5"
 bytes = "1.5"
 tracing = "0.1"
+rustls = "0.23.36"
+tokio-rustls = "0.26.4"
 
 [build-dependencies]
 tonic-build = "0.12"

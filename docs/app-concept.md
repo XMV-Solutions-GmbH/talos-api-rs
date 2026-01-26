@@ -9,6 +9,14 @@ A typed, async, idiomatic Rust client for the Talos Linux gRPC API.
 - **Async-First**: Built on `tokio` and `tonic`.
 - **No CLI Wrapper**: Does not call `talosctl` internally; uses pure gRPC.
 
+## Authentication & Security
+
+The client supports:
+
+- **mTLS**: Mutual TLS using Client Certificate, Client Key, and CA Certificate.
+- **Insecure Mode**: A specific flag (`insecure: true`) to bypass TLS verification (useful for bootstrap or maintenance).
+- **Endpoint validation**: Hostname verification (default on, disabled in insecure mode).
+
 ## Modules
 
 - `client`: Connection and auth logic.
