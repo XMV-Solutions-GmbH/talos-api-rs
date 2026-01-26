@@ -221,6 +221,13 @@ Copilot must maintain:
 	•	cargo clippy
 	•	cargo test
 
+**Before creating a PR (`/create-pr`):**
+1. Run `cargo fmt` to format all code
+2. Run `cargo clippy --all-targets --all-features -- -D warnings`
+3. Run `cargo test`
+4. Commit any formatting changes
+5. Then create the PR
+
 ⸻
 
 11. TODO.md (Initial)
