@@ -70,10 +70,12 @@ if [[ "${MERGEABLE}" == "CONFLICTING" ]]; then
   exit 1
 fi
 
-FAILED_CHECKS="$(gh pr view "${PR}" --json statusCheckRollup --jq '[.statusCheckRollup[] | select(.conclusion != "SUCCESS") | .name]')"
-if [[ "${FAILED_CHECKS}" != "[]" ]]; then
-  echo "ERROR: Not all checks are successful: ${FAILED_CHECKS}" >&2
-  exit 1
+if [[ "${ADMIN}" != "true" ]]; then
+  FAILED_CHECKS="$(gh pr view "${PR}" --json statusCheckRollup --jq '[.statusCheckRollup[] | select(.conclusion != "SUCCESS") | .name]')"
+  if [[ "${FAILED_CHECKS}" != "[]" ]]; then
+    echo "ERROR: Not all checks are successful: ${FAILED_CHECKS}" >&2
+    exit 1
+  fi
 fi
 
 DELETE_ARG=()
