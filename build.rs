@@ -18,7 +18,18 @@ fn main() {
             "// SPDX-License-Identifier: MIT OR Apache-2.0\n// DO NOT EDIT\n{}",
             content
         );
-        std::fs::write(generated_file, new_content).unwrap();
+        std::fs::write(&generated_file, new_content).unwrap();
+
+        // Format the generated file
+        if std::process::Command::new("rustfmt")
+            .arg("--edition")
+            .arg("2021")
+            .arg(&generated_file)
+            .status()
+            .is_err()
+        {
+            println!("cargo:warning=Failed to run rustfmt on generated file");
+        }
     }
 
     // Rerun if proto changes
