@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use talos_api_rs::{TalosClient, TalosClientConfig, TalosError};
+use talos_api_rs::{TalosClient, TalosClientConfig};
 
 #[tokio::main]
-async fn main() -> Result<(), TalosError> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = TalosClientConfig {
         endpoint: "http://127.0.0.1:50000".to_string(),
         crt_path: None,
