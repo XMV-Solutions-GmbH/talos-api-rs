@@ -14,21 +14,70 @@ We use `talosctl` to manage local Docker-based clusters for testing.
 
 **Prerequisites:**
 
-- Docker
+- Docker running
 - `talosctl` installed and in PATH
-- `TALOS_DEV_TESTS=1` environment variable set
+- `yq` installed (for config parsing)
 
-**Workflow:**
+**Run Integration Tests:**
 
 ```bash
-export TALOS_DEV_TESTS=1
-# Usually requires sudo for the docker provisioner to manage networks
-cargo test -- --ignored
+# Full integration test with real Talos cluster
+TALOS_DEV_TESTS=1 cargo test --test integration_test -- --nocapture
 ```
 
-(Note: Integration tests should be marked `#[ignore]` by default so `cargo test` runs fast, or filtered by env var logic).
+This will:
+
+1. Create a Docker-based Talos cluster (`talos-dev-integration`)
+2. Extract mTLS certificates from talosconfig
+3. Test API calls (Hostname, ServiceList, SystemStat)
+4. Show cluster status via `talosctl`
+5. Destroy the cluster on completion
+
+**Expected Output:**
+
+```
+========================================
+  Talos Integration Test Suite
+========================================
+Cluster provisioned at https://127.0.0.1:XXXXX
+
+Using mTLS with certs from:
+  CA:  /tmp/.../ca.crt
+  CRT: /tmp/.../client.crt
+  KEY: /tmp/.../client.key
+
+--- Machine API: Hostname ---
+✓ Node: unknown -> hostname: talos-dev-integration-controlplane-1
+
+--- Machine API: ServiceList ---
+✓ Node: unknown
+  Services:
+    ✓ apid [Running]
+    ✓ containerd [Running]
+    ...
+
+--- Machine API: SystemStat ---
+✓ Node: unknown
+  Boot time:         ...
+  Processes running: ...
+
+========================================
+  Integration Tests Complete
+========================================
+```
+
+**Test Duration:** ~3 minutes (includes cluster provisioning)
+
+**Skip Integration Tests:**
+
+Without `TALOS_DEV_TESTS=1`, integration tests are skipped:
+
+```bash
+cargo test  # Only runs unit tests
+```
 
 ## Writing Tests
 
 - Use `testkit` helpers to provision a cluster.
 - Ensure tests tear down the cluster in a `Drop` guard or via `finally` logic.
+- Integration tests check for `TALOS_DEV_TESTS` env var before running.

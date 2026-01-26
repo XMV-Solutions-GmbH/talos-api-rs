@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use crate::api::machine::machine_service_client::MachineServiceClient;
+use crate::api::machine::ApplyConfigurationRequest as ProtoApplyConfigRequest;
 use crate::api::version::version_service_client::VersionServiceClient;
 use crate::error::Result;
+use crate::resources::{ApplyConfigurationRequest, ApplyConfigurationResponse};
 use hyper_util::rt::TokioIo;
 use rustls::pki_types::{CertificateDer, PrivateKeyDer, ServerName};
 use std::sync::Arc;
@@ -287,6 +289,85 @@ impl TalosClient {
     /// Access the Machine API group
     pub fn machine(&self) -> MachineServiceClient<Channel> {
         MachineServiceClient::new(self.channel.clone())
+    }
+
+    // ========================================================================
+    // High-level convenience methods
+    // ========================================================================
+
+    /// Apply a configuration to the node.
+    ///
+    /// This is a high-level wrapper around the `MachineService::ApplyConfiguration` RPC.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api::{TalosClient, TalosClientConfig, ApplyConfigurationRequest, ApplyMode};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let client = TalosClient::new(TalosClientConfig {
+    ///     endpoint: "https://192.168.1.100:50000".to_string(),
+    ///     insecure: true,
+    ///     ..Default::default()
+    /// }).await?;
+    ///
+    /// // Apply configuration in dry-run mode
+    /// let request = ApplyConfigurationRequest::builder()
+    ///     .config_yaml("machine:\n  type: worker")
+    ///     .mode(ApplyMode::NoReboot)
+    ///     .dry_run(true)
+    ///     .build();
+    ///
+    /// let response = client.apply_configuration(request).await?;
+    /// println!("Warnings: {:?}", response.all_warnings());
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the RPC call fails or the configuration is invalid.
+    pub async fn apply_configuration(
+        &self,
+        request: ApplyConfigurationRequest,
+    ) -> Result<ApplyConfigurationResponse> {
+        let proto_request: ProtoApplyConfigRequest = request.into();
+        let response = self
+            .machine()
+            .apply_configuration(proto_request)
+            .await?
+            .into_inner();
+        Ok(response.into())
+    }
+
+    /// Apply a YAML configuration string to the node.
+    ///
+    /// Convenience method for simple configuration application.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api::{TalosClient, TalosClientConfig, ApplyMode};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let client = TalosClient::new(TalosClientConfig::default()).await?;
+    /// let config_yaml = std::fs::read_to_string("machine.yaml")?;
+    /// let response = client.apply_configuration_yaml(&config_yaml, ApplyMode::Auto, false).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn apply_configuration_yaml(
+        &self,
+        yaml: &str,
+        mode: crate::ApplyMode,
+        dry_run: bool,
+    ) -> Result<ApplyConfigurationResponse> {
+        let request = ApplyConfigurationRequest::builder()
+            .config_yaml(yaml)
+            .mode(mode)
+            .dry_run(dry_run)
+            .build();
+        self.apply_configuration(request).await
     }
 }
 

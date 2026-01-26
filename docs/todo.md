@@ -1,6 +1,6 @@
 # TODO
 
-> **Updated**: 2026-01-26 - Reprioritized based on cluster-lifecycle-manager requirements.
+> **Updated**: 2025-01-26 - ApplyConfiguration implemented, ED25519 fixed.
 
 ## Phase 1: Core Foundation ✅ COMPLETE
 
@@ -17,31 +17,33 @@
 
 ## Phase 2: Alpha Release (Cluster Lifecycle Core) 🔄 IN PROGRESS
 
-### 🔴 Critical Blockers
+### ✅ Critical Blockers (RESOLVED)
 
-- [ ] **ED25519 Certificate Support**
-  - Talos uses ED25519 for mTLS certificates
-  - Current rustls config doesn't properly handle ED25519 client certs
-  - Options: Configure CryptoProvider, switch to native-tls, or use ring
-  - **Blocks**: Bootstrap, Kubeconfig, Reset, all mTLS operations
-  - **Priority**: MUST resolve before Alpha
+- [x] **ED25519 Certificate Support**
+  - ✅ Custom rustls connector with ring crypto provider
+  - ✅ Custom PEM parser for "ED25519 PRIVATE KEY" label
+  - ✅ Full mTLS working with Talos clusters
+  - Merged: PR #7
 
 ### Priority 1: Alpha-Blocking Features
 
-- [ ] **ApplyConfiguration (insecure mode)**
-  - Apply machine config to nodes in maintenance mode
-  - Uses `--insecure` flag (no mTLS needed)
-  - Input: machineconfig YAML, node IP
+- [x] **ApplyConfiguration**
+  - ✅ Typed wrappers: `ApplyMode`, `ApplyConfigurationRequest`, `ApplyConfigurationResponse`
+  - ✅ Builder pattern for request construction
+  - ✅ High-level `TalosClient::apply_configuration()` method
+  - ✅ Convenience `apply_configuration_yaml()` method
+  - ✅ Unit tests for all types
+  - ✅ Integration test (dry-run mode)
 
 - [ ] **Bootstrap**
   - Initialize etcd cluster on first control-plane node
-  - Requires mTLS (blocked by ED25519)
   - Only called once per cluster
+  - ✅ ED25519 mTLS now working
 
 - [ ] **Kubeconfig** (server-streaming)
   - Retrieve kubeconfig from cluster
-  - Requires mTLS
   - Returns streaming response
+  - ✅ ED25519 mTLS now working
 
 - [ ] **Reset** (graceful)
   - Graceful node shutdown/reset
