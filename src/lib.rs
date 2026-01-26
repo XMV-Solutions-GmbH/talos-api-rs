@@ -11,4 +11,5 @@ pub use client::{TalosClient, TalosClientConfig};
 pub use error::TalosError;
 pub use resources::{
     ApplyConfigurationRequest, ApplyConfigurationResponse, ApplyConfigurationResult, ApplyMode,
+    BootstrapRequest, BootstrapResponse, BootstrapResult,
 };
