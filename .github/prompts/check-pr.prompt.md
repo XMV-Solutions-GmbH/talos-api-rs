@@ -10,7 +10,7 @@ When I ask you to check the PR, execute:
 
 1.  **If Status is PENDING (⏳):**
     *   Inform me that checks are still running.
-    *   Wait for 60 seconds (tell me you are doing a "pause" or simply ask me to check again in a moment if you cannot loop).
+    *   Wait for 20 seconds (tell me you are doing a "pause" or simply ask me to check again in a moment if you cannot loop).
     *   *Agent Instruction:* Ideally, if you can, retry the script once or twice after a delay. If not, just report "Pending".
 
 2.  **If Status is FAILURE (❌):**
