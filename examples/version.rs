@@ -16,8 +16,8 @@ async fn main() -> Result<(), TalosError> {
     // This example expects a running cluster or mock
     match TalosClient::new(config).await {
         Ok(_client) => {
-             // let response = client.version().version(...).await?;
-             println!("Connected! (Version call not fully implemented in example)");
+            // let response = client.version().version(...).await?;
+            println!("Connected! (Version call not fully implemented in example)");
         }
         Err(e) => {
             eprintln!("Failed to connect: {}", e);

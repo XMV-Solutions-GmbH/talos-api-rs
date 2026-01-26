@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use crate::error::Result;
 use crate::api::version::version_service_client::VersionServiceClient;
+use crate::error::Result;
 use tonic::transport::Channel;
 
 #[derive(Clone, Debug)]
@@ -29,15 +29,12 @@ impl TalosClient {
             .connect()
             .await?;
 
-        Ok(Self {
-            config,
-            channel,
-        })
+        Ok(Self { config, channel })
     }
 
     /// Access the Version API group
     pub fn version(&self) -> VersionServiceClient<Channel> {
-         VersionServiceClient::new(self.channel.clone())
+        VersionServiceClient::new(self.channel.clone())
     }
 }
 
@@ -45,14 +42,14 @@ impl TalosClient {
 mod tests {
     use super::*;
     use crate::api::version::{VersionRequest, VersionResponse};
-    // Note: The trait and server struct names depend on what tonic-build generates. 
+    // Note: The trait and server struct names depend on what tonic-build generates.
     // Usually it acts on the 'package.Service' name.
     // Assuming: impl VersionService for ...
     // And VersionServiceServer
     use crate::api::version::version_service_server::{VersionService, VersionServiceServer};
-    use tonic::transport::Server;
     use tokio::net::TcpListener;
     use tokio_stream::wrappers::TcpListenerStream;
+    use tonic::transport::Server;
 
     struct MockVersion;
 
@@ -90,10 +87,15 @@ mod tests {
         };
 
         // Allow some time for server to start? Usually not needed with spawn
-        let client = TalosClient::new(config).await.expect("Failed to create client");
+        let client = TalosClient::new(config)
+            .await
+            .expect("Failed to create client");
         let mut v_client = client.version();
-        
-        let response = v_client.version(VersionRequest { client: true }).await.expect("RPC failed");
+
+        let response = v_client
+            .version(VersionRequest { client: true })
+            .await
+            .expect("RPC failed");
         assert_eq!(response.get_ref().tag, "v1.2.3");
     }
 }
