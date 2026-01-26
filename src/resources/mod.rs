@@ -8,6 +8,7 @@
 mod bootstrap;
 mod configuration;
 mod kubeconfig;
+mod reset;
 
 pub use bootstrap::{
     BootstrapRequest, BootstrapRequestBuilder, BootstrapResponse, BootstrapResult,
@@ -17,3 +18,6 @@ pub use configuration::{
     ApplyConfigurationResult, ApplyMode,
 };
 pub use kubeconfig::KubeconfigResponse;
+pub use reset::{
+    ResetPartitionSpec, ResetRequest, ResetRequestBuilder, ResetResponse, ResetResult, WipeMode,
+};

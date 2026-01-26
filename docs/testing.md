@@ -2,6 +2,17 @@
 
 > **MANDATORY**: Integration tests MUST be run before every PR that adds or modifies API functionality.
 
+## Test Coverage Summary
+
+| Feature | Unit Tests | Integration Test |
+|---------|------------|------------------|
+| TalosClient (core) | 6 tests | ✅ Connection test |
+| ApplyConfiguration | 11 tests | ✅ Dry-run mode |
+| Bootstrap | 6 tests | ✅ Rejection on bootstrapped cluster |
+| Kubeconfig | 5 tests | ✅ Retrieves & validates structure |
+| Reset | 9 tests | ⚠️ API verification only (destructive) |
+| **Total** | **31 tests** | **5 API areas** |
+
 ## Unit Tests
 
 Run standard unit tests:

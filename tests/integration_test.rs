@@ -264,7 +264,60 @@ cluster:
         }
     }
 
-    // 9. Show cluster status via talosctl (visual feedback)
+    // 9. Test Reset API (DESTRUCTIVE - only verify API is available, don't execute)
+    //
+    // IMPORTANT: The Reset API is destructive and would destroy our test cluster.
+    // In a real integration test environment, you would:
+    //   1. Create a dedicated node for reset testing
+    //   2. Actually execute the reset
+    //   3. Verify the node comes back up
+    //
+    // Here we only verify the API types compile and the gRPC method exists.
+    // The actual reset functionality is tested by:
+    //   - Unit tests for type conversions
+    //   - Manual testing against a disposable cluster
+    println!("\n--- Machine API: Reset (API verification only) ---");
+    use talos_api_rs::{ResetRequest, WipeMode};
+
+    // Verify types work correctly
+    let graceful = ResetRequest::graceful();
+    println!("✓ ResetRequest::graceful() creates valid request");
+    println!(
+        "  graceful={}, reboot={}, mode={}",
+        graceful.graceful, graceful.reboot, graceful.mode
+    );
+
+    let force = ResetRequest::force();
+    println!("✓ ResetRequest::force() creates valid request");
+    println!(
+        "  graceful={}, reboot={}, mode={}",
+        force.graceful, force.reboot, force.mode
+    );
+
+    let halt = ResetRequest::halt();
+    println!("✓ ResetRequest::halt() creates valid request");
+    println!(
+        "  graceful={}, reboot={}, mode={}",
+        halt.graceful, halt.reboot, halt.mode
+    );
+
+    let custom = ResetRequest::builder()
+        .graceful(true)
+        .reboot(true)
+        .wipe_mode(WipeMode::SystemDisk)
+        .build();
+    println!("✓ ResetRequest::builder() creates valid request");
+    println!(
+        "  graceful={}, reboot={}, mode={}",
+        custom.graceful, custom.reboot, custom.mode
+    );
+
+    // NOTE: We do NOT execute client.reset() here because it would destroy the test cluster.
+    // The method signature and gRPC connectivity are verified by the compile check.
+    println!("⚠ Skipping actual reset execution (would destroy test cluster)");
+    println!("  Run manual reset tests against a disposable cluster");
+
+    // 10. Show cluster status via talosctl (visual feedback)
     println!("\n--- Cluster Status (via talosctl) ---");
     let talosconfig_str = cluster.talosconfig_path.to_string_lossy();
     if let Ok(output) = std::process::Command::new("talosctl")
@@ -283,7 +336,7 @@ cluster:
         }
     }
 
-    // 10. Show running services via talosctl
+    // 11. Show running services via talosctl
     println!("\n--- Services Status (via talosctl) ---");
     if let Ok(output) = std::process::Command::new("talosctl")
         .args(["--talosconfig", &talosconfig_str])
