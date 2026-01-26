@@ -8,14 +8,14 @@
 - [x] Insecure mode (skip TLS verify)
 - [x] Health API (Initial skeleton)
 - [ ] Machine list/status
-- [x] Unit tests (Skeleton)
+- [x] Unit tests (Core & Auth)
 
 ## Phase 2
 
 - [ ] Machine config APIs
 - [ ] Logs API
 - [ ] Diagnostics
-- [ ] Integration test harness
+- [x] Integration test harness
 
 ## Phase 3
 

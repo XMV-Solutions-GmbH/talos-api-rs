@@ -20,9 +20,13 @@ http = "1.0"
 url = "2.5"
 bytes = "1.5"
 tracing = "0.1"
-rustls = "0.23.36"
-tokio-rustls = "0.26.4"
+rustls = { version = "0.23.36", features = ["logging", "ring", "std", "tls12"], default-features = false }
+tokio-rustls = { version = "0.26.4", features = ["logging", "ring", "tls12"], default-features = false }
 hyper-util = { version = "0.1.19", features = ["tokio"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_yaml = "0.9.34"
+base64 = "0.22.1"
+tempfile = "3.10"
 
 [build-dependencies]
 tonic-build = "0.12"
@@ -32,3 +36,6 @@ tokio-test = "0.4"
 tokio-stream = { version = "0.1", features = ["net"] }
 tempfile = "3.10"
 anyhow = "1.0"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_yaml = "0.9.34"
+base64 = "0.22.1"
