@@ -1,0 +1,30 @@
+[package]
+name = "talos-api-rs"
+version = "0.1.0"
+edition = "2021"
+description = "A typed, async, idiomatic Rust client for the Talos Linux gRPC API."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/XMV-Solutions-GmbH/talos-api-rs"
+authors = ["Talos API Rust Contributors"]
+keywords = ["talos", "linux", "api", "client", "grpc"]
+categories = ["api-bindings", "infrastructure"]
+
+[dependencies]
+tokio = { version = "1.0", features = ["full"] }
+tonic = { version = "0.12", features = ["tls", "tls-roots"] }
+prost = "0.13"
+prost-types = "0.13"
+thiserror = "2.0"
+tower = "0.5"
+http = "1.0"
+url = "2.5"
+bytes = "1.5"
+tracing = "0.1"
+
+[build-dependencies]
+tonic-build = "0.12"
+
+[dev-dependencies]
+tokio-test = "0.4"
+tempfile = "3.10"
+anyhow = "1.0"

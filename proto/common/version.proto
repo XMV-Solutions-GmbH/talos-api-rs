@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package version;
+
+service VersionService {
+  rpc Version (VersionRequest) returns (VersionResponse);
+}
+
+message VersionRequest {
+  bool client = 1;
+}
+
+message VersionResponse {
+  string tag = 1;
+  string sha = 2;
+}
