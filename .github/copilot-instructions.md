@@ -113,7 +113,7 @@ Unit Tests
 	•	Mock gRPC services where possible
 	•	Deterministic, fast
 
-Dev / Integration Tests
+Dev / Integration Tests (MANDATORY PER FEATURE)
 
 Copilot MUST implement a local Talos test harness:
 
@@ -132,9 +132,16 @@ talosctl cluster destroy --name talos-dev
 
 
 Rules:
-	•	Integration tests live under testkit/
+	•	Integration tests live under tests/integration_test.rs
 	•	Tests must auto-skip if talosctl is missing
 	•	Use env-guard (TALOS_DEV_TESTS=1)
+	•	**Every new API feature MUST have an integration test**
+	•	**Integration tests MUST be run before every PR**
+
+Run Integration Tests:
+```bash
+TALOS_DEV_TESTS=1 cargo test --test integration_test -- --nocapture
+```
 
 For Unsupported Features
 	•	Use talosctl via subprocess ONLY in tests
@@ -221,12 +228,16 @@ Copilot must maintain:
 	•	cargo clippy
 	•	cargo test
 
-**Before creating a PR (`/create-pr`):**
+**Before creating a PR (`/create-pr`) - MANDATORY:**
 1. Run `cargo fmt` to format all code
 2. Run `cargo clippy --all-targets --all-features -- -D warnings`
-3. Run `cargo test`
-4. Commit any formatting changes
-5. Then create the PR
+3. Run `cargo test` (unit tests)
+4. **Run `TALOS_DEV_TESTS=1 cargo test --test integration_test -- --nocapture` (integration tests)**
+5. Commit any formatting changes
+6. Then create the PR
+
+**Integration Tests are MANDATORY for every feature that adds or modifies API functionality.**
+Skipping integration tests is NOT allowed unless explicitly approved by the user.
 
 ⸻
 

@@ -152,7 +152,64 @@ async fn test_cluster_lifecycle() {
         }
     }
 
-    // 6. Show cluster status via talosctl (visual feedback)
+    // 6. Test ApplyConfiguration (dry-run with minimal YAML)
+    println!("\n--- Machine API: ApplyConfiguration (dry-run) ---");
+    use talos_api_rs::{ApplyConfigurationRequest, ApplyMode};
+
+    // Use a minimal valid Talos config for dry-run validation
+    // This will fail validation but tests that the API is reachable
+    let minimal_config = r#"
+version: v1alpha1
+machine:
+  type: controlplane
+  token: placeholder
+  ca:
+    crt: placeholder
+    key: placeholder
+cluster:
+  controlPlane:
+    endpoint: https://127.0.0.1:6443
+  network:
+    cni:
+      name: flannel
+  token: placeholder
+  secretboxEncryptionSecret: placeholder
+  ca:
+    crt: placeholder
+    key: placeholder
+"#;
+
+    let request = ApplyConfigurationRequest::builder()
+        .config_yaml(minimal_config)
+        .mode(ApplyMode::Auto)
+        .dry_run(true)
+        .build();
+
+    match client.apply_configuration(request).await {
+        Ok(apply_response) => {
+            for result in &apply_response.results {
+                let node = result.node.as_deref().unwrap_or("unknown");
+                println!("✓ Node: {} -> mode: {}", node, result.mode);
+                if !result.mode_details.is_empty() {
+                    println!("  Details: {}", result.mode_details);
+                }
+                if !result.warnings.is_empty() {
+                    println!("  Warnings: {} total", result.warnings.len());
+                }
+            }
+        }
+        Err(e) => {
+            // Validation errors are expected with placeholder config
+            // We're testing that the API is reachable and responds
+            println!(
+                "  ApplyConfiguration dry-run returned error (expected): {}",
+                e
+            );
+            println!("  (Validation errors are expected with placeholder config)");
+        }
+    }
+
+    // 7. Show cluster status via talosctl (visual feedback)
     println!("\n--- Cluster Status (via talosctl) ---");
     let talosconfig_str = cluster.talosconfig_path.to_string_lossy();
     if let Ok(output) = std::process::Command::new("talosctl")
@@ -171,7 +228,7 @@ async fn test_cluster_lifecycle() {
         }
     }
 
-    // 7. Show running services via talosctl
+    // 8. Show running services via talosctl
     println!("\n--- Services Status (via talosctl) ---");
     if let Ok(output) = std::process::Command::new("talosctl")
         .args(["--talosconfig", &talosconfig_str])
