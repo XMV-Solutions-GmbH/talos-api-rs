@@ -7,6 +7,7 @@ use crate::api::version::version_service_client::VersionServiceClient;
 use crate::error::Result;
 use crate::resources::{
     ApplyConfigurationRequest, ApplyConfigurationResponse, BootstrapRequest, BootstrapResponse,
+    KubeconfigResponse,
 };
 use hyper_util::rt::TokioIo;
 use rustls::pki_types::{CertificateDer, PrivateKeyDer, ServerName};
@@ -424,6 +425,62 @@ impl TalosClient {
     /// Equivalent to `bootstrap(BootstrapRequest::new())`.
     pub async fn bootstrap_cluster(&self) -> Result<BootstrapResponse> {
         self.bootstrap(BootstrapRequest::new()).await
+    }
+
+    /// Retrieve the kubeconfig from the cluster.
+    ///
+    /// This is a server-streaming RPC that retrieves the kubeconfig file
+    /// from a control-plane node. The kubeconfig can be used to access
+    /// the Kubernetes API of the cluster.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api::{TalosClient, TalosClientConfig};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let client = TalosClient::new(TalosClientConfig::default()).await?;
+    ///
+    /// // Get kubeconfig
+    /// let kubeconfig = client.kubeconfig().await?;
+    /// println!("Kubeconfig from node: {:?}", kubeconfig.node);
+    ///
+    /// // Write to file
+    /// kubeconfig.write_to_file("kubeconfig.yaml")?;
+    ///
+    /// // Or get as string
+    /// let yaml = kubeconfig.as_str()?;
+    /// println!("{}", yaml);
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// - The node is not a control-plane node
+    /// - The cluster is not yet bootstrapped
+    /// - Network/connection issues
+    pub async fn kubeconfig(&self) -> Result<KubeconfigResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut stream = self.machine().kubeconfig(()).await?.into_inner();
+
+        let mut data = Vec::new();
+        let mut node = None;
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            // Capture node from first chunk with metadata
+            if node.is_none() {
+                if let Some(metadata) = &chunk.metadata {
+                    node = Some(metadata.hostname.clone());
+                }
+            }
+            data.extend(chunk.bytes);
+        }
+
+        Ok(KubeconfigResponse::new(data, node))
     }
 }
 

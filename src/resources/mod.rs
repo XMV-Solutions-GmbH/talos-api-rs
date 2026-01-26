@@ -7,6 +7,7 @@
 
 mod bootstrap;
 mod configuration;
+mod kubeconfig;
 
 pub use bootstrap::{
     BootstrapRequest, BootstrapRequestBuilder, BootstrapResponse, BootstrapResult,
@@ -15,3 +16,4 @@ pub use configuration::{
     ApplyConfigurationRequest, ApplyConfigurationRequestBuilder, ApplyConfigurationResponse,
     ApplyConfigurationResult, ApplyMode,
 };
+pub use kubeconfig::KubeconfigResponse;

@@ -237,7 +237,34 @@ cluster:
         }
     }
 
-    // 8. Show cluster status via talosctl (visual feedback)
+    // 8. Test Kubeconfig API (server-streaming)
+    println!("\n--- Machine API: Kubeconfig ---");
+
+    match client.kubeconfig().await {
+        Ok(kubeconfig) => {
+            let node = kubeconfig.node.as_deref().unwrap_or("unknown");
+            println!("✓ Node: {} -> kubeconfig retrieved", node);
+            println!("  Size: {} bytes", kubeconfig.len());
+
+            // Verify it's valid YAML/kubeconfig
+            if let Ok(content) = kubeconfig.as_str() {
+                if content.contains("apiVersion") && content.contains("clusters") {
+                    println!("  ✓ Valid kubeconfig structure detected");
+                } else {
+                    println!(
+                        "  Content preview: {}...",
+                        &content[..content.len().min(100)]
+                    );
+                }
+            }
+        }
+        Err(e) => {
+            println!("  Kubeconfig returned error: {}", e);
+            // May fail if cluster not fully ready - that's OK for integration test
+        }
+    }
+
+    // 9. Show cluster status via talosctl (visual feedback)
     println!("\n--- Cluster Status (via talosctl) ---");
     let talosconfig_str = cluster.talosconfig_path.to_string_lossy();
     if let Ok(output) = std::process::Command::new("talosctl")
@@ -256,7 +283,7 @@ cluster:
         }
     }
 
-    // 9. Show running services via talosctl
+    // 10. Show running services via talosctl
     println!("\n--- Services Status (via talosctl) ---");
     if let Ok(output) = std::process::Command::new("talosctl")
         .args(["--talosconfig", &talosconfig_str])

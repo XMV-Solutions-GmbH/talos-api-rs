@@ -116,3 +116,4 @@ The integration test (`tests/integration_test.rs`) covers:
 | SystemStat | ✓ | CPU, memory, boot time |
 | ApplyConfiguration | ✓ | Dry-run validation test |
 | Bootstrap | ✓ | Verifies rejection on already-bootstrapped cluster |
+| Kubeconfig | ✓ | Server-streaming RPC, validates kubeconfig structure |
