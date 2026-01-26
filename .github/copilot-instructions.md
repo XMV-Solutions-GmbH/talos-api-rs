@@ -221,6 +221,13 @@ Copilot must maintain:
 	•	cargo clippy
 	•	cargo test
 
+**Before creating a PR (`/create-pr`):**
+1. Run `cargo fmt` to format all code
+2. Run `cargo clippy --all-targets --all-features -- -D warnings`
+3. Run `cargo test`
+4. Commit any formatting changes
+5. Then create the PR
+
 ⸻
 
 11. TODO.md (Initial)
@@ -259,7 +266,8 @@ Copilot must maintain:
 
 12. Final Rule
 
-If something is unclear, STOP and ask.
+If something is fundamentally unclear, you are allowed to stop and ask. But try to be self-sufficient first.
+
 Never guess Talos semantics.
 
 This repository must look, feel, and behave like a serious open-source project from day one.

@@ -9,6 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         crt_path: None,
         key_path: None,
         ca_path: None,
+        insecure: false,
     };
 
     println!("Connecting to {}...", config.endpoint);
