@@ -28,7 +28,7 @@ METHOD="squash"
 DELETE_BRANCH="false"
 ADMIN="false"
 
-while getopts ":p:m:dka:h" opt; do
+while getopts ":p:m:dah" opt; do
   case "${opt}" in
     p) PR="${OPTARG}" ;;
     m) METHOD="${OPTARG}" ;;
