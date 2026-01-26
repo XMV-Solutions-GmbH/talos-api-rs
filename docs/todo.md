@@ -43,10 +43,13 @@
   - ✅ Unit tests (6 tests)
   - ✅ Integration test (verifies rejection on already-bootstrapped cluster)
 
-- [ ] **Kubeconfig** (server-streaming)
-  - Retrieve kubeconfig from cluster
-  - Returns streaming response
-  - ✅ ED25519 mTLS now working
+- [x] **Kubeconfig** (server-streaming)
+  - ✅ Typed wrapper: `KubeconfigResponse`
+  - ✅ Server-streaming RPC handling with chunk assembly
+  - ✅ High-level `TalosClient::kubeconfig()` method
+  - ✅ Helper methods: `as_str()`, `write_to_file()`, `len()`
+  - ✅ Unit tests (5 tests)
+  - ✅ Integration test (retrieves kubeconfig, validates structure)
 
 - [ ] **Reset** (graceful)
   - Graceful node shutdown/reset
