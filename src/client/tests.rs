@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use super::*;
-use crate::api::version::{VersionRequest, VersionResponse};
 use crate::api::version::version_service_server::{VersionService, VersionServiceServer};
+use crate::api::version::{VersionRequest, VersionResponse};
 use tokio::net::TcpListener;
 use tokio_stream::wrappers::TcpListenerStream;
 use tonic::transport::Server;

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use base64::prelude::*;
+use serde::Deserialize;
 use std::env;
 use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
-use serde::Deserialize;
-use base64::prelude::*;
 
 #[derive(Deserialize, Debug)]
 struct TalosConfig {
@@ -50,21 +50,28 @@ impl TalosCluster {
         let temp_dir = tempfile::tempdir().expect("Failed to create temp dir");
         let talosconfig_path = temp_dir.path().join("talosconfig");
 
-        println!("Creating Talos cluster '{}' with config at {:?} ...", name, talosconfig_path);
+        println!(
+            "Creating Talos cluster '{}' with config at {:?} ...",
+            name, talosconfig_path
+        );
 
         // We use 'docker' provisioner explicitly via subcommand
         // And --talosconfig-destination to save the config
         let output = Command::new("talosctl")
             .args([
-                "cluster", "create", "docker",
-                "--name", name,
-                "--talosconfig-destination", talosconfig_path.to_str().unwrap()
+                "cluster",
+                "create",
+                "docker",
+                "--name",
+                name,
+                "--talosconfig-destination",
+                talosconfig_path.to_str().unwrap(),
             ])
             .output()
             .expect("Failed to execute talosctl");
 
         if !output.status.success() {
-             let stderr = String::from_utf8_lossy(&output.stderr);
+            let stderr = String::from_utf8_lossy(&output.stderr);
             if stderr.contains("Pool overlaps") {
                 eprintln!("\n\n!!! ERROR: Docker network overlap detected !!!");
                 eprintln!("A local Docker network is colliding with the Talos test subnet.");
@@ -79,13 +86,20 @@ impl TalosCluster {
 
         // Parse talosconfig
         let config_str = fs::read_to_string(&talosconfig_path).expect("Failed to read talosconfig");
-        let config: TalosConfig = serde_yaml::from_str(&config_str).expect("Failed to parse talosconfig");
+        let config: TalosConfig =
+            serde_yaml::from_str(&config_str).expect("Failed to parse talosconfig");
 
-        let (_, ctx) = config.contexts.iter().next().expect("No context in talosconfig");
-        
+        let (_, ctx) = config
+            .contexts
+            .iter()
+            .next()
+            .expect("No context in talosconfig");
+
         // Helper to decode and write
         let decode_and_write = |fname: &str, content: &str| -> PathBuf {
-            let bytes = BASE64_STANDARD.decode(content).or_else(|_| BASE64_STANDARD.decode(content.replace('\n', "")))
+            let bytes = BASE64_STANDARD
+                .decode(content)
+                .or_else(|_| BASE64_STANDARD.decode(content.replace('\n', "")))
                 .expect("Failed to decode cert");
             let path = temp_dir.path().join(fname);
             fs::write(&path, bytes).expect("Failed to write cert file");
@@ -95,13 +109,13 @@ impl TalosCluster {
         let ca_path = decode_and_write("ca.crt", &ctx.ca);
         let crt_path = decode_and_write("client.crt", &ctx.crt);
         let key_path = decode_and_write("client.key", &ctx.key);
-        
+
         // Format endpoint from first entry in endpoints array
         let first_endpoint = ctx.endpoints.first().expect("No endpoints in talosconfig");
         let endpoint = if first_endpoint.contains("://") {
-             first_endpoint.clone()
+            first_endpoint.clone()
         } else {
-             format!("https://{}", first_endpoint)
+            format!("https://{}", first_endpoint)
         };
 
         Some(Self {
