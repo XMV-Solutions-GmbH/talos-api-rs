@@ -14,7 +14,7 @@ struct TalosConfig {
 
 #[derive(Deserialize, Debug)]
 struct ContextConfig {
-    target: String,
+    endpoints: Vec<String>,
     ca: String,
     crt: String,
     key: String,
@@ -52,16 +52,13 @@ impl TalosCluster {
 
         println!("Creating Talos cluster '{}' with config at {:?} ...", name, talosconfig_path);
 
-        // We use --talosconfig to direct the output to our temp file
-        // We use 'docker' provisioner
-        // Note: 'talosctl cluster create' generally updates the merged config unless --talosconfig is specified?
-        // Actually, if --talosconfig file does not exist, it creates it.
+        // We use 'docker' provisioner explicitly via subcommand
+        // And --talosconfig-destination to save the config
         let output = Command::new("talosctl")
             .args([
-                "cluster", "create", 
-                "--provisioner", "docker", 
+                "cluster", "create", "docker",
                 "--name", name,
-                "--talosconfig", talosconfig_path.to_str().unwrap()
+                "--talosconfig-destination", talosconfig_path.to_str().unwrap()
             ])
             .output()
             .expect("Failed to execute talosctl");
@@ -99,13 +96,12 @@ impl TalosCluster {
         let crt_path = decode_and_write("client.crt", &ctx.crt);
         let key_path = decode_and_write("client.key", &ctx.key);
         
-        // Format endpoint
-        // Start simple: use what is in target. If it is just IP, add protocol and port.
-        let endpoint = if ctx.target.contains("://") {
-             ctx.target.clone()
+        // Format endpoint from first entry in endpoints array
+        let first_endpoint = ctx.endpoints.first().expect("No endpoints in talosconfig");
+        let endpoint = if first_endpoint.contains("://") {
+             first_endpoint.clone()
         } else {
-             // Basic heuristic
-             format!("https://{}:50000", ctx.target)
+             format!("https://{}", first_endpoint)
         };
 
         Some(Self {

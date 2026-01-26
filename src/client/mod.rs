@@ -63,13 +63,17 @@ impl TalosClient {
             let tls_config = Arc::new(tls_config);
             let connector = tokio_rustls::TlsConnector::from(tls_config);
 
-            let endpoint_str_clone = if config.endpoint.starts_with("http") {
+            // For custom connector, we use http:// scheme because we handle TLS ourselves
+            // Tonic would reject https:// without its own TLS config
+            let endpoint_for_connector = if config.endpoint.starts_with("https://") {
+                config.endpoint.replacen("https://", "http://", 1)
+            } else if config.endpoint.starts_with("http://") {
                 config.endpoint.clone()
             } else {
-                format!("https://{}", config.endpoint)
+                format!("http://{}", config.endpoint)
             };
 
-            let channel = Endpoint::from_shared(endpoint_str_clone)
+            let channel = Endpoint::from_shared(endpoint_for_connector)
                 .map_err(|e| crate::error::TalosError::Config(e.to_string()))?
                 .connect_with_connector(tower::service_fn(move |uri: tonic::transport::Uri| {
                     let connector = connector.clone();
@@ -186,6 +190,4 @@ impl rustls::client::danger::ServerCertVerifier for NoVerifier {
 }
 
 #[cfg(test)]
-#[cfg(test)]
 mod tests;
-
