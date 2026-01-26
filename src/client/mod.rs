@@ -190,6 +190,7 @@ impl TalosClient {
     }
 
     /// Load PEM-encoded certificates
+    #[allow(clippy::result_large_err)]
     fn load_pem_certs(pem_data: &[u8]) -> Result<Vec<CertificateDer<'static>>> {
         let mut reader = std::io::BufReader::new(pem_data);
         let certs: Vec<CertificateDer<'static>> = rustls_pemfile::certs(&mut reader)
@@ -206,6 +207,7 @@ impl TalosClient {
     }
 
     /// Load PEM-encoded private key (supports RSA, EC, PKCS8, and ED25519)
+    #[allow(clippy::result_large_err)]
     fn load_pem_key(pem_data: &[u8]) -> Result<PrivateKeyDer<'static>> {
         // First, try standard PEM formats via rustls_pemfile
         let mut reader = std::io::BufReader::new(pem_data);
