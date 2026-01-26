@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use talos_api_rs::{TalosClient, TalosClientConfig, TalosError};
+use talos_api_rs::{TalosClient, TalosClientConfig};
 
 #[tokio::main]
-async fn main() -> Result<(), TalosError> {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = TalosClientConfig {
         endpoint: "http://127.0.0.1:50000".to_string(),
         crt_path: None,
@@ -16,8 +16,8 @@ async fn main() -> Result<(), TalosError> {
     // This example expects a running cluster or mock
     match TalosClient::new(config).await {
         Ok(_client) => {
-             // let response = client.version().version(...).await?;
-             println!("Connected! (Version call not fully implemented in example)");
+            // let response = client.version().version(...).await?;
+            println!("Connected! (Version call not fully implemented in example)");
         }
         Err(e) => {
             eprintln!("Failed to connect: {}", e);

@@ -7,20 +7,31 @@ fn main() {
 
     tonic_build::configure()
         .out_dir(&out_dir)
-        .compile_protos(
-            &["proto/common/version.proto"],
-            &["proto"],
-        )
+        .compile_protos(&["proto/common/version.proto"], &["proto"])
         .unwrap();
 
     // Add SPDX header to generated files
     let generated_file = out_dir.join("version.rs");
     if generated_file.exists() {
         let content = std::fs::read_to_string(&generated_file).unwrap();
-        let new_content = format!("// SPDX-License-Identifier: MIT OR Apache-2.0\n// DO NOT EDIT\n{}", content);
-        std::fs::write(generated_file, new_content).unwrap();
+        let new_content = format!(
+            "// SPDX-License-Identifier: MIT OR Apache-2.0\n// DO NOT EDIT\n{}",
+            content
+        );
+        std::fs::write(&generated_file, new_content).unwrap();
+
+        // Format the generated file
+        if std::process::Command::new("rustfmt")
+            .arg("--edition")
+            .arg("2021")
+            .arg(&generated_file)
+            .status()
+            .is_err()
+        {
+            println!("cargo:warning=Failed to run rustfmt on generated file");
+        }
     }
-    
+
     // Rerun if proto changes
     println!("cargo:rerun-if-changed=proto/common/version.proto");
 }

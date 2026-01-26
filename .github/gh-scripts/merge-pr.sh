@@ -6,7 +6,7 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  merge-pr.sh -p <PR_NUMBER_OR_URL> [-m squash|merge|rebase] [-d]
+  merge-pr.sh -p <PR_NUMBER_OR_URL> [-m squash|merge|rebase] [-d] [-a]
 
 Required:
   -p  PR number or URL
@@ -14,6 +14,7 @@ Required:
 Optional:
   -m  Merge method (default: squash)
   -d  Delete branch after merge
+  -a  Use admin privileges (bypass requirements)
 
 Behavior:
   - Verifies PR is open & mergeable
@@ -25,12 +26,14 @@ EOF
 PR=""
 METHOD="squash"
 DELETE_BRANCH="false"
+ADMIN="false"
 
-while getopts ":p:m:dh" opt; do
+while getopts ":p:m:dah" opt; do
   case "${opt}" in
     p) PR="${OPTARG}" ;;
     m) METHOD="${OPTARG}" ;;
     d) DELETE_BRANCH="true" ;;
+    a) ADMIN="true" ;;
     h) usage; exit 0 ;;
     *) usage; exit 1 ;;
   esac
@@ -67,15 +70,21 @@ if [[ "${MERGEABLE}" == "CONFLICTING" ]]; then
   exit 1
 fi
 
-FAILED_CHECKS="$(gh pr view "${PR}" --json statusCheckRollup --jq '[.statusCheckRollup[] | select(.conclusion != "SUCCESS") | .name]')"
-if [[ "${FAILED_CHECKS}" != "[]" ]]; then
-  echo "ERROR: Not all checks are successful: ${FAILED_CHECKS}" >&2
-  exit 1
+if [[ "${ADMIN}" != "true" ]]; then
+  FAILED_CHECKS="$(gh pr view "${PR}" --json statusCheckRollup --jq '[.statusCheckRollup[] | select(.conclusion != "SUCCESS") | .name]')"
+  if [[ "${FAILED_CHECKS}" != "[]" ]]; then
+    echo "ERROR: Not all checks are successful: ${FAILED_CHECKS}" >&2
+    exit 1
+  fi
 fi
 
 DELETE_ARG=()
 if [[ "${DELETE_BRANCH}" == "true" ]]; then
   DELETE_ARG+=(--delete-branch)
+fi
+
+if [[ "${ADMIN}" == "true" ]]; then
+  DELETE_ARG+=(--admin)
 fi
 
 echo ">> Merging PR (${METHOD})"
