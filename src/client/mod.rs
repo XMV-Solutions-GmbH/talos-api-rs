@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+use crate::api::machine::machine_service_client::MachineServiceClient;
 use crate::api::version::version_service_client::VersionServiceClient;
 use crate::error::Result;
 use hyper_util::rt::TokioIo;
@@ -133,6 +134,11 @@ impl TalosClient {
     /// Access the Version API group
     pub fn version(&self) -> VersionServiceClient<Channel> {
         VersionServiceClient::new(self.channel.clone())
+    }
+
+    /// Access the Machine API group
+    pub fn machine(&self) -> MachineServiceClient<Channel> {
+        MachineServiceClient::new(self.channel.clone())
     }
 }
 

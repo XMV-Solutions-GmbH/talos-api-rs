@@ -2,5 +2,7 @@
 
 pub mod generated;
 
-// Re-export common types if needed
+// Re-export API modules
+pub use generated::common;
+pub use generated::machine;
 pub use generated::version;

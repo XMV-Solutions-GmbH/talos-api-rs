@@ -15,7 +15,9 @@ try to create from our current branch
 if I acknowledge, then:
 
 - draft How + Tests bullets yourself and ask me to confirm quickly (single message)
-- run `.github/gh-scripte/create-pr.sh` with:
+- run cargo fmt, cargo clippy, cargo test
+- if any fail, correct errors
+- run `.github/gh-scripts/create-pr.sh` with:
   - -t title
   - -w what
   - -y why
