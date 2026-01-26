@@ -1194,6 +1194,7 @@ dependencies = [
  "anyhow",
  "bytes",
  "http",
+ "hyper-util",
  "prost",
  "prost-types",
  "rustls",

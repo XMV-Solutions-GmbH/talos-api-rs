@@ -259,7 +259,8 @@ Copilot must maintain:
 
 12. Final Rule
 
-If something is unclear, STOP and ask.
+If something is fundamentally unclear, you are allowed to stop and ask. But try to be self-sufficient first.
+
 Never guess Talos semantics.
 
 This repository must look, feel, and behave like a serious open-source project from day one.
