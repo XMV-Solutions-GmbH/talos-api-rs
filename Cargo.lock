@@ -1142,6 +1142,7 @@ dependencies = [
  "tempfile",
  "thiserror",
  "tokio",
+ "tokio-stream",
  "tokio-test",
  "tonic",
  "tonic-build",

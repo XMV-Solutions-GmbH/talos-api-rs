@@ -1,4 +1,3 @@
-use std::env;
 use std::path::PathBuf;
 
 fn main() {
@@ -8,7 +7,7 @@ fn main() {
 
     tonic_build::configure()
         .out_dir(&out_dir)
-        .compile(
+        .compile_protos(
             &["proto/common/version.proto"],
             &["proto"],
         )

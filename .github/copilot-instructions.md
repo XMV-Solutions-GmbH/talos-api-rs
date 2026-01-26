@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
 GitHub Copilot Instructions – Talos Rust Client
 
 You are acting as a senior Rust engineer and open-source maintainer. This repository hosts a Talos Linux API client written in Rust. The goal is to build a professional, production-grade client library, following the same architectural and quality principles as kube-rs, but NOT replacing talosctl.
@@ -64,6 +65,20 @@ Rules:
 	•	One shared TalosClient
 	•	API groups exposed as sub-clients
 	•	Explicit auth & endpoint config
+
+Project Initialization (MANDATORY)
+
+Copilot MUST initialize the Rust project structure.
+
+Rules:
+- Create a Cargo workspace if needed
+- Initialize `Cargo.toml` with correct metadata
+- Create `src/lib.rs` as the library entrypoint
+- NO binary (`main.rs`) unless explicitly requested
+- The crate MUST compile with `cargo build` immediately after initialization
+
+Existing non-code files (CODE_OF_CONDUCT.md, CONTRIBUTING.md, LICENSE*, README.md, SECURITY.md)
+MUST be preserved and not overwritten.
 
 ⸻
 
@@ -134,6 +149,10 @@ For Unsupported Features
 	•	No unwrap() in library code
 	•	No todo!() or unimplemented!()
 	•	Public API changes require changelog entry
+  • Every source file MUST start with an SPDX header:
+    `// SPDX-License-Identifier: MIT OR Apache-2.0`
+  • This rule applies to ALL `.rs` files, including generated code
+  • Generated code MUST additionally include a `DO NOT EDIT` notice
 
 ⸻
 
@@ -150,6 +169,7 @@ Rust Docs
 	•	All public structs & functions documented
 	•	Examples compile
 	•	cargo doc --no-deps must succeed
+  • SPDX headers MUST also be present in non-Rust files where applicable (Markdown, YAML, TOML)
 
 ⸻
 
@@ -243,3 +263,4 @@ If something is unclear, STOP and ask.
 Never guess Talos semantics.
 
 This repository must look, feel, and behave like a serious open-source project from day one.
+SPDX compliance is mandatory and non-negotiable.

@@ -26,5 +26,6 @@ tonic-build = "0.12"
 
 [dev-dependencies]
 tokio-test = "0.4"
+tokio-stream = { version = "0.1", features = ["net"] }
 tempfile = "3.10"
 anyhow = "1.0"

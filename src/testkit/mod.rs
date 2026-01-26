@@ -24,13 +24,25 @@ impl TalosCluster {
             return None;
         }
 
-        println!("Creating Talos cluster '{}'...", name);
-        let status = Command::new("talosctl")
-            .args(&["cluster", "create", "--name", name, "--provisioner", "docker"]) // use docker explicitly
-            .status()
+        println!("Creating Talos cluster '{}' ...", name);
+        
+        let output = Command::new("talosctl")
+            .args(&["cluster", "create", "docker", "--name", name]) 
+            .output()
             .expect("Failed to execute talosctl");
 
-        if !status.success() {
+        if !output.status.success() {
+             let stderr = String::from_utf8_lossy(&output.stderr);
+             if stderr.contains("Pool overlaps") {
+                 eprintln!("\n\n!!! ERROR: Docker network overlap detected !!!");
+                 eprintln!("A local Docker network is colliding with the Talos test subnet.");
+                 eprintln!("Please clean up existing networks with:");
+                 eprintln!("  docker network prune");
+                 eprintln!("  # OR remove specific conflicting networks (check 'docker network ls')");
+                 eprintln!("\nFull error: {}\n", stderr);
+             } else {
+                 eprintln!("talosctl error: {}", stderr);
+             }
              panic!("Failed to create cluster");
         }
         

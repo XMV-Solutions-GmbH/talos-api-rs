@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
 use crate::error::Result;
-use crate::api::version::VersionServiceClient;
+use crate::api::version::version_service_client::VersionServiceClient;
 use tonic::transport::Channel;
 
 #[derive(Clone, Debug)]
@@ -14,6 +14,7 @@ pub struct TalosClientConfig {
 
 #[derive(Clone)]
 pub struct TalosClient {
+    #[allow(dead_code)] // TODO: Remove when config is used
     config: TalosClientConfig,
     channel: Channel,
 }
