@@ -4,8 +4,8 @@
 
 - [x] Project scaffolding
 - [x] TalosClient core
-- [ ] Auth & TLS config (Detailed implementation)
-- [ ] Insecure mode (skip TLS verify)
+- [x] Auth & TLS config (Detailed implementation)
+- [x] Insecure mode (skip TLS verify)
 - [x] Health API (Initial skeleton)
 - [ ] Machine list/status
 - [x] Unit tests (Skeleton)
