@@ -4,8 +4,9 @@ use crate::api::machine::machine_service_client::MachineServiceClient;
 use crate::api::version::version_service_client::VersionServiceClient;
 use crate::error::Result;
 use hyper_util::rt::TokioIo;
+use rustls::pki_types::{CertificateDer, PrivateKeyDer, ServerName};
 use std::sync::Arc;
-use tonic::transport::{Certificate, Channel, ClientTlsConfig, Endpoint, Identity};
+use tonic::transport::{Channel, Endpoint};
 
 #[derive(Clone, Debug)]
 pub struct TalosClientConfig {
@@ -38,97 +39,242 @@ pub struct TalosClient {
 
 impl TalosClient {
     pub async fn new(config: TalosClientConfig) -> Result<Self> {
-        let endpoint_str = if config.endpoint.starts_with("http") {
+        // Install ring as default crypto provider (supports ED25519)
+        let _ = rustls::crypto::ring::default_provider().install_default();
+
+        // Check if using plain HTTP (no TLS)
+        let is_http = config.endpoint.starts_with("http://");
+
+        let channel = if is_http {
+            // Plain HTTP - no TLS at all
+            Self::create_http_channel(&config).await?
+        } else if config.insecure {
+            Self::create_insecure_channel(&config).await?
+        } else {
+            Self::create_mtls_channel(&config).await?
+        };
+
+        Ok(Self { config, channel })
+    }
+
+    /// Create a plain HTTP channel (no TLS)
+    async fn create_http_channel(config: &TalosClientConfig) -> Result<Channel> {
+        let channel = Channel::from_shared(config.endpoint.clone())
+            .map_err(|e| crate::error::TalosError::Config(e.to_string()))?
+            .connect()
+            .await?;
+        Ok(channel)
+    }
+
+    /// Create an insecure channel (TLS without certificate verification)
+    async fn create_insecure_channel(config: &TalosClientConfig) -> Result<Channel> {
+        let tls_config = rustls::ClientConfig::builder()
+            .with_root_certificates(rustls::RootCertStore::empty())
+            .with_no_client_auth();
+
+        Self::connect_with_custom_tls(config, tls_config, true).await
+    }
+
+    /// Create an mTLS channel with full certificate verification
+    async fn create_mtls_channel(config: &TalosClientConfig) -> Result<Channel> {
+        // Load CA certificate
+        let root_store = if let Some(ca_path) = &config.ca_path {
+            let ca_pem = std::fs::read(ca_path).map_err(|e| {
+                crate::error::TalosError::Config(format!("Failed to read CA cert: {e}"))
+            })?;
+            let mut root_store = rustls::RootCertStore::empty();
+            let certs = Self::load_pem_certs(&ca_pem)?;
+            for cert in certs {
+                root_store.add(cert).map_err(|e| {
+                    crate::error::TalosError::Config(format!("Failed to add CA cert: {e}"))
+                })?;
+            }
+            root_store
+        } else {
+            // Use system roots if no CA provided
+            let mut root_store = rustls::RootCertStore::empty();
+            root_store.extend(webpki_roots::TLS_SERVER_ROOTS.iter().cloned());
+            root_store
+        };
+
+        // Build TLS config with or without client auth
+        let tls_config =
+            if let (Some(crt_path), Some(key_path)) = (&config.crt_path, &config.key_path) {
+                // mTLS with client certificate
+                let cert_pem = std::fs::read(crt_path).map_err(|e| {
+                    crate::error::TalosError::Config(format!("Failed to read client cert: {e}"))
+                })?;
+                let key_pem = std::fs::read(key_path).map_err(|e| {
+                    crate::error::TalosError::Config(format!("Failed to read client key: {e}"))
+                })?;
+
+                let client_certs = Self::load_pem_certs(&cert_pem)?;
+                let client_key = Self::load_pem_key(&key_pem)?;
+
+                rustls::ClientConfig::builder()
+                    .with_root_certificates(root_store)
+                    .with_client_auth_cert(client_certs, client_key)
+                    .map_err(|e| {
+                        crate::error::TalosError::Config(format!(
+                            "Failed to configure client auth: {e}"
+                        ))
+                    })?
+            } else {
+                // TLS without client auth
+                rustls::ClientConfig::builder()
+                    .with_root_certificates(root_store)
+                    .with_no_client_auth()
+            };
+
+        Self::connect_with_custom_tls(config, tls_config, false).await
+    }
+
+    /// Connect using a custom rustls TLS configuration
+    async fn connect_with_custom_tls(
+        config: &TalosClientConfig,
+        mut tls_config: rustls::ClientConfig,
+        skip_verification: bool,
+    ) -> Result<Channel> {
+        // Override verifier for insecure mode
+        if skip_verification {
+            tls_config
+                .dangerous()
+                .set_certificate_verifier(Arc::new(NoVerifier));
+        }
+
+        // gRPC requires ALPN h2
+        tls_config.alpn_protocols = vec![b"h2".to_vec()];
+        let tls_config = Arc::new(tls_config);
+        let connector = tokio_rustls::TlsConnector::from(tls_config);
+
+        // Extract host for SNI
+        let endpoint_url = if config.endpoint.starts_with("http") {
             config.endpoint.clone()
         } else {
             format!("https://{}", config.endpoint)
         };
+        let parsed_url = url::Url::parse(&endpoint_url)
+            .map_err(|e| crate::error::TalosError::Config(format!("Invalid endpoint URL: {e}")))?;
+        let host = parsed_url
+            .host_str()
+            .ok_or_else(|| crate::error::TalosError::Config("No host in endpoint".to_string()))?
+            .to_string();
+        let port = parsed_url.port().unwrap_or(50000);
 
-        let mut channel_builder = Channel::from_shared(endpoint_str)
-            .map_err(|e| crate::error::TalosError::Config(e.to_string()))?;
+        // For custom connector, use http:// scheme (we handle TLS ourselves)
+        let endpoint_for_connector = format!("http://{}:{}", host, port);
 
-        // TLS Configuration
-        if config.insecure {
-            // Insecure mode: trust all certs via custom connector logic
-            let mut tls_config = rustls::ClientConfig::builder()
-                .with_root_certificates(rustls::RootCertStore::empty())
-                .with_no_client_auth();
+        let channel = Endpoint::from_shared(endpoint_for_connector)
+            .map_err(|e| crate::error::TalosError::Config(e.to_string()))?
+            .connect_with_connector(tower::service_fn(move |uri: tonic::transport::Uri| {
+                let connector = connector.clone();
+                let host = host.clone();
+                async move {
+                    let uri_host = uri.host().unwrap_or("127.0.0.1");
+                    let uri_port = uri.port_u16().unwrap_or(50000);
+                    let addr = format!("{}:{}", uri_host, uri_port);
 
-            // Override verifier with one that accepts everything
-            tls_config
-                .dangerous()
-                .set_certificate_verifier(Arc::new(NoVerifier));
+                    let tcp = tokio::net::TcpStream::connect(addr).await?;
 
-            // Tonic requires ALPN for gRPC (h2)
-            tls_config.alpn_protocols = vec![b"h2".to_vec()];
-            let tls_config = Arc::new(tls_config);
-            let connector = tokio_rustls::TlsConnector::from(tls_config);
+                    // Use actual hostname for SNI (important for cert verification)
+                    let server_name = ServerName::try_from(host.clone())
+                        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidInput, e))?;
 
-            // For custom connector, we use http:// scheme because we handle TLS ourselves
-            // Tonic would reject https:// without its own TLS config
-            let endpoint_for_connector = if config.endpoint.starts_with("https://") {
-                config.endpoint.replacen("https://", "http://", 1)
-            } else if config.endpoint.starts_with("http://") {
-                config.endpoint.clone()
-            } else {
-                format!("http://{}", config.endpoint)
-            };
+                    let tls_stream = connector.connect(server_name, tcp).await?;
+                    Ok::<_, std::io::Error>(TokioIo::new(tls_stream))
+                }
+            }))
+            .await?;
 
-            let channel = Endpoint::from_shared(endpoint_for_connector)
-                .map_err(|e| crate::error::TalosError::Config(e.to_string()))?
-                .connect_with_connector(tower::service_fn(move |uri: tonic::transport::Uri| {
-                    let connector = connector.clone();
-                    async move {
-                        let host = uri.host().unwrap_or("127.0.0.1");
-                        let port = uri.port_u16().unwrap_or(50000);
-                        let addr = format!("{}:{}", host, port);
+        Ok(channel)
+    }
 
-                        let tcp = tokio::net::TcpStream::connect(addr).await?;
+    /// Load PEM-encoded certificates
+    fn load_pem_certs(pem_data: &[u8]) -> Result<Vec<CertificateDer<'static>>> {
+        let mut reader = std::io::BufReader::new(pem_data);
+        let certs: Vec<CertificateDer<'static>> = rustls_pemfile::certs(&mut reader)
+            .collect::<std::result::Result<Vec<_>, _>>()
+            .map_err(|e| {
+                crate::error::TalosError::Config(format!("Failed to parse PEM certificates: {e}"))
+            })?;
+        if certs.is_empty() {
+            return Err(crate::error::TalosError::Config(
+                "No certificates found in PEM data".to_string(),
+            ));
+        }
+        Ok(certs)
+    }
 
-                        // We use a dummy server name because verification is disabled anyway
-                        let server_name = rustls::pki_types::ServerName::try_from("any").unwrap();
+    /// Load PEM-encoded private key (supports RSA, EC, PKCS8, and ED25519)
+    fn load_pem_key(pem_data: &[u8]) -> Result<PrivateKeyDer<'static>> {
+        // First, try standard PEM formats via rustls_pemfile
+        let mut reader = std::io::BufReader::new(pem_data);
 
-                        let tls_stream = connector.connect(server_name, tcp).await?;
-                        Ok::<_, std::io::Error>(TokioIo::new(tls_stream))
-                    }
-                }))
-                .await?;
-
-            return Ok(Self {
-                #[allow(dead_code)]
-                config,
-                channel,
-            });
-        } else if config.endpoint.starts_with("https") {
-            // Strict mode (mTLS)
-            let mut tls = ClientTlsConfig::new();
-
-            if let Some(ca_path) = &config.ca_path {
-                let pem = std::fs::read_to_string(ca_path).map_err(|e| {
-                    crate::error::TalosError::Config(format!("Failed to read CA: {e}"))
-                })?;
-                tls = tls.ca_certificate(Certificate::from_pem(pem));
+        loop {
+            match rustls_pemfile::read_one(&mut reader) {
+                Ok(Some(rustls_pemfile::Item::Pkcs1Key(key))) => {
+                    return Ok(PrivateKeyDer::Pkcs1(key));
+                }
+                Ok(Some(rustls_pemfile::Item::Pkcs8Key(key))) => {
+                    return Ok(PrivateKeyDer::Pkcs8(key));
+                }
+                Ok(Some(rustls_pemfile::Item::Sec1Key(key))) => {
+                    return Ok(PrivateKeyDer::Sec1(key));
+                }
+                Ok(Some(_)) => {
+                    // Skip other PEM items (certificates, etc.)
+                    continue;
+                }
+                Ok(None) => {
+                    break;
+                }
+                Err(e) => {
+                    return Err(crate::error::TalosError::Config(format!(
+                        "Failed to parse PEM key: {e}"
+                    )));
+                }
             }
-
-            if let (Some(crt), Some(key)) = (&config.crt_path, &config.key_path) {
-                let cert_pem = std::fs::read_to_string(crt).map_err(|e| {
-                    crate::error::TalosError::Config(format!("Failed to read Cert: {e}"))
-                })?;
-                let key_pem = std::fs::read_to_string(key).map_err(|e| {
-                    crate::error::TalosError::Config(format!("Failed to read Key: {e}"))
-                })?;
-                tls = tls.identity(Identity::from_pem(cert_pem, key_pem));
-            }
-            channel_builder = channel_builder.tls_config(tls)?;
         }
 
-        let channel = channel_builder.connect().await?;
+        // Fallback: Handle non-standard "ED25519 PRIVATE KEY" PEM label
+        // Talos uses this format, which is PKCS#8-encoded but with a custom label
+        let pem_str = std::str::from_utf8(pem_data)
+            .map_err(|e| crate::error::TalosError::Config(format!("Invalid UTF-8 in key: {e}")))?;
 
-        Ok(Self {
-            #[allow(dead_code)]
-            config,
-            channel,
-        })
+        if pem_str.contains("-----BEGIN ED25519 PRIVATE KEY-----") {
+            // Extract the base64 content between the headers
+            let start_marker = "-----BEGIN ED25519 PRIVATE KEY-----";
+            let end_marker = "-----END ED25519 PRIVATE KEY-----";
+
+            if let Some(start) = pem_str.find(start_marker) {
+                if let Some(end) = pem_str.find(end_marker) {
+                    let base64_content = &pem_str[start + start_marker.len()..end];
+                    let base64_clean: String = base64_content
+                        .chars()
+                        .filter(|c| !c.is_whitespace())
+                        .collect();
+
+                    let der_bytes = base64::Engine::decode(
+                        &base64::engine::general_purpose::STANDARD,
+                        &base64_clean,
+                    )
+                    .map_err(|e| {
+                        crate::error::TalosError::Config(format!(
+                            "Failed to decode ED25519 key: {e}"
+                        ))
+                    })?;
+
+                    // ED25519 PRIVATE KEY is actually PKCS#8 encoded
+                    return Ok(PrivateKeyDer::Pkcs8(
+                        rustls::pki_types::PrivatePkcs8KeyDer::from(der_bytes),
+                    ));
+                }
+            }
+        }
+
+        Err(crate::error::TalosError::Config(
+            "No private key found in PEM data".to_string(),
+        ))
     }
 
     /// Access the Version API group

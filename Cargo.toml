@@ -37,6 +37,8 @@ bytes = "1.5"
 tracing = "0.1"
 rustls = { version = "0.23.36", features = ["logging", "ring", "std", "tls12"], default-features = false }
 tokio-rustls = { version = "0.26.4", features = ["logging", "ring", "tls12"], default-features = false }
+rustls-pemfile = "2.2"
+webpki-roots = "0.26"
 hyper-util = { version = "0.1.19", features = ["tokio"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_yaml = "0.9.34"

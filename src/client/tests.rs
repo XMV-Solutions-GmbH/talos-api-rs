@@ -46,7 +46,7 @@ async fn test_new_client_invalid_cert_path() {
     assert!(result.is_err());
     match result {
         Err(crate::error::TalosError::Config(msg)) => {
-            assert!(msg.contains("Failed to read Cert"));
+            assert!(msg.contains("Failed to read client cert"));
         }
         _ => panic!("Expected Config error"),
     }
@@ -77,13 +77,13 @@ async fn test_version_call() {
 
     tokio::spawn(server_future);
 
-    // Test client
+    // Test client - use insecure mode since mock server doesn't have TLS
     let config = TalosClientConfig {
         endpoint: format!("http://{}", addr),
         crt_path: None,
         key_path: None,
         ca_path: None,
-        insecure: false, // Testing cleartext http here, which tonic supports by default
+        insecure: true, // Mock server has no TLS
     };
 
     let client = TalosClient::new(config)
@@ -116,7 +116,7 @@ async fn test_machine_client_type() {
 
     let config = TalosClientConfig {
         endpoint: format!("http://{}", addr),
-        insecure: false,
+        insecure: true, // Mock server has no TLS
         ..Default::default()
     };
 
