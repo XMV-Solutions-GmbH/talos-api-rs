@@ -1,5 +1,7 @@
 # Testing Guide
 
+> **MANDATORY**: Integration tests MUST be run before every PR that adds or modifies API functionality.
+
 ## Unit Tests
 
 Run standard unit tests:
@@ -8,7 +10,7 @@ Run standard unit tests:
 cargo test
 ```
 
-## Integration Tests (Dev Harness)
+## Integration Tests (Dev Harness) - MANDATORY
 
 We use `talosctl` to manage local Docker-based clusters for testing.
 
@@ -81,3 +83,35 @@ cargo test  # Only runs unit tests
 - Use `testkit` helpers to provision a cluster.
 - Ensure tests tear down the cluster in a `Drop` guard or via `finally` logic.
 - Integration tests check for `TALOS_DEV_TESTS` env var before running.
+
+## PR Checklist (MANDATORY)
+
+Before creating a PR, run:
+
+```bash
+# 1. Format code
+cargo fmt
+
+# 2. Lint check
+cargo clippy --all-targets --all-features -- -D warnings
+
+# 3. Unit tests
+cargo test
+
+# 4. Integration tests (MANDATORY for API changes)
+TALOS_DEV_TESTS=1 cargo test --test integration_test -- --nocapture
+```
+
+**Integration tests are REQUIRED for every feature that adds or modifies API functionality.**
+
+## Current Integration Test Coverage
+
+The integration test (`tests/integration_test.rs`) covers:
+
+| API | Status | Notes |
+|-----|--------|-------|
+| Version API | ✓ | Returns "Unimplemented" (expected) |
+| Hostname | ✓ | Returns node hostname |
+| ServiceList | ✓ | Lists all running services |
+| SystemStat | ✓ | CPU, memory, boot time |
+| ApplyConfiguration | ✓ | Dry-run validation test |
