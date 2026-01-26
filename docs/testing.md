@@ -13,9 +13,9 @@ cargo test
 We use `talosctl` to manage local Docker-based clusters for testing.
 
 **Prerequisites:**
+
 - Docker
 - `talosctl` installed and in PATH
-- `sudo` privileges (required for `talosctl cluster create` to setup networking/CNI)
 - `TALOS_DEV_TESTS=1` environment variable set
 
 **Workflow:**
@@ -23,7 +23,7 @@ We use `talosctl` to manage local Docker-based clusters for testing.
 ```bash
 export TALOS_DEV_TESTS=1
 # Usually requires sudo for the docker provisioner to manage networks
-sudo -E cargo test -- --ignored
+cargo test -- --ignored
 ```
 
 (Note: Integration tests should be marked `#[ignore]` by default so `cargo test` runs fast, or filtered by env var logic).

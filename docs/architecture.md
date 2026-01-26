@@ -2,7 +2,7 @@
 
 ## Directory Structure
 
-```
+```text
 crate
 ├── client/          # TalosClient, connection, auth, TLS
 ├── api/             # Generated gRPC APIs (prost/tonic)
