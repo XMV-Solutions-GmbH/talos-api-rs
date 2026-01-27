@@ -4,7 +4,7 @@
 /// rpc applyConfiguration
 /// ApplyConfiguration describes a request to assert a new configuration upon a
 /// node.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ApplyConfigurationRequest {
     #[prost(bytes = "vec", tag = "1")]
     pub data: ::prost::alloc::vec::Vec<u8>,
@@ -74,7 +74,7 @@ pub struct ApplyConfigurationResponse {
     pub messages: ::prost::alloc::vec::Vec<ApplyConfiguration>,
 }
 /// rpc reboot
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RebootRequest {
     #[prost(enumeration = "reboot_request::Mode", tag = "1")]
     pub mode: i32,
@@ -125,7 +125,7 @@ pub struct RebootResponse {
     pub messages: ::prost::alloc::vec::Vec<Reboot>,
 }
 /// rpc Bootstrap
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct BootstrapRequest {
     /// Enable etcd recovery from the snapshot.
     /// Snapshot should be uploaded before this call via EtcdRecover RPC.
@@ -189,7 +189,7 @@ pub mod sequence_event {
         }
     }
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct PhaseEvent {
     #[prost(string, tag = "1")]
     pub phase: ::prost::alloc::string::String,
@@ -225,7 +225,7 @@ pub mod phase_event {
         }
     }
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct TaskEvent {
     #[prost(string, tag = "1")]
     pub task: ::prost::alloc::string::String,
@@ -261,7 +261,7 @@ pub mod task_event {
         }
     }
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ServiceStateEvent {
     #[prost(string, tag = "1")]
     pub service: ::prost::alloc::string::String,
@@ -322,25 +322,25 @@ pub mod service_state_event {
         }
     }
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RestartEvent {
     #[prost(int64, tag = "1")]
     pub cmd: i64,
 }
 /// ConfigLoadErrorEvent is reported when the config loading has failed.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ConfigLoadErrorEvent {
     #[prost(string, tag = "1")]
     pub error: ::prost::alloc::string::String,
 }
 /// ConfigValidationErrorEvent is reported when config validation has failed.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ConfigValidationErrorEvent {
     #[prost(string, tag = "1")]
     pub error: ::prost::alloc::string::String,
 }
 /// AddressEvent reports node endpoints aggregated from k8s.Endpoints and network.Hostname.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct AddressEvent {
     #[prost(string, tag = "1")]
     pub hostname: ::prost::alloc::string::String,
@@ -366,7 +366,7 @@ pub mod machine_status_event {
     }
     /// Nested message and enum types in `MachineStatus`.
     pub mod machine_status {
-        #[derive(Clone, PartialEq, ::prost::Message)]
+        #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
         pub struct UnmetCondition {
             #[prost(string, tag = "1")]
             pub name: ::prost::alloc::string::String,
@@ -422,7 +422,7 @@ pub mod machine_status_event {
         }
     }
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EventsRequest {
     #[prost(int32, tag = "1")]
     pub tail_events: i32,
@@ -445,7 +445,7 @@ pub struct Event {
     pub actor_id: ::prost::alloc::string::String,
 }
 /// rpc reset
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ResetPartitionSpec {
     #[prost(string, tag = "1")]
     pub label: ::prost::alloc::string::String,
@@ -526,7 +526,7 @@ pub struct Shutdown {
     #[prost(string, tag = "2")]
     pub actor_id: ::prost::alloc::string::String,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ShutdownRequest {
     /// Force indicates whether node should shutdown without first cordening and draining
     #[prost(bool, tag = "1")]
@@ -538,7 +538,7 @@ pub struct ShutdownResponse {
     pub messages: ::prost::alloc::vec::Vec<Shutdown>,
 }
 /// rpc upgrade
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct UpgradeRequest {
     #[prost(string, tag = "1")]
     pub image: ::prost::alloc::string::String,
@@ -623,7 +623,7 @@ pub struct ServiceEvents {
     #[prost(message, repeated, tag = "1")]
     pub events: ::prost::alloc::vec::Vec<ServiceEvent>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ServiceEvent {
     #[prost(string, tag = "1")]
     pub msg: ::prost::alloc::string::String,
@@ -632,7 +632,7 @@ pub struct ServiceEvent {
     #[prost(message, optional, tag = "3")]
     pub ts: ::core::option::Option<::prost_types::Timestamp>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ServiceHealth {
     #[prost(bool, tag = "1")]
     pub unknown: bool,
@@ -644,7 +644,7 @@ pub struct ServiceHealth {
     pub last_change: ::core::option::Option<::prost_types::Timestamp>,
 }
 /// rpc servicestart
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ServiceStartRequest {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
@@ -661,7 +661,7 @@ pub struct ServiceStartResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<ServiceStart>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ServiceStopRequest {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
@@ -678,7 +678,7 @@ pub struct ServiceStopResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<ServiceStop>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ServiceRestartRequest {
     #[prost(string, tag = "1")]
     pub id: ::prost::alloc::string::String,
@@ -698,14 +698,14 @@ pub struct ServiceRestartResponse {
 /// CopyRequest describes a request to copy data out of Talos node
 ///
 /// Copy produces .tar.gz archive which is streamed back to the caller
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct CopyRequest {
     /// Root path to start copying data out, it might be either a file or directory
     #[prost(string, tag = "1")]
     pub root_path: ::prost::alloc::string::String,
 }
 /// ListRequest describes a request to list the contents of a directory.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ListRequest {
     /// Root indicates the root directory for the list. If not indicated, '/' is
     /// presumed.
@@ -763,7 +763,7 @@ pub mod list_request {
     }
 }
 /// DiskUsageRequest describes a request to list disk usage of directories and regular files
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DiskUsageRequest {
     /// RecursionDepth indicates how many levels of subdirectories should be
     /// recursed. The default (0) indicates that no limit should be enforced.
@@ -820,7 +820,7 @@ pub struct FileInfo {
     #[prost(message, repeated, tag = "12")]
     pub xattrs: ::prost::alloc::vec::Vec<Xattr>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Xattr {
     #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,
@@ -860,7 +860,7 @@ pub struct MountsResponse {
     pub messages: ::prost::alloc::vec::Vec<Mounts>,
 }
 /// The messages message containing the requested processes.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct MountStat {
     #[prost(string, tag = "1")]
     pub filesystem: ::prost::alloc::string::String,
@@ -888,7 +888,7 @@ pub struct VersionResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<Version>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct VersionInfo {
     #[prost(string, tag = "1")]
     pub tag: ::prost::alloc::string::String,
@@ -903,7 +903,7 @@ pub struct VersionInfo {
     #[prost(string, tag = "6")]
     pub arch: ::prost::alloc::string::String,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct PlatformInfo {
     #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,
@@ -911,7 +911,7 @@ pub struct PlatformInfo {
     pub mode: ::prost::alloc::string::String,
 }
 /// FeaturesInfo describes individual Talos features that can be switched on or off.
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct FeaturesInfo {
     /// RBAC is true if role-based access control is enabled.
     #[prost(bool, tag = "1")]
@@ -919,7 +919,7 @@ pub struct FeaturesInfo {
 }
 /// rpc logs
 /// The request message containing the process name.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct LogsRequest {
     #[prost(string, tag = "1")]
     pub namespace: ::prost::alloc::string::String,
@@ -933,7 +933,7 @@ pub struct LogsRequest {
     #[prost(int32, tag = "5")]
     pub tail_lines: i32,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ReadRequest {
     #[prost(string, tag = "1")]
     pub path: ::prost::alloc::string::String,
@@ -952,7 +952,7 @@ pub struct LogsContainersResponse {
     pub messages: ::prost::alloc::vec::Vec<LogsContainer>,
 }
 /// rpc rollback
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RollbackRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Rollback {
@@ -964,7 +964,7 @@ pub struct RollbackResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<Rollback>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ContainersRequest {
     #[prost(string, tag = "1")]
     pub namespace: ::prost::alloc::string::String,
@@ -973,7 +973,7 @@ pub struct ContainersRequest {
     pub driver: i32,
 }
 /// The messages message containing the requested containers.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ContainerInfo {
     #[prost(string, tag = "1")]
     pub namespace: ::prost::alloc::string::String,
@@ -1010,7 +1010,7 @@ pub struct ContainersResponse {
     pub messages: ::prost::alloc::vec::Vec<Container>,
 }
 /// dmesg
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DmesgRequest {
     #[prost(bool, tag = "1")]
     pub follow: bool,
@@ -1057,7 +1057,7 @@ pub struct ProcessInfo {
 }
 /// rpc restart
 /// The request message containing the process to restart.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RestartRequest {
     #[prost(string, tag = "1")]
     pub namespace: ::prost::alloc::string::String,
@@ -1079,7 +1079,7 @@ pub struct RestartResponse {
     pub messages: ::prost::alloc::vec::Vec<Restart>,
 }
 /// The request message containing the containerd namespace.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct StatsRequest {
     #[prost(string, tag = "1")]
     pub namespace: ::prost::alloc::string::String,
@@ -1101,7 +1101,7 @@ pub struct StatsResponse {
     pub messages: ::prost::alloc::vec::Vec<Stats>,
 }
 /// The messages message containing the requested stat.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Stat {
     #[prost(string, tag = "1")]
     pub namespace: ::prost::alloc::string::String,
@@ -1128,7 +1128,7 @@ pub struct MemoryResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<Memory>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct MemInfo {
     #[prost(uint64, tag = "1")]
     pub memtotal: u64,
@@ -1310,7 +1310,7 @@ pub struct CpuStat {
     #[prost(double, tag = "10")]
     pub guest_nice: f64,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct SoftIrqStat {
     #[prost(uint64, tag = "1")]
     pub hi: u64,
@@ -1345,7 +1345,7 @@ pub struct CpUsFreqStats {
     #[prost(message, repeated, tag = "2")]
     pub cpu_freq_stats: ::prost::alloc::vec::Vec<CpuFreqStats>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct CpuFreqStats {
     #[prost(uint64, tag = "1")]
     pub current_frequency: u64,
@@ -1437,7 +1437,7 @@ pub struct NetworkDeviceStats {
     #[prost(message, repeated, tag = "3")]
     pub devices: ::prost::alloc::vec::Vec<NetDev>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct NetDev {
     #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,
@@ -1488,7 +1488,7 @@ pub struct DiskStats {
     #[prost(message, repeated, tag = "3")]
     pub devices: ::prost::alloc::vec::Vec<DiskStat>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DiskStat {
     #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,
@@ -1523,7 +1523,7 @@ pub struct DiskStat {
     #[prost(uint64, tag = "16")]
     pub discard_time_ms: u64,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdLeaveClusterRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct EtcdLeaveCluster {
@@ -1535,7 +1535,7 @@ pub struct EtcdLeaveClusterResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<EtcdLeaveCluster>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdRemoveMemberRequest {
     #[prost(string, tag = "1")]
     pub member: ::prost::alloc::string::String,
@@ -1550,7 +1550,7 @@ pub struct EtcdRemoveMemberResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<EtcdRemoveMember>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdRemoveMemberByIdRequest {
     #[prost(uint64, tag = "1")]
     pub member_id: u64,
@@ -1565,7 +1565,7 @@ pub struct EtcdRemoveMemberByIdResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<EtcdRemoveMemberById>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdForfeitLeadershipRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct EtcdForfeitLeadership {
@@ -1579,13 +1579,13 @@ pub struct EtcdForfeitLeadershipResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<EtcdForfeitLeadership>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdMemberListRequest {
     #[prost(bool, tag = "1")]
     pub query_local: bool,
 }
 /// EtcdMember describes a single etcd member.
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdMember {
     /// member ID.
     #[prost(uint64, tag = "2")]
@@ -1620,7 +1620,7 @@ pub struct EtcdMemberListResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<EtcdMembers>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdSnapshotRequest {}
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct EtcdRecover {
@@ -1644,7 +1644,7 @@ pub struct EtcdAlarm {
     #[prost(message, repeated, tag = "2")]
     pub member_alarms: ::prost::alloc::vec::Vec<EtcdMemberAlarm>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdMemberAlarm {
     #[prost(uint64, tag = "1")]
     pub member_id: u64,
@@ -1717,7 +1717,7 @@ pub struct EtcdStatus {
     #[prost(message, optional, tag = "2")]
     pub member_status: ::core::option::Option<EtcdMemberStatus>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdMemberStatus {
     #[prost(string, tag = "11")]
     pub storage_version: ::prost::alloc::string::String,
@@ -1742,7 +1742,7 @@ pub struct EtcdMemberStatus {
     #[prost(bool, tag = "9")]
     pub is_learner: bool,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdDowngradeValidateRequest {
     #[prost(string, tag = "1")]
     pub version: ::prost::alloc::string::String,
@@ -1759,7 +1759,7 @@ pub struct EtcdDowngradeValidate {
     #[prost(message, optional, tag = "2")]
     pub cluster_downgrade: ::core::option::Option<EtcdClusterDowngrade>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdDowngradeEnableRequest {
     #[prost(string, tag = "1")]
     pub version: ::prost::alloc::string::String,
@@ -1788,12 +1788,12 @@ pub struct EtcdDowngradeCancel {
     #[prost(message, optional, tag = "2")]
     pub cluster_downgrade: ::core::option::Option<EtcdClusterDowngrade>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct EtcdClusterDowngrade {
     #[prost(string, tag = "1")]
     pub cluster_version: ::prost::alloc::string::String,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct RouteConfig {
     #[prost(string, tag = "1")]
     pub network: ::prost::alloc::string::String,
@@ -1802,7 +1802,7 @@ pub struct RouteConfig {
     #[prost(uint32, tag = "3")]
     pub metric: u32,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct DhcpOptionsConfig {
     #[prost(uint32, tag = "1")]
     pub route_metric: u32,
@@ -1831,7 +1831,7 @@ pub struct NetworkConfig {
     #[prost(message, repeated, tag = "2")]
     pub interfaces: ::prost::alloc::vec::Vec<NetworkDeviceConfig>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct InstallConfig {
     #[prost(string, tag = "1")]
     pub install_disk: ::prost::alloc::string::String,
@@ -1884,26 +1884,26 @@ pub mod machine_config {
         }
     }
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ControlPlaneConfig {
     #[prost(string, tag = "1")]
     pub endpoint: ::prost::alloc::string::String,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct CniConfig {
     #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,
     #[prost(string, repeated, tag = "2")]
     pub urls: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ClusterNetworkConfig {
     #[prost(string, tag = "1")]
     pub dns_domain: ::prost::alloc::string::String,
     #[prost(message, optional, tag = "2")]
     pub cni_config: ::core::option::Option<CniConfig>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ClusterConfig {
     #[prost(string, tag = "1")]
     pub name: ::prost::alloc::string::String,
@@ -1914,7 +1914,7 @@ pub struct ClusterConfig {
     #[prost(bool, tag = "4")]
     pub allow_scheduling_on_control_planes: bool,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct GenerateClientConfigurationRequest {
     /// Roles in the generated client certificate.
     #[prost(string, repeated, tag = "1")]
@@ -1960,7 +1960,7 @@ pub struct PacketCaptureRequest {
     #[prost(message, repeated, tag = "4")]
     pub bpf_filter: ::prost::alloc::vec::Vec<BpfInstruction>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct BpfInstruction {
     #[prost(uint32, tag = "1")]
     pub op: u32,
@@ -1971,7 +1971,7 @@ pub struct BpfInstruction {
     #[prost(uint32, tag = "4")]
     pub k: u32,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct NetstatRequest {
     #[prost(enumeration = "netstat_request::Filter", tag = "1")]
     pub filter: i32,
@@ -1984,12 +1984,12 @@ pub struct NetstatRequest {
 }
 /// Nested message and enum types in `NetstatRequest`.
 pub mod netstat_request {
-    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Feature {
         #[prost(bool, tag = "1")]
         pub pid: bool,
     }
-    #[derive(Clone, Copy, PartialEq, ::prost::Message)]
+    #[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct L4proto {
         #[prost(bool, tag = "1")]
         pub tcp: bool,
@@ -2008,7 +2008,7 @@ pub mod netstat_request {
         #[prost(bool, tag = "8")]
         pub raw6: bool,
     }
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct NetNs {
         #[prost(bool, tag = "1")]
         pub hostnetwork: bool,
@@ -2047,7 +2047,7 @@ pub mod netstat_request {
         }
     }
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ConnectRecord {
     #[prost(string, tag = "1")]
     pub l4proto: ::prost::alloc::string::String,
@@ -2088,7 +2088,7 @@ pub struct ConnectRecord {
 }
 /// Nested message and enum types in `ConnectRecord`.
 pub mod connect_record {
-    #[derive(Clone, PartialEq, ::prost::Message)]
+    #[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
     pub struct Process {
         #[prost(uint32, tag = "1")]
         pub pid: u32,
@@ -2199,7 +2199,7 @@ pub struct NetstatResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<Netstat>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct MetaWriteRequest {
     #[prost(uint32, tag = "1")]
     pub key: u32,
@@ -2216,7 +2216,7 @@ pub struct MetaWriteResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<MetaWrite>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct MetaDeleteRequest {
     #[prost(uint32, tag = "1")]
     pub key: u32,
@@ -2231,7 +2231,7 @@ pub struct MetaDeleteResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<MetaDelete>,
 }
-#[derive(Clone, Copy, PartialEq, ::prost::Message)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ImageListRequest {
     /// Containerd namespace to use.
     #[prost(enumeration = "super::common::ContainerdNamespace", tag = "1")]
@@ -2250,7 +2250,7 @@ pub struct ImageListResponse {
     #[prost(message, optional, tag = "5")]
     pub created_at: ::core::option::Option<::prost_types::Timestamp>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct ImagePullRequest {
     /// Containerd namespace to use.
     #[prost(enumeration = "super::common::ContainerdNamespace", tag = "1")]
@@ -2298,7 +2298,7 @@ pub mod machine_service_client {
     }
     impl<T> MachineServiceClient<T>
     where
-        T: tonic::client::GrpcService<tonic::body::BoxBody>,
+        T: tonic::client::GrpcService<tonic::body::Body>,
         T::Error: Into<StdError>,
         T::ResponseBody: Body<Data = Bytes> + std::marker::Send + 'static,
         <T::ResponseBody as Body>::Error: Into<StdError> + std::marker::Send,
@@ -2319,12 +2319,12 @@ pub mod machine_service_client {
             F: tonic::service::Interceptor,
             T::ResponseBody: Default,
             T: tonic::codegen::Service<
-                http::Request<tonic::body::BoxBody>,
+                http::Request<tonic::body::Body>,
                 Response = http::Response<
-                    <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
+                    <T as tonic::client::GrpcService<tonic::body::Body>>::ResponseBody,
                 >,
             >,
-            <T as tonic::codegen::Service<http::Request<tonic::body::BoxBody>>>::Error:
+            <T as tonic::codegen::Service<http::Request<tonic::body::Body>>>::Error:
                 Into<StdError> + std::marker::Send + std::marker::Sync,
         {
             MachineServiceClient::new(InterceptedService::new(inner, interceptor))
@@ -2368,7 +2368,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/ApplyConfiguration");
             let mut req = request.into_request();
@@ -2389,7 +2389,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Bootstrap");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2404,7 +2404,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Containers");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2421,7 +2421,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Copy");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2436,7 +2436,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/CPUFreqStats");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2450,7 +2450,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/CPUInfo");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2464,7 +2464,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/DiskStats");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2481,7 +2481,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Dmesg");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2498,7 +2498,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Events");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2513,7 +2513,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/EtcdMemberList");
             let mut req = request.into_request();
@@ -2532,7 +2532,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/machine.MachineService/EtcdRemoveMemberByID",
             );
@@ -2551,7 +2551,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/EtcdLeaveCluster");
             let mut req = request.into_request();
@@ -2569,7 +2569,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/machine.MachineService/EtcdForfeitLeadership",
             );
@@ -2591,7 +2591,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/EtcdRecover");
             let mut req = request.into_streaming_request();
             req.extensions_mut()
@@ -2611,7 +2611,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/EtcdSnapshot");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2628,7 +2628,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/EtcdAlarmList");
             let mut req = request.into_request();
@@ -2646,7 +2646,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/EtcdAlarmDisarm");
             let mut req = request.into_request();
@@ -2666,7 +2666,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/EtcdDefragment");
             let mut req = request.into_request();
@@ -2684,7 +2684,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/EtcdStatus");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2701,7 +2701,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/machine.MachineService/EtcdDowngradeValidate",
             );
@@ -2722,7 +2722,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/EtcdDowngradeEnable");
             let mut req = request.into_request();
@@ -2742,7 +2742,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/EtcdDowngradeCancel");
             let mut req = request.into_request();
@@ -2759,7 +2759,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Hostname");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2776,7 +2776,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Kubeconfig");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2793,7 +2793,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/List");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2810,7 +2810,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/DiskUsage");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2824,7 +2824,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/LoadAvg");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2841,7 +2841,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Logs");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2856,7 +2856,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/LogsContainers");
             let mut req = request.into_request();
@@ -2871,7 +2871,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Memory");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2885,7 +2885,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Mounts");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2900,7 +2900,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/NetworkDeviceStats");
             let mut req = request.into_request();
@@ -2917,7 +2917,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Processes");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2934,7 +2934,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Read");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2948,7 +2948,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Reboot");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2962,7 +2962,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Restart");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2976,7 +2976,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Rollback");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -2990,7 +2990,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Reset");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3005,7 +3005,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/ServiceList");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3020,7 +3020,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/ServiceRestart");
             let mut req = request.into_request();
@@ -3036,7 +3036,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/ServiceStart");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3051,7 +3051,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/ServiceStop");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3065,7 +3065,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Shutdown");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3079,7 +3079,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Stats");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3094,7 +3094,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/SystemStat");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3108,7 +3108,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Upgrade");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3122,7 +3122,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Version");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3140,7 +3140,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
                 "/machine.MachineService/GenerateClientConfiguration",
             );
@@ -3162,7 +3162,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path =
                 http::uri::PathAndQuery::from_static("/machine.MachineService/PacketCapture");
             let mut req = request.into_request();
@@ -3178,7 +3178,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/Netstat");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3193,7 +3193,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/MetaWrite");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3209,7 +3209,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/MetaDelete");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3227,7 +3227,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/ImageList");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3242,7 +3242,7 @@ pub mod machine_service_client {
             self.inner.ready().await.map_err(|e| {
                 tonic::Status::unknown(format!("Service was not ready: {}", e.into()))
             })?;
-            let codec = tonic::codec::ProstCodec::default();
+            let codec = tonic_prost::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static("/machine.MachineService/ImagePull");
             let mut req = request.into_request();
             req.extensions_mut()
@@ -3638,7 +3638,7 @@ pub mod machine_service_server {
         B: Body + std::marker::Send + 'static,
         B::Error: Into<StdError> + std::marker::Send + 'static,
     {
-        type Response = http::Response<tonic::body::BoxBody>;
+        type Response = http::Response<tonic::body::Body>;
         type Error = std::convert::Infallible;
         type Future = BoxFuture<Self::Response, Self::Error>;
         fn poll_ready(
@@ -3676,7 +3676,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ApplyConfigurationSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -3715,7 +3715,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = BootstrapSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -3754,7 +3754,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ContainersSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -3796,7 +3796,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = CopySvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -3832,7 +3832,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = CPUFreqStatsSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -3868,7 +3868,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = CPUInfoSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -3904,7 +3904,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = DiskStatsSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -3946,7 +3946,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = DmesgSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -3989,7 +3989,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EventsSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4031,7 +4031,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdMemberListSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4074,7 +4074,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdRemoveMemberByIDSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4116,7 +4116,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdLeaveClusterSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4159,7 +4159,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdForfeitLeadershipSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4201,7 +4201,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdRecoverSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4245,7 +4245,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdSnapshotSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4281,7 +4281,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdAlarmListSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4317,7 +4317,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdAlarmDisarmSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4353,7 +4353,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdDefragmentSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4389,7 +4389,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdStatusSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4432,7 +4432,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdDowngradeValidateSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4474,7 +4474,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdDowngradeEnableSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4510,7 +4510,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = EtcdDowngradeCancelSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4546,7 +4546,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = HostnameSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4584,7 +4584,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = KubeconfigSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4626,7 +4626,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ListSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4670,7 +4670,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = DiskUsageSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4706,7 +4706,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = LoadAvgSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4748,7 +4748,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = LogsSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4784,7 +4784,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = LogsContainersSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4819,7 +4819,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = MemorySvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4854,7 +4854,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = MountsSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4890,7 +4890,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = NetworkDeviceStatsSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4926,7 +4926,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ProcessesSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -4968,7 +4968,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ReadSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5006,7 +5006,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = RebootSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5045,7 +5045,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = RestartSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5084,7 +5084,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = RollbackSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5122,7 +5122,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ResetSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5158,7 +5158,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ServiceListSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5200,7 +5200,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ServiceRestartSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5241,7 +5241,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ServiceStartSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5282,7 +5282,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ServiceStopSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5321,7 +5321,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ShutdownSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5359,7 +5359,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = StatsSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5395,7 +5395,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = SystemStatSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5434,7 +5434,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = UpgradeSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5470,7 +5470,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = VersionSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5515,7 +5515,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = GenerateClientConfigurationSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5559,7 +5559,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = PacketCaptureSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5598,7 +5598,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = NetstatSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5637,7 +5637,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = MetaWriteSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5676,7 +5676,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = MetaDeleteSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5720,7 +5720,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ImageListSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5759,7 +5759,7 @@ pub mod machine_service_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let method = ImagePullSvc(inner);
-                        let codec = tonic::codec::ProstCodec::default();
+                        let codec = tonic_prost::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
                                 accept_compression_encodings,
@@ -5775,7 +5775,7 @@ pub mod machine_service_server {
                     Box::pin(fut)
                 }
                 _ => Box::pin(async move {
-                    let mut response = http::Response::new(empty_body());
+                    let mut response = http::Response::new(tonic::body::Body::default());
                     let headers = response.headers_mut();
                     headers.insert(
                         tonic::Status::GRPC_STATUS,

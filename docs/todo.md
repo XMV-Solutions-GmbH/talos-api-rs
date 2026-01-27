@@ -288,17 +288,16 @@
 
 ## v0.2.0 Roadmap - Next Release
 
-### Dependency Updates 🔧
+### Dependency Updates 🔧 ✅ COMPLETE (v0.2.0)
 
 | PR | Description | Status | Notes |
 | -- | ----------- | ------ | ----- |
 | #19 | webpki-roots 0.26.11 → 1.0.5 | ✅ Merged | Security update: removed untrusted CAs |
-| - | tonic 0.13 → 0.14 | 📋 Planned | Enables prost 0.14, rand 0.9 |
-| - | prost 0.13 → 0.14 | 📋 Blocked by tonic | Breaking: `Message::encoded_len()` |
-| - | rand 0.8 → 0.9 | 📋 Blocked by tower | tower-0.4 needs rand 0.8 |
-| - | tonic-build 0.13 → 0.14 | 📋 Blocked by tonic | Breaking: `build_transport()` removed |
+| - | tonic 0.12 → 0.14 | ✅ Complete | MSRV 1.82, new tls features |
+| - | prost 0.13 → 0.14 | ✅ Complete | tonic-prost extracted |
+| - | tonic-build → tonic-prost-build | ✅ Complete | Renamed in tonic 0.14 |
 
-**Note:** Major dependency updates (tonic/prost/rand) require coordinated upgrade. Wait for ecosystem to stabilize.
+**Note:** rand 0.8 → 0.9 still blocked by tower ecosystem.
 
 ### Streaming API Improvements 🚀
 
