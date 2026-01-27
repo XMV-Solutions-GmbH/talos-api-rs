@@ -184,10 +184,10 @@
 - [x] CODE_OF_CONDUCT.md
 - [x] SECURITY.md
 - [x] CI pipelines (Tests/Lint)
-- [ ] Release pipelines (Build/Publish)
-- [ ] Automated dependency updates (Dependabot)
+- [x] Release pipelines (Build/Publish) - `.github/workflows/release.yml`
+- [x] Automated dependency updates (Dependabot) - `.github/dependabot.yml`
 - [x] CHANGELOG.md
-- [ ] Release checklist documentation
+- [x] Release checklist documentation - `docs/release-checklist.md`
 
 ---
 
