@@ -1,9 +1,10 @@
 # talos-api-rs
 
-[![Crates.io](https://img.shields.io/crates/v/talos-api-rs.svg)](https://crates.io/crates/talos-api-rs)
-[![Documentation](https://docs.rs/talos-api-rs/badge.svg)](https://docs.rs/talos-api-rs)
+![Crates.io](https://img.shields.io/crates/v/talos-api-rs)
+![Downloads](https://img.shields.io/crates/d/talos-api-rs)
+![docs.rs](https://img.shields.io/docsrs/talos-api-rs)
+![License](https://img.shields.io/crates/l/talos-api-rs)
 [![CI](https://github.com/XMV-Solutions-GmbH/talos-api-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/XMV-Solutions-GmbH/talos-api-rs/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
 [![MSRV](https://img.shields.io/badge/MSRV-1.75-blue.svg)](https://www.rust-lang.org)
 
 A typed, async, idiomatic Rust client for SideroLabs [Talos Linux](https://www.talos.dev/) gRPC API.
