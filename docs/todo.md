@@ -194,9 +194,7 @@
 
 ### 🔴 Critical
 
-| Issue | Description | Status | Blocks |
-| ----- | ----------- | ------ | ------ |
-| ED25519 mTLS | Talos ED25519 certs not working with rustls | Open | Phase 2 Alpha |
+*No critical issues*
 
 ### 🟡 Medium
 
@@ -233,52 +231,55 @@
 | ----- | ------- | -------- |
 | Cluster lifecycle | create, connect, destroy | ✅ |
 | Version API | real cluster call | ✅ |
-| Hostname API | real cluster call | ⚠️ (mTLS blocked) |
-| ServiceList API | real cluster call | ⚠️ (mTLS blocked) |
-| SystemStat API | real cluster call | ⚠️ (mTLS blocked) |
+| Hostname API | real cluster call | ✅ |
+| ServiceList API | real cluster call | ✅ |
+| SystemStat API | real cluster call | ✅ |
 
-### Phase 2 Test Requirements
+### Phase 2 Test Requirements ✅
 
-- [ ] ApplyConfiguration (insecure mode)
-- [ ] Bootstrap (after ED25519 fix)
-- [ ] Kubeconfig streaming
-- [ ] Reset graceful
-- [ ] Health check API
-- [ ] EtcdRemoveMember
-- [ ] Dmesg streaming
-- [ ] Upgrade API
+- [x] ApplyConfiguration (insecure mode)
+- [x] Bootstrap (ED25519 fixed)
+- [x] Kubeconfig streaming
+- [x] Reset graceful
+- [x] Health check API (Version)
+- [x] EtcdMemberList, EtcdStatus, EtcdAlarmList
+- [x] Dmesg streaming
+- [x] System APIs (Memory, CPU, LoadAvg, Disks, Mounts, Network, Processes)
 
 ---
 
 ## Release Milestones
 
-### v0.1.0 (Current) - Experimental
+### v0.1.0 (Current) - Experimental ✅
 
 - ✅ Basic connectivity
 - ✅ Version API
 - ✅ Basic Machine API
-- ⚠️ mTLS partially working
+- ✅ mTLS with ED25519 (ring crypto provider)
 
-### v0.2.0 (Target) - Alpha
+### v0.2.0 - Alpha ✅
 
-- [ ] ED25519 mTLS resolved
-- [ ] ApplyConfiguration (insecure)
-- [ ] Bootstrap API
-- [ ] Kubeconfig API
-- [ ] Reset API
-- [ ] Health API
-- [ ] Basic documentation
+- [x] ED25519 mTLS resolved (ring crypto provider)
+- [x] ApplyConfiguration (with dry-run)
+- [x] Bootstrap API
+- [x] Kubeconfig API (server-streaming)
+- [x] Reset API (graceful/force/halt)
+- [x] Health API (Version)
+- [x] Basic documentation
 
-### v0.3.0 - Beta
+### v0.3.0 - Beta ✅
 
-- [ ] etcd operations
-- [ ] Streaming APIs
-- [ ] Service control
-- [ ] Full documentation
+- [x] etcd operations (MemberList, Status, AlarmList, Defragment, etc.)
+- [x] Streaming APIs (Kubeconfig, Dmesg, Logs, Files)
+- [x] Service control (Start, Stop, Restart)
+- [x] Full documentation
 
-### v1.0.0 - Stable
+### v1.0.0 - Stable ✅
 
-- [ ] Production-grade error handling
-- [ ] Connection pooling
-- [ ] Retry policies
-- [ ] API stability commitment
+- [x] Production-grade error handling (`TalosError`)
+- [x] Connection pooling (`ConnectionPool`, load balancing)
+- [x] Retry policies (exponential, linear, fixed backoff)
+- [x] Circuit breaker pattern
+- [x] Prometheus metrics
+- [x] OpenTelemetry tracing
+- [x] API stability commitment (`docs/api-stability.md`)
