@@ -162,13 +162,13 @@
 - [x] Example: resilient_client.rs - demonstrates all production features
 - [x] Example: monitoring_metrics.rs - Prometheus metrics demo
 
-### Release Preparation ✅ PARTIAL
+### Release Preparation ✅ COMPLETE
 
-- [ ] crates.io publication
+- [ ] crates.io publication (requires CRATES_IO_TOKEN secret)
 - [x] Semantic versioning
 - [x] CHANGELOG.md
-- [ ] Changelog automation
-- [ ] API stability guarantees
+- [x] Release automation (GitHub Actions)
+- [x] API stability guarantees - `docs/api-stability.md`
 - [x] MSRV (Minimum Supported Rust Version) policy - Rust 1.75+
 - [x] docs.rs documentation metadata
 

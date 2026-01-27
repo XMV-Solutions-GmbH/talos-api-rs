@@ -172,6 +172,9 @@ impl Histogram {
     }
 }
 
+/// Key for histogram lookup (method, endpoint).
+type HistogramKey = (Option<String>, Option<String>);
+
 /// Thread-safe metrics collector for the Talos client.
 #[derive(Debug)]
 pub struct MetricsCollector {
@@ -179,7 +182,7 @@ pub struct MetricsCollector {
     /// Counter: requests_total{method, endpoint, status}
     requests_total: RwLock<HashMap<Labels, AtomicU64>>,
     /// Histogram: request_duration_seconds{method, endpoint}
-    request_duration: RwLock<HashMap<(Option<String>, Option<String>), Histogram>>,
+    request_duration: RwLock<HashMap<HistogramKey, Histogram>>,
     /// Gauge: circuit_breaker_state (0=closed, 1=half-open, 2=open)
     circuit_breaker_state: AtomicU64,
     /// Counter: circuit_breaker_rejections_total
