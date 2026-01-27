@@ -28,7 +28,7 @@ The client supports:
 
 ## Development Phases
 
-> **Note**: Phases reprioritized based on cluster-lifecycle-manager requirements (2026-01-26).
+> **Updated**: 2026-01-27 (v0.2.0 released)
 
 ### Phase 1: Core Foundation ✅ COMPLETE
 
@@ -38,46 +38,44 @@ The client supports:
 | ------- | ------ | ----- |
 | Project scaffolding | ✅ | Cargo workspace, CI/CD |
 | TalosClient core | ✅ | Connection management |
-| TLS/mTLS config | ✅ | Certificate loading |
+| TLS/mTLS config | ✅ | Certificate loading, ED25519 support |
 | Insecure mode | ✅ | Custom TLS verifier |
 | Version API | ✅ | Health check capability |
 | Machine API (basic) | ✅ | ServiceList, Hostname, SystemStat, Reboot, Shutdown |
-| Unit tests | ✅ | 6 tests covering core functionality |
+| Unit tests | ✅ | 200 tests covering all modules |
 | Integration harness | ✅ | Docker-based Talos cluster |
 
 ---
 
-### Phase 2: Alpha Release (Cluster Lifecycle Core) 🔄 IN PROGRESS
+### Phase 2: Alpha Release (Cluster Lifecycle Core) ✅ COMPLETE
 
-**Goal**: Enable core cluster lifecycle operations for the Tauri app.
+**Goal**: Enable core cluster lifecycle operations.
 
-> Based on `talosctl` commands analysis for cluster-lifecycle-manager.
-
-#### Priority 1: Absolute Core (Alpha-Blocking)
+#### Priority 1: Absolute Core ✅ ALL COMPLETE
 
 | # | Feature | mTLS | Status | Description |
 | - | ------- | ---- | ------ | ----------- |
-| 1 | `gen config` | ❌ | ❌ | Machine config generation (NOT gRPC - CLI only) |
-| 2 | `ApplyConfiguration --insecure` | ❌ | ❌ | Initial config in maintenance mode |
-| 3 | `Bootstrap` | ✅ | ❌ | Initialize etcd on first control-plane |
-| 4 | `Kubeconfig` (streaming) | ✅ | ❌ | Retrieve kubeconfig |
-| 5 | `Reset --graceful` | ✅ | ❌ | Graceful node teardown |
+| 1 | `gen config` | ❌ | N/A | Machine config generation (NOT gRPC - CLI only) |
+| 2 | `ApplyConfiguration` | ❌/✅ | ✅ | Initial config (insecure) + updates (mTLS) |
+| 3 | `Bootstrap` | ✅ | ✅ | Initialize etcd on first control-plane |
+| 4 | `Kubeconfig` (streaming) | ✅ | ✅ | Retrieve kubeconfig |
+| 5 | `Reset --graceful` | ✅ | ✅ | Graceful node teardown |
 
-**Critical Blocker**: ED25519 mTLS must work for Bootstrap, Kubeconfig, Reset.
+**ED25519 mTLS**: ✅ RESOLVED with ring crypto provider (PR #7)
 
-#### Priority 2: Beta Operations
-
-| # | Feature | mTLS | Status | Description |
-| - | ------- | ---- | ------ | ----------- |
-| 6 | Health check API | ✅ | ❌ | Pre-flight checks, monitoring |
-| 7 | `EtcdRemoveMember` | ✅ | ❌ | Control-plane scale-down |
-| 8 | `Dmesg` (streaming) | ✅ | ❌ | Kernel logs for diagnostics |
-
-#### Priority 3: Production Day-2
+#### Priority 2: Beta Operations ✅ ALL COMPLETE
 
 | # | Feature | mTLS | Status | Description |
 | - | ------- | ---- | ------ | ----------- |
-| 9 | `Upgrade` | ✅ | ❌ | Talos version upgrades |
+| 6 | Health check API | ✅ | ✅ | Version API for health checks |
+| 7 | `EtcdRemoveMember` | ✅ | ✅ | Control-plane scale-down |
+| 8 | `Dmesg` (streaming) | ✅ | ✅ | Kernel logs for diagnostics |
+
+#### Priority 3: Production Day-2 ✅ ALL COMPLETE
+
+| # | Feature | mTLS | Status | Description |
+| - | ------- | ---- | ------ | ----------- |
+| 9 | `Upgrade` | ✅ | ✅ | Talos version upgrades |
 | 10 | `Version` (remote) | ✅ | ✅ | Remote version check |
 
 #### Non-gRPC Operations (Out of Scope for Library)
@@ -93,40 +91,41 @@ These are **local CLI operations**, not gRPC APIs:
 
 ---
 
-### Phase 3: Extended APIs
+### Phase 3: Extended APIs ✅ COMPLETE
 
 **Goal**: Complete API coverage for advanced operations.
 
-| Feature | Priority | Description |
-| ------- | -------- | ----------- |
-| Service Control | 🟡 High | Start, Stop, Restart services |
-| Logs API | 🟡 High | Service log streaming |
-| Events API | 🟡 High | Cluster event stream |
-| etcd Snapshot | 🟡 High | Backup etcd data |
-| etcd Recover | 🟡 High | Restore from snapshot |
-| File Operations | 🟢 Medium | Read, List, Copy, DiskUsage |
-| System Info | 🟢 Medium | Memory, CPU, Disk, Network stats |
-| Process List | 🟢 Medium | Running processes |
-| Packet Capture | 🟢 Low | Network debugging |
-| Netstat | 🟢 Low | Network connections |
+| Feature | Priority | Status | Description |
+| ------- | -------- | ------ | ----------- |
+| Service Control | 🟡 High | ✅ | Start, Stop, Restart services |
+| Logs API | 🟡 High | ✅ | Service log streaming |
+| Events API | 🟡 High | ❌ | Cluster event stream (not implemented) |
+| etcd Snapshot | 🟡 High | ❌ | Backup etcd data (not implemented) |
+| etcd Recover | 🟡 High | ❌ | Restore from snapshot (client-streaming) |
+| File Operations | 🟢 Medium | ✅ | Read, List, Copy, DiskUsage |
+| System Info | 🟢 Medium | ✅ | Memory, CPU, Disk, Network stats |
+| Process List | 🟢 Medium | ✅ | Running processes |
+| Packet Capture | 🟢 Low | ✅ | Network debugging |
+| Netstat | 🟢 Low | ✅ | Network connections |
+| **ImageList/ImagePull** | 🟢 Medium | ✅ | Container image management (v0.2.0) |
 
 ---
 
-### Phase 4: Production Readiness & crates.io
+### Phase 4: Production Readiness & crates.io ✅ COMPLETE
 
 **Goal**: Production-grade library with public release.
 
-| Feature | Description |
-| ------- | ----------- |
-| Connection pooling | Multiple endpoint support with failover |
-| Retry policies | Configurable retry with exponential backoff |
-| Timeouts | Per-request and global timeouts |
-| Interceptors | Logging, metrics, tracing hooks |
-| Resource wrappers | High-level Rust types over Protobuf |
-| Builder patterns | Fluent API for complex requests |
-| Full documentation | docs.rs ready, examples |
-| crates.io release | Public package publication |
-| MSRV policy | Minimum Supported Rust Version |
+| Feature | Status | Description |
+| ------- | ------ | ----------- |
+| Connection pooling | ✅ | Multiple endpoint support with failover |
+| Retry policies | ✅ | Configurable retry with exponential backoff |
+| Timeouts | ✅ | Per-request and global timeouts |
+| Interceptors | ✅ | Logging, metrics, tracing hooks |
+| Resource wrappers | ✅ | High-level Rust types over Protobuf |
+| Builder patterns | ✅ | Fluent API for complex requests |
+| Full documentation | ✅ | docs.rs ready, examples |
+| crates.io release | ✅ | Published: v0.1.0, v0.1.1, v0.1.2, v0.2.0 |
+| MSRV policy | ✅ | Rust 1.82+ (v0.2.0) |
 
 ---
 
@@ -145,6 +144,8 @@ These are **local CLI operations**, not gRPC APIs:
 │  • Bootstrap, Kubeconfig, Reset, Health                     │
 │  • EtcdRemoveMember, Upgrade, Dmesg, Logs                   │
 │  • All remote API calls after bootstrap                     │
+│                                                             │
+│  ED25519 Support: ✅ WORKING (ring crypto provider)         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -152,57 +153,32 @@ These are **local CLI operations**, not gRPC APIs:
 
 ## Known Issues & Technical Debt
 
-### 🔴 Critical: ED25519 Certificate Support
+### ✅ RESOLVED: ED25519 Certificate Support
 
-**Problem**: Talos generates ED25519 client certificates by default. The current rustls configuration does not properly handle ED25519 for client authentication.
+**Status**: Fixed in PR #7 with ring crypto provider.
 
-**Symptoms**:
-
-```text
-mTLS connection failed: Transport error: transport error
-received fatal alert: CertificateRequired
-```
-
-**Root Cause**:
-
-- Talos uses `ED25519` for all PKI (Signature Algorithm: ED25519)
-- `tonic`'s default TLS config expects RSA/ECDSA certificates
-- PEM parsing works, but the TLS handshake fails during client cert presentation
-
-**Potential Solutions**:
-
-1. **Configure rustls with ED25519 support** - Requires proper `CryptoProvider` setup
-2. **Use `ring` crypto provider** - May have better ED25519 support
-3. **Alternative: `native-tls`** - Switch from rustls to OpenSSL-based TLS
-4. **Workaround: RSA certs** - Generate Talos cluster with RSA (non-standard)
-
-**Impact**: Full mTLS authentication is blocked until resolved.
+Talos ED25519 client certificates are now fully supported via custom rustls configuration with the `ring` crypto provider.
 
 ---
 
-### 🟡 Medium: Streaming gRPC Methods
+### ✅ RESOLVED: Streaming gRPC Methods
 
-**Problem**: Several Talos APIs use server-streaming gRPC (Logs, Events, Kubeconfig, etcd Snapshot, etc.). These require different handling than unary calls.
+**Status**: Server-streaming implemented for most APIs.
 
-**Current State**: Not implemented.
+Implemented streaming APIs with chunk assembly:
 
-**Required Changes**:
+- ✅ `Kubeconfig` - Assembles kubeconfig chunks
+- ✅ `Dmesg` - Kernel message streaming
+- ✅ `Logs` - Service log streaming
+- ✅ `Copy`, `Read` - File content streaming
+- ✅ `List`, `DiskUsage` - File listing streaming
+- ✅ `PacketCapture` - Network capture streaming
+- ✅ `ImageList` - Container image listing
 
-- Return `tonic::Streaming<T>` instead of `Response<T>`
-- Handle stream lifecycle (cancellation, errors, completion)
-- Provide async iterator/stream wrapper for ergonomic usage
+**Remaining**:
 
-**Affected APIs**:
-
-- `Logs`, `LogsContainers`
-- `Events`
-- `Dmesg`
-- `Kubeconfig`
-- `EtcdSnapshot`
-- `Copy`, `Read`
-- `List` (file listing)
-- `DiskUsage`
-- `PacketCapture`
+- ❌ `Events` - Not implemented
+- ❌ `EtcdSnapshot` - Not implemented
 
 ---
 
@@ -223,17 +199,16 @@ received fatal alert: CertificateRequired
 
 ---
 
-### 🟢 Low: Multi-Node Targeting
+### ✅ RESOLVED: Multi-Node Targeting
 
-**Problem**: Talos API supports targeting multiple nodes in a single request via metadata. Current implementation targets single endpoints.
+**Status**: Fixed in v0.1.2.
 
-**Current State**: Single-endpoint only.
+Multi-node targeting implemented via gRPC metadata:
 
-**Required Changes**:
-
-- Implement gRPC metadata for node targeting
-- Handle multi-node responses (responses contain per-node results)
-- Consider connection multiplexing
+- `NodeTarget` enum for specifying target nodes
+- `with_node()` / `with_nodes()` methods on `TalosClient`
+- gRPC metadata `x-talos-node` header support
+- Cluster-wide operations support
 
 ---
 
@@ -267,61 +242,65 @@ received fatal alert: CertificateRequired
 
 ## API Surface Tracking
 
+> **Updated**: 2026-01-27 (v0.2.0)
+
 ### Machine Service (machine.proto)
 
-| Method | Phase | Implemented | Tested |
-| ------ | ----- | ----------- | ------ |
-| ApplyConfiguration | 2 | ❌ | ❌ |
-| Bootstrap | 3 | ❌ | ❌ |
-| Containers | 2 | ❌ | ❌ |
-| Copy | 2 | ❌ | ❌ |
-| CPUFreqStats | 2 | ❌ | ❌ |
-| CPUInfo | 2 | ❌ | ❌ |
-| DiskStats | 2 | ❌ | ❌ |
-| Dmesg | 2 | ❌ | ❌ |
-| Events | 2 | ❌ | ❌ |
-| EtcdMemberList | 3 | ❌ | ❌ |
-| EtcdRemoveMemberByID | 3 | ❌ | ❌ |
-| EtcdLeaveCluster | 3 | ❌ | ❌ |
-| EtcdForfeitLeadership | 3 | ❌ | ❌ |
-| EtcdRecover | 3 | ❌ | ❌ |
-| EtcdSnapshot | 3 | ❌ | ❌ |
-| EtcdAlarmList | 3 | ❌ | ❌ |
-| EtcdAlarmDisarm | 3 | ❌ | ❌ |
-| EtcdDefragment | 3 | ❌ | ❌ |
-| EtcdStatus | 3 | ❌ | ❌ |
-| Hostname | 1 | ✅ | ✅ |
-| Kubeconfig | 3 | ❌ | ❌ |
-| List | 2 | ❌ | ❌ |
-| DiskUsage | 2 | ❌ | ❌ |
-| LoadAvg | 2 | ❌ | ❌ |
-| Logs | 2 | ❌ | ❌ |
-| LogsContainers | 2 | ❌ | ❌ |
-| Memory | 2 | ❌ | ❌ |
-| Mounts | 2 | ❌ | ❌ |
-| NetworkDeviceStats | 2 | ❌ | ❌ |
-| Processes | 2 | ❌ | ❌ |
-| Read | 2 | ❌ | ❌ |
-| Reboot | 1 | ✅ | ✅ |
-| Restart | 2 | ❌ | ❌ |
-| Rollback | 2 | ❌ | ❌ |
-| Reset | 2 | ❌ | ❌ |
-| ServiceList | 1 | ✅ | ✅ |
-| ServiceRestart | 2 | ❌ | ❌ |
-| ServiceStart | 2 | ❌ | ❌ |
-| ServiceStop | 2 | ❌ | ❌ |
-| Shutdown | 1 | ✅ | ✅ |
-| Stats | 2 | ❌ | ❌ |
-| SystemStat | 1 | ✅ | ✅ |
-| Upgrade | 2 | ❌ | ❌ |
-| Version | 1 | ✅ | ✅ |
-| GenerateClientConfiguration | 3 | ❌ | ❌ |
-| PacketCapture | 3 | ❌ | ❌ |
-| Netstat | 3 | ❌ | ❌ |
-| MetaWrite | 3 | ❌ | ❌ |
-| MetaDelete | 3 | ❌ | ❌ |
-| ImageList | 2 | ❌ | ❌ |
-| ImagePull | 2 | ❌ | ❌ |
+| Method | Phase | Implemented | Tested | Notes |
+| ------ | ----- | ----------- | ------ | ----- |
+| ApplyConfiguration | 2 | ✅ | ✅ | Dry-run, mode selection |
+| Bootstrap | 2 | ✅ | ✅ | Recovery options |
+| Containers | 3 | ❌ | ❌ | |
+| Copy | 3 | ✅ | ✅ | Server-streaming |
+| CPUFreqStats | 3 | ❌ | ❌ | |
+| CPUInfo | 3 | ✅ | ✅ | |
+| DiskStats | 3 | ✅ | ✅ | |
+| DiskUsage | 3 | ✅ | ✅ | Server-streaming |
+| Dmesg | 2 | ✅ | ✅ | Server-streaming |
+| Events | 3 | ❌ | ❌ | Server-streaming |
+| EtcdAlarmDisarm | 3 | ✅ | ✅ | |
+| EtcdAlarmList | 3 | ✅ | ✅ | |
+| EtcdDefragment | 3 | ✅ | ✅ | |
+| EtcdForfeitLeadership | 3 | ✅ | ✅ | |
+| EtcdLeaveCluster | 3 | ✅ | ✅ | |
+| EtcdMemberList | 3 | ✅ | ✅ | |
+| EtcdRecover | 3 | ❌ | ❌ | Client-streaming |
+| EtcdRemoveMemberByID | 3 | ✅ | ✅ | |
+| EtcdSnapshot | 3 | ❌ | ❌ | Server-streaming |
+| EtcdStatus | 3 | ✅ | ✅ | |
+| GenerateClientConfiguration | 3 | ✅ | ✅ | |
+| Hostname | 1 | ✅ | ✅ | |
+| ImageList | 2 | ✅ | ✅ | v0.2.0 |
+| ImagePull | 2 | ✅ | ✅ | v0.2.0 |
+| Kubeconfig | 2 | ✅ | ✅ | Server-streaming |
+| List | 3 | ✅ | ✅ | Server-streaming |
+| LoadAvg | 3 | ✅ | ✅ | |
+| Logs | 2 | ✅ | ✅ | Server-streaming |
+| LogsContainers | 3 | ❌ | ❌ | |
+| Memory | 3 | ✅ | ✅ | |
+| MetaDelete | 4 | ❌ | ❌ | |
+| MetaWrite | 4 | ❌ | ❌ | |
+| Mounts | 3 | ✅ | ✅ | |
+| Netstat | 3 | ✅ | ✅ | Filtering support |
+| NetworkDeviceStats | 3 | ✅ | ✅ | |
+| PacketCapture | 3 | ✅ | ✅ | Server-streaming |
+| Processes | 3 | ✅ | ✅ | |
+| Read | 3 | ✅ | ✅ | Server-streaming |
+| Reboot | 1 | ✅ | ✅ | |
+| Reset | 2 | ✅ | ✅ | Graceful/Force/Halt |
+| Restart | 3 | ❌ | ❌ | Container restart |
+| Rollback | 3 | ✅ | ✅ | |
+| ServiceList | 1 | ✅ | ✅ | |
+| ServiceRestart | 3 | ✅ | ✅ | |
+| ServiceStart | 3 | ✅ | ✅ | |
+| ServiceStop | 3 | ✅ | ✅ | |
+| Shutdown | 1 | ✅ | ✅ | |
+| Stats | 3 | ❌ | ❌ | |
+| SystemStat | 1 | ✅ | ✅ | |
+| Upgrade | 2 | ✅ | ✅ | Reboot mode options |
+| Version | 1 | ✅ | ✅ | |
+
+**Coverage**: 43/52 methods implemented (83%)
 
 ### Version Service (version.proto)
 
@@ -329,16 +308,32 @@ received fatal alert: CertificateRequired
 | ------ | ----- | ----------- | ------ |
 | Version | 1 | ✅ | ✅ |
 
+### Not Implemented (Planned)
+
+| Method | Reason | Priority |
+| ------ | ------ | -------- |
+| Containers | Low demand | Low |
+| CPUFreqStats | Low demand | Low |
+| Events | Streaming complexity | Medium |
+| EtcdRecover | Client-streaming | Medium |
+| EtcdSnapshot | Streaming complexity | Medium |
+| LogsContainers | Low demand | Low |
+| MetaDelete | Advanced use case | Low |
+| MetaWrite | Advanced use case | Low |
+| Restart | Container-specific | Low |
+| Stats | Overlaps with other APIs | Low |
+
 ---
 
 ## Dependencies & Version Tracking
 
 | Dependency | Current | Purpose | Notes |
 | ---------- | ------- | ------- | ----- |
-| tonic | 0.12 | gRPC framework | |
-| prost | 0.13 | Protobuf codegen | |
+| tonic | 0.14 | gRPC framework | Updated v0.2.0 |
+| tonic-prost | 0.14 | Prost integration | New in v0.2.0 |
+| prost | 0.14 | Protobuf codegen | Updated v0.2.0 |
 | tokio | 1.x | Async runtime | |
-| rustls | 0.23 | TLS implementation | ED25519 issue |
+| rustls | 0.23 | TLS implementation | ED25519 ✅ fixed |
 | tokio-rustls | 0.26 | Async TLS | |
 | hyper-util | 0.1 | HTTP utilities | Custom connector |
 
