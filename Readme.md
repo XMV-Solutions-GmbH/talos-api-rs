@@ -5,7 +5,7 @@
 ![docs.rs](https://img.shields.io/docsrs/talos-api-rs)
 ![License](https://img.shields.io/crates/l/talos-api-rs)
 [![CI](https://github.com/XMV-Solutions-GmbH/talos-api-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/XMV-Solutions-GmbH/talos-api-rs/actions/workflows/ci.yml)
-[![MSRV](https://img.shields.io/badge/MSRV-1.75-blue.svg)](https://www.rust-lang.org)
+[![MSRV](https://img.shields.io/badge/MSRV-1.82-blue.svg)](https://www.rust-lang.org)
 
 A typed, async, idiomatic Rust client for SideroLabs [Talos Linux](https://www.talos.dev/) gRPC API.
 
@@ -37,10 +37,11 @@ Prometheus metrics, and OpenTelemetry tracing. Inspired by [`kube-rs`](https://g
 | -------- | ---- | ------ |
 | **Machine** | Version, Hostname, Reboot, Shutdown, Upgrade, Rollback | ✅ |
 | **Configuration** | ApplyConfiguration, GenerateConfiguration | ✅ |
-| **Cluster** | Bootstrap, Kubeconfig, Reset | ✅ |
+| **Cluster** | Bootstrap, Kubeconfig, Reset, ClusterDiscovery | ✅ |
 | **Services** | ServiceList, ServiceStart, ServiceStop, ServiceRestart | ✅ |
 | **etcd** | MemberList, Status, AlarmList, Defragment, ForfeitLeadership | ✅ |
 | **System** | Memory, CPUInfo, LoadAvg, DiskStats, Mounts, NetworkDeviceStats, Processes | ✅ |
+| **Images** | ImageList, ImagePull | ✅ |
 | **Files** | List, Read, Copy, DiskUsage | ✅ |
 | **Diagnostics** | Dmesg, Logs, Netstat, PacketCapture | ✅ |
 

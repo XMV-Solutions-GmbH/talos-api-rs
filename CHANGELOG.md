@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2026-01-27
 
+**Talos gRPC API**: v1.9.x (compatible with Talos Linux 1.9+)
+**Documentation**: <https://docs.rs/talos-api-rs/0.2.0/>
+
 ### Added
 
 - **Container Image APIs**

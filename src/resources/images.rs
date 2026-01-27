@@ -7,7 +7,7 @@
 //! # Example
 //!
 //! ```no_run
-//! use talos_api_rs::resources::images::{ImageListRequest, ImagePullRequest, ContainerdNamespace};
+//! use talos_api_rs::{ImageListRequest, ImagePullRequest, ContainerdNamespace};
 //!
 //! // List all images in the system namespace
 //! let list_req = ImageListRequest::new(ContainerdNamespace::System);

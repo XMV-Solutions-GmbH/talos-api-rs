@@ -1556,7 +1556,7 @@ impl TalosClient {
     ///
     /// ```no_run
     /// # use talos_api_rs::client::{TalosClient, TalosClientConfig};
-    /// # use talos_api_rs::resources::ImagePullRequest;
+    /// # use talos_api_rs::ImagePullRequest;
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let config = TalosClientConfig::new("https://192.168.1.100:50000");
     /// let client = TalosClient::new(config).await?;
@@ -1565,7 +1565,7 @@ impl TalosClient {
     /// let response = client.image_pull(
     ///     ImagePullRequest::new("docker.io/library/nginx:latest")
     /// ).await?;
-    /// println!("Pulled images: {:?}", response.images);
+    /// println!("Pulled images: {:?}", response.results);
     /// # Ok(())
     /// # }
     /// ```
