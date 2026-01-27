@@ -103,10 +103,13 @@ pub mod runtime;
 pub mod testkit;
 
 pub use client::{
-    ConnectionPool, ConnectionPoolConfig, EndpointHealth, HealthStatus, LoadBalancer, TalosClient,
-    TalosClientConfig, TalosClientConfigBuilder,
+    ConnectionPool, ConnectionPoolConfig, EndpointHealth, HealthStatus, LoadBalancer, NodeTarget,
+    TalosClient, TalosClientConfig, TalosClientConfigBuilder, NODE_METADATA_KEY,
 };
-pub use config::{TalosConfig, TalosContext};
+pub use config::{
+    TalosConfig, TalosContext, ENV_TALOSCONFIG, ENV_TALOS_CONTEXT, ENV_TALOS_ENDPOINTS,
+    ENV_TALOS_NODES,
+};
 pub use error::TalosError;
 pub use resources::{
     ApplyConfigurationRequest, ApplyConfigurationResponse, ApplyConfigurationResult, ApplyMode,

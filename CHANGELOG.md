@@ -5,9 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2026-01-27
+
+### Added
+
+- **Node Targeting** - Target specific nodes in multi-node clusters
+  - `NodeTarget` enum for specifying target nodes (single, multiple, or default)
+  - `with_node()` / `with_nodes()` methods on `TalosClient`
+  - gRPC metadata `x-talos-node` header support
+  - Cluster-wide operations support
+- **Environment Configuration** - Environment variable support for configuration
+  - `TALOSCONFIG` - Override config file path
+  - `TALOS_CONTEXT` - Override active context
+  - `TALOS_ENDPOINTS` - Override endpoints (comma-separated)
+  - `TALOS_NODES` - Target specific nodes (comma-separated)
+  - `TalosConfig::load_with_env()` method
+- **TalosConfig Integration** - Create client directly from talosconfig
+  - `TalosClient::from_talosconfig()` method
+  - Automatic cert extraction and mTLS setup
+  - Context-based endpoint selection
+
+### Fixed
+
+- **Release naming** - Fixed double "v" in GitHub release titles (was "vv0.1.1", now "v0.1.2")
+
+### Changed
+
+- Improved documentation for config module with environment variable details
+
 ## [0.1.1] - 2025-01-27
 
 ### Fixed
+
 - **docs.rs build failure** - Skip protobuf code generation when `DOCS_RS=1` environment variable is set.
   docs.rs has a read-only filesystem, so we use pre-generated code instead.
 
