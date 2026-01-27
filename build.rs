@@ -1,6 +1,14 @@
+// SPDX-License-Identifier: MIT OR Apache-2.0
+
 use std::path::PathBuf;
 
 fn main() {
+    // Skip code generation on docs.rs - use pre-generated files
+    // docs.rs has a read-only filesystem
+    if std::env::var("DOCS_RS").is_ok() {
+        return;
+    }
+
     let out_dir = PathBuf::from("src/api/generated");
     // Ensure directory exists
     std::fs::create_dir_all(&out_dir).unwrap();
