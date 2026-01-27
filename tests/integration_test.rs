@@ -317,7 +317,60 @@ cluster:
     println!("⚠ Skipping actual reset execution (would destroy test cluster)");
     println!("  Run manual reset tests against a disposable cluster");
 
-    // 10. Show cluster status via talosctl (visual feedback)
+    // 10. Test etcd APIs (control plane only)
+    println!("\n--- etcd API: Member List ---");
+    use talos_api_rs::{EtcdMemberListRequest};
+
+    match client.etcd_member_list(EtcdMemberListRequest::new()).await {
+        Ok(response) => {
+            let members = response.all_members();
+            println!("✓ etcd cluster has {} member(s)", members.len());
+            for member in members {
+                println!(
+                    "  Member: {} (ID: {}, learner: {})",
+                    member.hostname, member.id, member.is_learner
+                );
+            }
+        }
+        Err(e) => {
+            println!("  etcd_member_list returned error: {}", e);
+        }
+    }
+
+    println!("\n--- etcd API: Status ---");
+    match client.etcd_status().await {
+        Ok(response) => {
+            if let Some(status) = response.first() {
+                println!("✓ etcd status retrieved");
+                println!("  Member ID: {}", status.member_id);
+                println!("  Protocol: {}", status.protocol_version);
+                println!("  DB Size: {}", status.db_size_human());
+                println!("  Leader: {} (is_leader: {})", status.leader, status.is_leader());
+            }
+        }
+        Err(e) => {
+            println!("  etcd_status returned error: {}", e);
+        }
+    }
+
+    println!("\n--- etcd API: Alarm List ---");
+    match client.etcd_alarm_list().await {
+        Ok(response) => {
+            if response.has_alarms() {
+                println!("⚠ Active alarms found:");
+                for alarm in response.active_alarms() {
+                    println!("  Member {}: {}", alarm.member_id, alarm.alarm);
+                }
+            } else {
+                println!("✓ No active etcd alarms");
+            }
+        }
+        Err(e) => {
+            println!("  etcd_alarm_list returned error: {}", e);
+        }
+    }
+
+    // 11. Show cluster status via talosctl (visual feedback)
     println!("\n--- Cluster Status (via talosctl) ---");
     let talosconfig_str = cluster.talosconfig_path.to_string_lossy();
     if let Ok(output) = std::process::Command::new("talosctl")
@@ -336,7 +389,7 @@ cluster:
         }
     }
 
-    // 11. Show running services via talosctl
+    // 12. Show running services via talosctl
     println!("\n--- Services Status (via talosctl) ---");
     if let Ok(output) = std::process::Command::new("talosctl")
         .args(["--talosconfig", &talosconfig_str])

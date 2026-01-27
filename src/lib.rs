@@ -11,6 +11,14 @@ pub use client::{TalosClient, TalosClientConfig};
 pub use error::TalosError;
 pub use resources::{
     ApplyConfigurationRequest, ApplyConfigurationResponse, ApplyConfigurationResult, ApplyMode,
-    BootstrapRequest, BootstrapResponse, BootstrapResult, KubeconfigResponse, ResetPartitionSpec,
-    ResetRequest, ResetResponse, ResetResult, WipeMode,
+    BootstrapRequest, BootstrapResponse, BootstrapResult, ContainerDriver, DmesgRequest,
+    DmesgResponse, EtcdAlarmDisarmResponse, EtcdAlarmListResponse, EtcdAlarmType,
+    EtcdDefragmentResponse, EtcdForfeitLeadershipRequest, EtcdForfeitLeadershipResponse,
+    EtcdLeaveClusterRequest, EtcdLeaveClusterResponse, EtcdMember, EtcdMemberAlarm,
+    EtcdMemberListRequest, EtcdMemberListResponse, EtcdMemberStatus, EtcdRemoveMemberByIdRequest,
+    EtcdRemoveMemberByIdResponse, EtcdStatusResponse, KubeconfigResponse, LogsRequest,
+    LogsResponse, ResetPartitionSpec, ResetRequest, ResetResponse, ResetResult,
+    ServiceRestartRequest, ServiceRestartResponse, ServiceStartRequest, ServiceStartResponse,
+    ServiceStopRequest, ServiceStopResponse, UpgradeRebootMode, UpgradeRequest, UpgradeResponse,
+    UpgradeResult, WipeMode,
 };
