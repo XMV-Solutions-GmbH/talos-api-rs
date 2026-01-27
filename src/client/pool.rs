@@ -445,6 +445,7 @@ impl ConnectionPool {
     }
 
     /// Select an endpoint based on the load balancing strategy.
+    #[allow(clippy::result_large_err)]
     fn select_endpoint(&self, healthy: &[String]) -> Result<String> {
         if healthy.is_empty() {
             return Err(TalosError::Connection(
