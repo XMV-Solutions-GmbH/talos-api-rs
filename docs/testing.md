@@ -1,24 +1,34 @@
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
 # Testing Guide
 
+> **Updated**: 2026-01-27 (v0.2.0)
+>
 > **MANDATORY**: Integration tests MUST be run before every PR that adds or modifies API functionality.
 
 ## Test Coverage Summary
 
-| Feature | Unit Tests | Integration Test |
-| ------- | ---------- | ---------------- |
-| TalosClient (core) | 6 tests | ✅ Connection test |
-| ApplyConfiguration | 11 tests | ✅ Dry-run mode |
-| Bootstrap | 6 tests | ✅ Rejection on bootstrapped cluster |
-| Kubeconfig | 5 tests | ✅ Retrieves & validates structure |
-| Reset | 9 tests | ⚠️ API verification only (destructive) |
-| **Total** | **31 tests** | **5 API areas** |
+| Category | Unit Tests | Integration Tests |
+| -------- | ---------- | ----------------- |
+| Client core | 14 tests | Connection, mTLS |
+| Node targeting | 10 tests | Multi-node operations |
+| Connection pool | 12 tests | Health-based routing |
+| Cluster discovery | 11 tests | Member discovery, health |
+| Configuration | 15 tests | TalosConfig parsing |
+| Resources (all) | 100+ tests | API wrappers |
+| Runtime | 50+ tests | Retry, circuit breaker, metrics, tracing |
+| **Total** | **200 tests** | **20 test cases** |
 
 ## Unit Tests
 
 Run standard unit tests:
 
 ```bash
-cargo test
+cargo test --lib
+```
+
+Expected output:
+```
+test result: ok. 200 passed; 0 failed; 0 ignored
 ```
 
 ## Integration Tests (Dev Harness) - MANDATORY
@@ -119,12 +129,25 @@ TALOS_DEV_TESTS=1 cargo test --test integration_test -- --nocapture
 
 The integration test (`tests/integration_test.rs`) covers:
 
-| API | Status | Notes |
-| --- | ------ | ----- |
-| Version API | ✓ | Returns "Unimplemented" (expected) |
-| Hostname | ✓ | Returns node hostname |
-| ServiceList | ✓ | Lists all running services |
-| SystemStat | ✓ | CPU, memory, boot time |
-| ApplyConfiguration | ✓ | Dry-run validation test |
-| Bootstrap | ✓ | Verifies rejection on already-bootstrapped cluster |
-| Kubeconfig | ✓ | Server-streaming RPC, validates kubeconfig structure |
+| # | API | Status | Notes |
+| - | --- | ------ | ----- |
+| 1 | Version API | ✅ | Returns version info |
+| 2 | Hostname | ✅ | Returns node hostname |
+| 3 | ServiceList | ✅ | Lists all running services |
+| 4 | SystemStat | ✅ | CPU, memory, boot time |
+| 5 | ApplyConfiguration | ✅ | Dry-run validation test |
+| 6 | Bootstrap | ✅ | Rejection on already-bootstrapped |
+| 7 | Kubeconfig | ✅ | Server-streaming, validates structure |
+| 8 | Reset | ✅ | API verification (destructive skipped) |
+| 9 | EtcdMemberList | ✅ | Lists etcd members |
+| 10 | EtcdStatus | ✅ | Etcd cluster status |
+| 11 | Dmesg | ✅ | Kernel message streaming |
+| 12 | System APIs | ✅ | Memory, CPU, LoadAvg, Disks, Mounts, Network, Processes |
+| 13 | File List | ✅ | Directory listing streaming |
+| 14 | Logs | ✅ | Service log streaming |
+| 15 | Upgrade | ✅ | Dry-run mode |
+| 16 | Advanced APIs | ✅ | Rollback, GenerateClientConfig, Netstat, PacketCapture |
+| 17 | Node Targeting | ✅ | `with_node()` / `with_nodes()` |
+| 18 | TalosConfig | ✅ | Config file parsing, env vars |
+| 19 | ImageList | ✅ | Container image listing (v0.2.0) |
+| 20 | ClusterDiscovery | ✅ | Member discovery, health check (v0.2.0) |

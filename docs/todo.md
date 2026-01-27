@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
 # TODO
 
 > **Updated**: 2026-01-27 - v0.2.0 Released! 🎉 Next: v0.3.0 Roadmap

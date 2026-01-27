@@ -89,7 +89,7 @@ The `api::generated` module contains code generated from Talos protobuf definiti
 
 ## MSRV Policy
 
-- Current MSRV: **Rust 1.75**
+- Current MSRV: **Rust 1.82**
 - MSRV changes are documented in CHANGELOG
 - We test against the current MSRV in CI
 - MSRV will only be increased in MINOR versions (0.x.0) or MAJOR versions
