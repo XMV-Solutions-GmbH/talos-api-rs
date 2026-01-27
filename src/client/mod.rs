@@ -42,16 +42,30 @@ use crate::resources::{
 use hyper_util::rt::TokioIo;
 use rustls::pki_types::{CertificateDer, PrivateKeyDer, ServerName};
 use std::sync::Arc;
+use std::time::Duration;
 use tonic::transport::{Channel, Endpoint};
 
+/// Configuration for the Talos API client.
 #[derive(Clone, Debug)]
 pub struct TalosClientConfig {
+    /// The gRPC endpoint URL.
     pub endpoint: String,
+    /// Path to client certificate.
     pub crt_path: Option<String>,
+    /// Path to client private key.
     pub key_path: Option<String>,
+    /// Path to CA certificate.
     pub ca_path: Option<String>,
-    /// If true, skips TLS verification (insecure)
+    /// If true, skips TLS verification (insecure).
     pub insecure: bool,
+    /// Connection timeout for establishing the gRPC channel.
+    pub connect_timeout: Option<Duration>,
+    /// Request timeout for individual RPC calls.
+    pub request_timeout: Option<Duration>,
+    /// Keepalive interval for long-running connections.
+    pub keepalive_interval: Option<Duration>,
+    /// Keepalive timeout.
+    pub keepalive_timeout: Option<Duration>,
 }
 
 impl Default for TalosClientConfig {
@@ -62,6 +76,183 @@ impl Default for TalosClientConfig {
             key_path: None,
             ca_path: None,
             insecure: false,
+            connect_timeout: Some(Duration::from_secs(10)),
+            request_timeout: Some(Duration::from_secs(30)),
+            keepalive_interval: Some(Duration::from_secs(30)),
+            keepalive_timeout: Some(Duration::from_secs(10)),
+        }
+    }
+}
+
+impl TalosClientConfig {
+    /// Create a new configuration with an endpoint.
+    #[must_use]
+    pub fn new(endpoint: impl Into<String>) -> Self {
+        Self {
+            endpoint: endpoint.into(),
+            ..Default::default()
+        }
+    }
+
+    /// Create a builder for more complex configuration.
+    #[must_use]
+    pub fn builder(endpoint: impl Into<String>) -> TalosClientConfigBuilder {
+        TalosClientConfigBuilder::new(endpoint)
+    }
+
+    /// Set client certificate path.
+    #[must_use]
+    pub fn with_client_cert(mut self, crt_path: impl Into<String>) -> Self {
+        self.crt_path = Some(crt_path.into());
+        self
+    }
+
+    /// Set client key path.
+    #[must_use]
+    pub fn with_client_key(mut self, key_path: impl Into<String>) -> Self {
+        self.key_path = Some(key_path.into());
+        self
+    }
+
+    /// Set CA certificate path.
+    #[must_use]
+    pub fn with_ca(mut self, ca_path: impl Into<String>) -> Self {
+        self.ca_path = Some(ca_path.into());
+        self
+    }
+
+    /// Enable insecure mode (skip TLS verification).
+    #[must_use]
+    pub fn insecure(mut self) -> Self {
+        self.insecure = true;
+        self
+    }
+
+    /// Set connect timeout.
+    #[must_use]
+    pub fn with_connect_timeout(mut self, timeout: Duration) -> Self {
+        self.connect_timeout = Some(timeout);
+        self
+    }
+
+    /// Set request timeout.
+    #[must_use]
+    pub fn with_request_timeout(mut self, timeout: Duration) -> Self {
+        self.request_timeout = Some(timeout);
+        self
+    }
+
+    /// Disable all timeouts.
+    #[must_use]
+    pub fn no_timeout(mut self) -> Self {
+        self.connect_timeout = None;
+        self.request_timeout = None;
+        self
+    }
+}
+
+/// Builder for `TalosClientConfig`.
+#[derive(Debug, Clone)]
+pub struct TalosClientConfigBuilder {
+    endpoint: String,
+    crt_path: Option<String>,
+    key_path: Option<String>,
+    ca_path: Option<String>,
+    insecure: bool,
+    connect_timeout: Option<Duration>,
+    request_timeout: Option<Duration>,
+    keepalive_interval: Option<Duration>,
+    keepalive_timeout: Option<Duration>,
+}
+
+impl TalosClientConfigBuilder {
+    /// Create a new builder.
+    #[must_use]
+    pub fn new(endpoint: impl Into<String>) -> Self {
+        Self {
+            endpoint: endpoint.into(),
+            crt_path: None,
+            key_path: None,
+            ca_path: None,
+            insecure: false,
+            connect_timeout: Some(Duration::from_secs(10)),
+            request_timeout: Some(Duration::from_secs(30)),
+            keepalive_interval: Some(Duration::from_secs(30)),
+            keepalive_timeout: Some(Duration::from_secs(10)),
+        }
+    }
+
+    /// Set client certificate path.
+    #[must_use]
+    pub fn client_cert(mut self, path: impl Into<String>) -> Self {
+        self.crt_path = Some(path.into());
+        self
+    }
+
+    /// Set client key path.
+    #[must_use]
+    pub fn client_key(mut self, path: impl Into<String>) -> Self {
+        self.key_path = Some(path.into());
+        self
+    }
+
+    /// Set CA certificate path.
+    #[must_use]
+    pub fn ca_cert(mut self, path: impl Into<String>) -> Self {
+        self.ca_path = Some(path.into());
+        self
+    }
+
+    /// Enable insecure mode.
+    #[must_use]
+    pub fn insecure(mut self) -> Self {
+        self.insecure = true;
+        self
+    }
+
+    /// Set connect timeout.
+    #[must_use]
+    pub fn connect_timeout(mut self, timeout: Duration) -> Self {
+        self.connect_timeout = Some(timeout);
+        self
+    }
+
+    /// Set request timeout.
+    #[must_use]
+    pub fn request_timeout(mut self, timeout: Duration) -> Self {
+        self.request_timeout = Some(timeout);
+        self
+    }
+
+    /// Set keepalive settings.
+    #[must_use]
+    pub fn keepalive(mut self, interval: Duration, timeout: Duration) -> Self {
+        self.keepalive_interval = Some(interval);
+        self.keepalive_timeout = Some(timeout);
+        self
+    }
+
+    /// Disable timeouts.
+    #[must_use]
+    pub fn no_timeout(mut self) -> Self {
+        self.connect_timeout = None;
+        self.request_timeout = None;
+        self
+    }
+
+    /// Build the configuration.
+    #[must_use]
+    pub fn build(self) -> TalosClientConfig {
+        TalosClientConfig {
+            endpoint: self.endpoint,
+            crt_path: self.crt_path,
+            key_path: self.key_path,
+            ca_path: self.ca_path,
+            insecure: self.insecure,
+            connect_timeout: self.connect_timeout,
+            request_timeout: self.request_timeout,
+            keepalive_interval: self.keepalive_interval,
+            keepalive_timeout: self.keepalive_timeout,
         }
     }
 }
@@ -95,10 +286,25 @@ impl TalosClient {
 
     /// Create a plain HTTP channel (no TLS)
     async fn create_http_channel(config: &TalosClientConfig) -> Result<Channel> {
-        let channel = Channel::from_shared(config.endpoint.clone())
-            .map_err(|e| crate::error::TalosError::Config(e.to_string()))?
-            .connect()
-            .await?;
+        let mut endpoint = Channel::from_shared(config.endpoint.clone())
+            .map_err(|e| crate::error::TalosError::Config(e.to_string()))?;
+
+        // Apply timeout configuration
+        if let Some(timeout) = config.connect_timeout {
+            endpoint = endpoint.connect_timeout(timeout);
+        }
+        if let Some(timeout) = config.request_timeout {
+            endpoint = endpoint.timeout(timeout);
+        }
+        if let Some(interval) = config.keepalive_interval {
+            if let Some(ka_timeout) = config.keepalive_timeout {
+                endpoint = endpoint
+                    .http2_keep_alive_interval(interval)
+                    .keep_alive_timeout(ka_timeout);
+            }
+        }
+
+        let channel = endpoint.connect().await?;
         Ok(channel)
     }
 
@@ -200,8 +406,26 @@ impl TalosClient {
         // For custom connector, use http:// scheme (we handle TLS ourselves)
         let endpoint_for_connector = format!("http://{}:{}", host, port);
 
-        let channel = Endpoint::from_shared(endpoint_for_connector)
-            .map_err(|e| crate::error::TalosError::Config(e.to_string()))?
+        // Build endpoint with timeout configuration
+        let mut endpoint = Endpoint::from_shared(endpoint_for_connector)
+            .map_err(|e| crate::error::TalosError::Config(e.to_string()))?;
+
+        // Apply timeout configuration
+        if let Some(timeout) = config.connect_timeout {
+            endpoint = endpoint.connect_timeout(timeout);
+        }
+        if let Some(timeout) = config.request_timeout {
+            endpoint = endpoint.timeout(timeout);
+        }
+        if let Some(interval) = config.keepalive_interval {
+            if let Some(ka_timeout) = config.keepalive_timeout {
+                endpoint = endpoint
+                    .http2_keep_alive_interval(interval)
+                    .keep_alive_timeout(ka_timeout);
+            }
+        }
+
+        let channel = endpoint
             .connect_with_connector(tower::service_fn(move |uri: tonic::transport::Uri| {
                 let connector = connector.clone();
                 let host = host.clone();

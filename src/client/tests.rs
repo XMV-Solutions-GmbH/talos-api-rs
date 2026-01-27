@@ -84,6 +84,10 @@ async fn test_version_call() {
         key_path: None,
         ca_path: None,
         insecure: true, // Mock server has no TLS
+        connect_timeout: None,
+        request_timeout: None,
+        keepalive_interval: None,
+        keepalive_timeout: None,
     };
 
     let client = TalosClient::new(config)

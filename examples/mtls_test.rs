@@ -5,13 +5,11 @@ use talos_api_rs::{TalosClient, TalosClientConfig};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let config = TalosClientConfig {
-        endpoint: "https://127.0.0.1:52149".to_string(),
-        ca_path: Some("/tmp/talos-certs/ca.crt".to_string()),
-        crt_path: Some("/tmp/talos-certs/client.crt".to_string()),
-        key_path: Some("/tmp/talos-certs/client.key".to_string()),
-        insecure: false,
-    };
+    let config = TalosClientConfig::builder("https://127.0.0.1:52149")
+        .ca_cert("/tmp/talos-certs/ca.crt")
+        .client_cert("/tmp/talos-certs/client.crt")
+        .client_key("/tmp/talos-certs/client.key")
+        .build();
 
     println!("Creating mTLS client with ED25519 certs...");
     let client = TalosClient::new(config).await?;

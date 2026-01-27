@@ -20,13 +20,11 @@ async fn test_cluster_lifecycle() {
     println!("Cluster provisioned at {}", cluster.endpoint);
 
     // 2. Create Client with mTLS (using cluster certs)
-    let mtls_config = TalosClientConfig {
-        endpoint: cluster.endpoint.clone(),
-        crt_path: Some(cluster.crt_path.to_string_lossy().to_string()),
-        key_path: Some(cluster.key_path.to_string_lossy().to_string()),
-        ca_path: Some(cluster.ca_path.to_string_lossy().to_string()),
-        insecure: false,
-    };
+    let mtls_config = TalosClientConfig::builder(&cluster.endpoint)
+        .client_cert(cluster.crt_path.to_string_lossy())
+        .client_key(cluster.key_path.to_string_lossy())
+        .ca_cert(cluster.ca_path.to_string_lossy())
+        .build();
 
     println!("\nUsing mTLS with certs from:");
     println!("  CA:  {}", cluster.ca_path.display());
@@ -40,11 +38,9 @@ async fn test_cluster_lifecycle() {
             println!("\nmTLS connection failed: {}", e);
             println!("Falling back to insecure mode...\n");
 
-            let insecure_config = TalosClientConfig {
-                endpoint: cluster.endpoint.clone(),
-                insecure: true,
-                ..Default::default()
-            };
+            let insecure_config = TalosClientConfig::builder(&cluster.endpoint)
+                .insecure()
+                .build();
 
             TalosClient::new(insecure_config)
                 .await

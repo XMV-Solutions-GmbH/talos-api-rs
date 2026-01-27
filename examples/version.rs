@@ -4,13 +4,7 @@ use talos_api_rs::{TalosClient, TalosClientConfig};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let config = TalosClientConfig {
-        endpoint: "http://127.0.0.1:50000".to_string(),
-        crt_path: None,
-        key_path: None,
-        ca_path: None,
-        insecure: false,
-    };
+    let config = TalosClientConfig::new("http://127.0.0.1:50000");
 
     println!("Connecting to {}...", config.endpoint);
     // In a real example we would handle the error properly
