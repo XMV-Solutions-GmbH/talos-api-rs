@@ -1,2 +1,6 @@
 # Rust
 target
+
+# Cargo.lock not tracked for libraries (per Cargo best practices)
+# https://doc.rust-lang.org/cargo/faq.html#why-have-cargolock-in-version-control
+Cargo.lock
