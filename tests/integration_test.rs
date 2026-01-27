@@ -714,7 +714,7 @@ cluster:
     // that aren't reachable from the host. So we test with the actual cluster endpoint.
     println!("\n--- Discovery API: ClusterHealth (direct endpoint) ---");
     match discovery
-        .check_endpoints_health(&[cluster.endpoint.clone()])
+        .check_endpoints_health(std::slice::from_ref(&cluster.endpoint))
         .await
     {
         Ok(health) => {
