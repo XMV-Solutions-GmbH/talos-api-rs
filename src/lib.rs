@@ -7,7 +7,10 @@ pub mod resources;
 pub mod runtime;
 pub mod testkit;
 
-pub use client::{TalosClient, TalosClientConfig, TalosClientConfigBuilder};
+pub use client::{
+    ConnectionPool, ConnectionPoolConfig, EndpointHealth, HealthStatus, LoadBalancer, TalosClient,
+    TalosClientConfig, TalosClientConfigBuilder,
+};
 pub use error::TalosError;
 pub use resources::{
     ApplyConfigurationRequest, ApplyConfigurationResponse, ApplyConfigurationResult, ApplyMode,
@@ -32,6 +35,7 @@ pub use resources::{
     UpgradeResult, WipeMode,
 };
 pub use runtime::{
-    BackoffStrategy, CustomRetryPolicy, DefaultRetryPolicy, ExponentialBackoff, FixedBackoff,
-    LinearBackoff, NoBackoff, NoRetryPolicy, RetryConfig, RetryConfigBuilder, RetryPolicy,
+    BackoffStrategy, CircuitBreaker, CircuitBreakerConfig, CircuitState, CustomRetryPolicy,
+    DefaultRetryPolicy, ExponentialBackoff, FixedBackoff, LinearBackoff, NoBackoff, NoRetryPolicy,
+    RetryConfig, RetryConfigBuilder, RetryPolicy,
 };

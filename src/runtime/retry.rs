@@ -493,6 +493,8 @@ impl AsGrpcStatus for crate::error::TalosError {
             crate::error::TalosError::Transport(_) => tonic::Code::Unavailable,
             crate::error::TalosError::Config(_) => tonic::Code::InvalidArgument,
             crate::error::TalosError::Validation(_) => tonic::Code::InvalidArgument,
+            crate::error::TalosError::Connection(_) => tonic::Code::Unavailable,
+            crate::error::TalosError::CircuitOpen(_) => tonic::Code::Unavailable,
             crate::error::TalosError::Unknown(_) => tonic::Code::Internal,
         }
     }

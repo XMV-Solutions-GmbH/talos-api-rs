@@ -16,6 +16,12 @@ pub enum TalosError {
     #[error("Validation error: {0}")]
     Validation(String),
 
+    #[error("Connection error: {0}")]
+    Connection(String),
+
+    #[error("Circuit breaker is open: {0}")]
+    CircuitOpen(String),
+
     #[error("Unknown error: {0}")]
     Unknown(String),
 }
