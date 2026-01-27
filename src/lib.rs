@@ -15,24 +15,25 @@
 //!
 //! ## Quick Start
 //!
-//! ```rust,ignore
+//! ```rust,no_run
 //! use talos_api_rs::{TalosClient, TalosClientConfig};
 //!
-//! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
-//! // Connect with mTLS
-//! let config = TalosClientConfig::builder("https://10.0.0.1:50000")
-//!     .ca_cert("/path/to/ca.crt")
-//!     .client_cert("/path/to/client.crt")
-//!     .client_key("/path/to/client.key")
-//!     .build();
+//! #[tokio::main]
+//! async fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     // Connect with mTLS
+//!     let config = TalosClientConfig::builder("https://10.0.0.1:50000")
+//!         .ca_cert("/path/to/ca.crt")
+//!         .client_cert("/path/to/client.crt")
+//!         .client_key("/path/to/client.key")
+//!         .build();
 //!
-//! let client = TalosClient::new(config).await?;
+//!     let client = TalosClient::new(config).await?;
 //!
-//! // Get kubeconfig from cluster
-//! let kubeconfig = client.kubeconfig().await?;
-//! println!("Got kubeconfig for cluster");
-//! # Ok(())
-//! # }
+//!     // Get kubeconfig from cluster
+//!     let kubeconfig = client.kubeconfig().await?;
+//!     println!("Got kubeconfig for cluster");
+//!     Ok(())
+//! }
 //! ```
 //!
 //! ## Module Overview
