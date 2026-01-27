@@ -21,7 +21,8 @@ use crate::api::generated::machine::{
     EtcdMemberStatus as ProtoEtcdMemberStatus, EtcdMembers as ProtoEtcdMembers,
     EtcdRemoveMemberByIdRequest as ProtoEtcdRemoveMemberByIdRequest,
     EtcdRemoveMemberByIdResponse as ProtoEtcdRemoveMemberByIdResponse,
-    EtcdStatus as ProtoEtcdStatus, EtcdStatusResponse as ProtoEtcdStatusResponse,
+    EtcdSnapshotRequest as ProtoEtcdSnapshotRequest, EtcdStatus as ProtoEtcdStatus,
+    EtcdStatusResponse as ProtoEtcdStatusResponse,
 };
 
 // =============================================================================
@@ -689,6 +690,82 @@ fn humanize_bytes(bytes: u64) -> String {
 }
 
 // =============================================================================
+// EtcdSnapshot
+// =============================================================================
+
+/// Request to create an etcd snapshot.
+///
+/// This creates a consistent snapshot of the etcd database that can be
+/// used for backup and disaster recovery.
+#[derive(Debug, Clone, Default)]
+pub struct EtcdSnapshotRequest;
+
+impl EtcdSnapshotRequest {
+    /// Create a new snapshot request.
+    #[must_use]
+    pub fn new() -> Self {
+        Self
+    }
+}
+
+impl From<EtcdSnapshotRequest> for ProtoEtcdSnapshotRequest {
+    fn from(_req: EtcdSnapshotRequest) -> Self {
+        Self {}
+    }
+}
+
+/// Response from an etcd snapshot operation.
+///
+/// Contains the raw snapshot data as bytes, which can be written
+/// to a file for backup purposes.
+#[derive(Debug, Clone)]
+pub struct EtcdSnapshotResponse {
+    /// The snapshot data.
+    pub data: Vec<u8>,
+}
+
+impl EtcdSnapshotResponse {
+    /// Create a new snapshot response from raw data.
+    #[must_use]
+    pub fn new(data: Vec<u8>) -> Self {
+        Self { data }
+    }
+
+    /// Get the snapshot data.
+    #[must_use]
+    pub fn data(&self) -> &[u8] {
+        &self.data
+    }
+
+    /// Get the size of the snapshot in bytes.
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.data.len()
+    }
+
+    /// Check if the snapshot is empty.
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+
+    /// Get a human-readable size string.
+    #[must_use]
+    pub fn size_human(&self) -> String {
+        humanize_bytes(self.data.len() as u64)
+    }
+
+    /// Write the snapshot to a file.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if writing to the file fails.
+    pub fn write_to_file(&self, path: impl AsRef<std::path::Path>) -> std::io::Result<()> {
+        std::fs::write(path, &self.data)
+    }
+}
+
+// =============================================================================
 // Tests
 // =============================================================================
 
@@ -765,5 +842,40 @@ mod tests {
     fn test_etcd_forfeit_leadership_request() {
         let req = EtcdForfeitLeadershipRequest::new();
         let _proto: ProtoEtcdForfeitLeadershipRequest = req.into();
+    }
+
+    #[test]
+    fn test_etcd_snapshot_request() {
+        let req = EtcdSnapshotRequest::new();
+        let _proto: ProtoEtcdSnapshotRequest = req.into();
+    }
+
+    #[test]
+    fn test_etcd_snapshot_response() {
+        let data = vec![1, 2, 3, 4, 5];
+        let response = EtcdSnapshotResponse::new(data.clone());
+
+        assert_eq!(response.data(), &[1, 2, 3, 4, 5]);
+        assert_eq!(response.len(), 5);
+        assert!(!response.is_empty());
+        assert_eq!(response.size_human(), "5 B");
+    }
+
+    #[test]
+    fn test_etcd_snapshot_response_empty() {
+        let response = EtcdSnapshotResponse::new(vec![]);
+        assert!(response.is_empty());
+        assert_eq!(response.len(), 0);
+    }
+
+    #[test]
+    fn test_etcd_snapshot_response_size_human() {
+        // 1 KB
+        let response = EtcdSnapshotResponse::new(vec![0; 1024]);
+        assert_eq!(response.size_human(), "1.00 KB");
+
+        // 1 MB
+        let response = EtcdSnapshotResponse::new(vec![0; 1024 * 1024]);
+        assert_eq!(response.size_human(), "1.00 MB");
     }
 }

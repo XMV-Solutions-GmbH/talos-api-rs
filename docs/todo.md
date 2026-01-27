@@ -11,8 +11,6 @@
 | API | Type | Blocker | Notes |
 | --- | ---- | ------- | ----- |
 | EtcdRecover | Client-streaming | v1.0 | Requires client-streaming support |
-| EtcdSnapshot | Server-streaming | v1.0 | Backup/restore workflows |
-| Events | Server-streaming | v1.0 | Cluster event monitoring |
 
 ### Streaming Improvements
 
@@ -79,3 +77,5 @@ Summary of what's done - see [CHANGELOG.md](../CHANGELOG.md) for details.
 - [x] **talosconfig parsing** (`~/.talos/config`)
 - [x] **Cluster discovery** helpers
 - [x] **Full documentation** on docs.rs
+- [x] **Events API** for cluster event streaming
+- [x] **EtcdSnapshot API** for backups
