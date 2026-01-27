@@ -129,8 +129,6 @@ talosctl cluster create --name talos-dev
 
 talosctl cluster destroy --name talos-dev
 
-
-
 Rules:
 	•	Integration tests live under tests/integration_test.rs
 	•	Tests must auto-skip if talosctl is missing

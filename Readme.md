@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
 [![MSRV](https://img.shields.io/badge/MSRV-1.75-blue.svg)](https://www.rust-lang.org)
 
-A typed, async, idiomatic Rust client for the [Talos Linux](https://www.talos.dev/) gRPC API.
+A typed, async, idiomatic Rust client for SideroLabs [Talos Linux](https://www.talos.dev/) gRPC API.
 
 Built for **production use** with connection pooling, circuit breakers, retry policies,
 Prometheus metrics, and OpenTelemetry tracing. Inspired by [`kube-rs`](https://github.com/kube-rs/kube).
