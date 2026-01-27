@@ -151,7 +151,7 @@
 - [x] Sensitive header redaction
 - [x] Request metrics (`InterceptorMetrics`)
 - [x] Metrics (Prometheus-compatible) - `MetricsCollector`, `MetricsConfig`
-- [ ] Distributed tracing (OpenTelemetry)
+- [x] Distributed tracing (OpenTelemetry) - `TalosSpan`, `SpanFactory`, `TracingConfig`
 
 ### Developer Experience ✅ COMPLETE
 
