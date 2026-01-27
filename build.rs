@@ -13,7 +13,7 @@ fn main() {
     // Ensure directory exists
     std::fs::create_dir_all(&out_dir).unwrap();
 
-    tonic_build::configure()
+    tonic_prost_build::configure()
         .out_dir(&out_dir)
         .build_server(true)
         .compile_protos(

@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-01-27
+
+### Changed
+
+- **BREAKING: MSRV increased** - Minimum Supported Rust Version is now 1.82 (was 1.75)
+- **BREAKING: Dependencies upgraded**
+  - `tonic` 0.12 → 0.14.2
+  - `prost` 0.13 → 0.14.3
+  - `prost-types` 0.13 → 0.14.3
+  - `tonic-build` 0.12 → `tonic-prost-build` 0.14.2
+- **New dependency**: `tonic-prost` 0.14.2 (prost extracted from tonic)
+- **Feature rename**: `tls-roots` → `tls-webpki-roots` (tonic 0.14 API change)
+- **New feature**: `tls-ring` for TLS with ring crypto provider
+
+### Migration Guide
+
+If upgrading from 0.1.x:
+
+1. Ensure Rust 1.82+ is installed
+2. The TLS features changed:
+   - Old: `tonic = { features = ["tls", "tls-roots"] }`
+   - New: `tonic = { features = ["transport", "tls-ring", "tls-webpki-roots"] }`
+3. `tonic-prost` is now a separate runtime dependency
+
 ## [0.1.2] - 2026-01-27
 
 ### Added

@@ -1,8 +1,8 @@
 [package]
 name = "talos-api-rs"
-version = "0.1.2"
+version = "0.2.0"
 edition = "2021"
-rust-version = "1.75"
+rust-version = "1.82"
 description = "A typed, async, idiomatic Rust client for the Talos Linux gRPC API"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/XMV-Solutions-GmbH/talos-api-rs"
@@ -26,9 +26,10 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 tokio = { version = "1.0", features = ["full"] }
-tonic = { version = "0.12", features = ["tls", "tls-roots"] }
-prost = "0.13"
-prost-types = "0.13"
+tonic = { version = "0.14", features = ["transport", "tls-ring", "tls-webpki-roots"] }
+tonic-prost = "0.14"
+prost = "0.14"
+prost-types = "0.14"
 thiserror = "2.0"
 tower = "0.5"
 http = "1.0"
@@ -48,7 +49,7 @@ tempfile = "3.10"
 dirs = "5.0"
 
 [build-dependencies]
-tonic-build = "0.12"
+tonic-prost-build = "0.14"
 
 [dev-dependencies]
 tokio-test = "0.4"

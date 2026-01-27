@@ -46,41 +46,41 @@ pub struct EmptyResponse {
     #[prost(message, repeated, tag = "1")]
     pub messages: ::prost::alloc::vec::Vec<Empty>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct Url {
     #[prost(string, tag = "1")]
     pub full_path: ::prost::alloc::string::String,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct PemEncodedCertificateAndKey {
     #[prost(bytes = "vec", tag = "1")]
     pub crt: ::prost::alloc::vec::Vec<u8>,
     #[prost(bytes = "vec", tag = "2")]
     pub key: ::prost::alloc::vec::Vec<u8>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct PemEncodedKey {
     #[prost(bytes = "vec", tag = "1")]
     pub key: ::prost::alloc::vec::Vec<u8>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct PemEncodedCertificate {
     #[prost(bytes = "vec", tag = "1")]
     pub crt: ::prost::alloc::vec::Vec<u8>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct NetIp {
     #[prost(bytes = "vec", tag = "1")]
     pub ip: ::prost::alloc::vec::Vec<u8>,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct NetIpPort {
     #[prost(bytes = "vec", tag = "1")]
     pub ip: ::prost::alloc::vec::Vec<u8>,
     #[prost(int32, tag = "2")]
     pub port: i32,
 }
-#[derive(Clone, PartialEq, ::prost::Message)]
+#[derive(Clone, PartialEq, Eq, Hash, ::prost::Message)]
 pub struct NetIpPrefix {
     #[prost(bytes = "vec", tag = "1")]
     pub ip: ::prost::alloc::vec::Vec<u8>,
