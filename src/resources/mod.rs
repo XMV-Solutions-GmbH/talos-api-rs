@@ -10,6 +10,7 @@ mod bootstrap;
 mod configuration;
 mod dmesg;
 mod etcd;
+mod events;
 mod files;
 mod images;
 mod kubeconfig;
@@ -34,7 +35,7 @@ pub use etcd::{
     EtcdLeaveClusterResponse, EtcdLeaveClusterResult, EtcdMember, EtcdMemberAlarm,
     EtcdMemberListRequest, EtcdMemberListResponse, EtcdMemberStatus, EtcdMembersResult,
     EtcdRemoveMemberByIdRequest, EtcdRemoveMemberByIdResponse, EtcdRemoveMemberByIdResult,
-    EtcdStatusResponse, EtcdStatusResult,
+    EtcdSnapshotRequest, EtcdSnapshotResponse, EtcdStatusResponse, EtcdStatusResult,
 };
 pub use kubeconfig::KubeconfigResponse;
 pub use logs::{ContainerDriver, LogsRequest, LogsRequestBuilder, LogsResponse};
@@ -75,3 +76,5 @@ pub use images::{
     ContainerdNamespace, ImageInfo, ImageListRequest, ImagePullRequest, ImagePullResponse,
     ImagePullResult,
 };
+
+pub use events::{Event, EventData, EventsRequest};
