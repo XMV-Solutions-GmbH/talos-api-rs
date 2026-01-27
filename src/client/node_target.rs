@@ -33,9 +33,10 @@ use tonic::Request;
 pub const NODE_METADATA_KEY: &str = "x-talos-node";
 
 /// Represents a target node or set of nodes for API operations
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub enum NodeTarget {
     /// No specific target - use the connected endpoint
+    #[default]
     Default,
     /// Target a single node by IP or hostname
     Single(String),
@@ -136,12 +137,6 @@ impl NodeTarget {
             }
         }
         request
-    }
-}
-
-impl Default for NodeTarget {
-    fn default() -> Self {
-        Self::Default
     }
 }
 
