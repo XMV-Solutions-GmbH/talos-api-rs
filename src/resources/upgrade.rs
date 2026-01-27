@@ -42,7 +42,7 @@ impl std::fmt::Display for UpgradeRebootMode {
 /// # Example
 ///
 /// ```no_run
-/// use talos_api::resources::UpgradeRequest;
+/// use talos_api_rs::resources::UpgradeRequest;
 ///
 /// // Upgrade to a specific version
 /// let request = UpgradeRequest::new("ghcr.io/siderolabs/installer:v1.6.0");

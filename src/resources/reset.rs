@@ -94,7 +94,7 @@ impl From<ResetPartitionSpec> for ProtoPartitionSpec {
 /// # Example
 ///
 /// ```no_run
-/// use talos_api::resources::{ResetRequest, WipeMode};
+/// use talos_api_rs::resources::{ResetRequest, WipeMode};
 ///
 /// // Graceful reset with reboot (recommended for cluster nodes)
 /// let request = ResetRequest::graceful();

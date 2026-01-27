@@ -10,7 +10,7 @@
 //! # Example
 //!
 //! ```ignore
-//! use talos_api::client::{ConnectionPool, ConnectionPoolConfig, LoadBalancer};
+//! use talos_api_rs::client::{ConnectionPool, ConnectionPoolConfig, LoadBalancer};
 //!
 //! let config = ConnectionPoolConfig::new(vec![
 //!     "https://node1:50000".to_string(),

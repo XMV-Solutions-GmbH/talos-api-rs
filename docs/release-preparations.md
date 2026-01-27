@@ -167,15 +167,15 @@ If docs.rs fails to build (rare), you can request a rebuild:
 
 Before your first publish to crates.io:
 
-- [ ] crates.io account created
-- [ ] API token generated with publish scope
-- [ ] `CRATES_IO_TOKEN` secret added to GitHub
-- [ ] `cargo publish --dry-run` succeeds locally
-- [ ] All documentation compiles: `cargo doc --no-deps`
-- [ ] Doc tests pass: `cargo test --doc`
-- [ ] Version in `Cargo.toml` is correct
-- [ ] CHANGELOG.md is up to date
-- [ ] All required `Cargo.toml` metadata is present:
+- [x] crates.io account created
+- [x] API token generated with publish scope
+- [x] `CRATES_IO_TOKEN` secret added to GitHub
+- [x] `cargo publish --dry-run` succeeds locally
+- [x] All documentation compiles: `cargo doc --no-deps`
+- [x] Doc tests pass: `cargo test --doc`
+- [x] Version in `Cargo.toml` is correct
+- [x] CHANGELOG.md is up to date
+- [x] All required `Cargo.toml` metadata is present:
   - `name`, `version`, `edition`
   - `description`, `license`
   - `repository`, `documentation`

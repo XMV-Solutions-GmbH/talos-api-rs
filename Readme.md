@@ -4,23 +4,23 @@
 [![Documentation](https://docs.rs/talos-api-rs/badge.svg)](https://docs.rs/talos-api-rs)
 [![CI](https://github.com/XMV-Solutions-GmbH/talos-api-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/XMV-Solutions-GmbH/talos-api-rs/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-experimental-orange.svg)](#status)
+[![MSRV](https://img.shields.io/badge/MSRV-1.75-blue.svg)](https://www.rust-lang.org)
 
-Idiomatic, async Rust client for the Talos Linux gRPC API.
+A typed, async, idiomatic Rust client for the [Talos Linux](https://www.talos.dev/) gRPC API.
 
-This crate provides a **typed, production-grade API client** for interacting with
-[Talos Linux](https://www.talos.dev/) nodes and clusters from Rust, inspired by the
-design principles of [`kube-rs`](https://github.com/kube-rs/kube).
+Built for **production use** with connection pooling, circuit breakers, retry policies,
+Prometheus metrics, and OpenTelemetry tracing. Inspired by [`kube-rs`](https://github.com/kube-rs/kube).
 
 ---
 
-## Goals
+## Features
 
+- **40+ APIs** — Machine, etcd, system, files, diagnostics
 - **Async-first** — Built on `tokio` and `tonic`
 - **Strongly typed** — No stringly-typed API calls
-- **Minimal abstraction** — Thin wrapper over gRPC, no magic
-- **Observable** — Tracing and logging built-in
-- **Production-ready** — Error handling, retries, timeouts (planned)
+- **Production-ready** — Retries, circuit breakers, connection pooling
+- **Observable** — Prometheus metrics, OpenTelemetry tracing
+- **mTLS support** — ED25519 certificates (Talos default)
 
 ## Non-Goals
 
@@ -30,29 +30,18 @@ design principles of [`kube-rs`](https://github.com/kube-rs/kube).
 
 ---
 
-## Status
+## API Coverage
 
-> ⚠️ **Experimental** — API surface and internals may change without notice.
-
-| Phase | Status | Description |
-|-------|--------|-------------|
-| Phase 1 | ✅ Complete | Core client, TLS, Version & basic Machine APIs |
-| Phase 2 | 🔄 In Progress | Cluster lifecycle (Bootstrap, Reset, Kubeconfig) |
-| Phase 3 | 📋 Planned | Extended APIs (etcd, logs, events, streaming) |
-| Phase 4 | 📋 Planned | Production readiness, crates.io release |
-
-### Current Capabilities
-
-- ✅ TLS and insecure mode connections
-- ✅ Version API (health checks)
-- ✅ Machine API: Hostname, ServiceList, SystemStat, Reboot, Shutdown
-- ⚠️ mTLS with ED25519 certificates (Talos default) — **in progress**
-
-### Known Limitations
-
-- ED25519 client certificates require additional rustls configuration
-- Streaming APIs (Logs, Events, Kubeconfig) not yet implemented
-- Multi-node targeting not yet supported
+| Category | APIs | Status |
+| -------- | ---- | ------ |
+| **Machine** | Version, Hostname, Reboot, Shutdown, Upgrade, Rollback | ✅ |
+| **Configuration** | ApplyConfiguration, GenerateConfiguration | ✅ |
+| **Cluster** | Bootstrap, Kubeconfig, Reset | ✅ |
+| **Services** | ServiceList, ServiceStart, ServiceStop, ServiceRestart | ✅ |
+| **etcd** | MemberList, Status, AlarmList, Defragment, ForfeitLeadership | ✅ |
+| **System** | Memory, CPUInfo, LoadAvg, DiskStats, Mounts, NetworkDeviceStats, Processes | ✅ |
+| **Files** | List, Read, Copy, DiskUsage | ✅ |
+| **Diagnostics** | Dmesg, Logs, Netstat, PacketCapture | ✅ |
 
 See [docs/todo.md](docs/todo.md) for the full roadmap.
 
@@ -109,15 +98,56 @@ let config = TalosClientConfig {
 let client = TalosClient::new(config).await?;
 ```
 
+### Production Client with Resilience
+
+```rust
+use talos_api_rs::{TalosClientConfig, TalosClient, RetryConfig, CircuitBreakerConfig};
+use std::time::Duration;
+
+// Configure with timeouts, retries, and circuit breaker
+let config = TalosClientConfig::builder("https://10.0.0.1:50000")
+    .ca_cert("/path/to/ca.crt")
+    .client_cert("/path/to/client.crt")
+    .client_key("/path/to/client.key")
+    .connect_timeout(Duration::from_secs(5))
+    .request_timeout(Duration::from_secs(30))
+    .build();
+
+let client = TalosClient::new(config).await?;
+
+// Use high-level APIs
+let hostname = client.hostname().await?;
+let services = client.service_list().await?;
+let kubeconfig = client.kubeconfig().await?;
+```
+
+### Prometheus Metrics
+
+```rust
+use talos_api_rs::runtime::{MetricsCollector, MetricsConfig};
+
+let metrics = MetricsCollector::new(MetricsConfig::builder()
+    .namespace("talos")
+    .build());
+
+// Record requests
+metrics.record_request("Version", "10.0.0.1:50000", true, Duration::from_millis(42));
+
+// Export Prometheus format
+println!("{}", metrics.to_prometheus_text());
+```
+
 ---
 
 ## Documentation
 
+- **[API Documentation](https://docs.rs/talos-api-rs)** — Full Rustdoc on docs.rs
 - [API Concept](docs/app-concept.md) — Architecture and design decisions
-- [TODO & Roadmap](docs/todo.md) — Development progress and plans
 - [Architecture](docs/architecture.md) — Technical architecture
+- [API Stability](docs/api-stability.md) — Stability guarantees
 - [Testing](docs/testing.md) — Test strategy and harness
 - [Release Checklist](docs/release-checklist.md) — crates.io publication guide
+- [Release Preparations](docs/release-preparations.md) — Token and docs.rs setup
 
 ---
 

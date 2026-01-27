@@ -8,7 +8,7 @@
 
 mod circuit_breaker;
 mod logging;
-mod metrics;
+pub mod metrics;
 mod retry;
 pub mod tracing;
 

@@ -8,7 +8,7 @@
 //! # Example
 //!
 //! ```ignore
-//! use talos_api::runtime::{LoggingInterceptor, LogLevel};
+//! use talos_api_rs::runtime::{LoggingInterceptor, LogLevel};
 //!
 //! // Create interceptor with custom log level
 //! let interceptor = LoggingInterceptor::new()

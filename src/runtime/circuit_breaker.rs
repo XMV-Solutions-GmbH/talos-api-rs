@@ -14,7 +14,7 @@
 //! # Example
 //!
 //! ```ignore
-//! use talos_api::runtime::{CircuitBreaker, CircuitBreakerConfig};
+//! use talos_api_rs::runtime::{CircuitBreaker, CircuitBreakerConfig};
 //!
 //! let config = CircuitBreakerConfig::default()
 //!     .with_failure_threshold(5)
