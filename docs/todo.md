@@ -160,7 +160,8 @@
 - [x] Builder patterns for complex requests
 - [x] `TalosClientConfig::builder()` fluent API
 - [x] Comprehensive documentation
-- [ ] More examples
+- [x] Example: resilient_client.rs - demonstrates all production features
+- [ ] More examples (cluster lifecycle, monitoring)
 
 ### Release Preparation ✅ PARTIAL
 

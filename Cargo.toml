@@ -57,3 +57,4 @@ anyhow = "1.0"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_yaml = "0.9.34"
 base64 = "0.22.1"
+tracing-subscriber = { version = "0.3", features = ["fmt"] }
