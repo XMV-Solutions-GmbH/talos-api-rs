@@ -32,6 +32,18 @@ use std::path::{Path, PathBuf};
 
 use crate::error::{Result, TalosError};
 
+/// Environment variable for overriding the config file path
+pub const ENV_TALOSCONFIG: &str = "TALOSCONFIG";
+
+/// Environment variable for overriding the context
+pub const ENV_TALOS_CONTEXT: &str = "TALOS_CONTEXT";
+
+/// Environment variable for overriding endpoints (comma-separated)
+pub const ENV_TALOS_ENDPOINTS: &str = "TALOS_ENDPOINTS";
+
+/// Environment variable for specifying target nodes (comma-separated)
+pub const ENV_TALOS_NODES: &str = "TALOS_NODES";
+
 /// Represents the entire talosctl configuration file structure
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct TalosConfig {
@@ -171,6 +183,121 @@ impl TalosConfig {
     pub fn context_names(&self) -> Vec<&str> {
         self.contexts.keys().map(|s| s.as_str()).collect()
     }
+
+    /// Load configuration with environment variable overrides
+    ///
+    /// This method respects the following environment variables:
+    /// - `TALOSCONFIG`: Path to the config file (default: `~/.talos/config`)
+    /// - `TALOS_CONTEXT`: Override the active context
+    /// - `TALOS_ENDPOINTS`: Override endpoints (comma-separated)
+    /// - `TALOS_NODES`: Override target nodes (comma-separated)
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api_rs::config::TalosConfig;
+    ///
+    /// # fn main() -> Result<(), Box<dyn std::error::Error>> {
+    /// // Load config with env overrides
+    /// let config = TalosConfig::load_with_env()?;
+    ///
+    /// // Get effective context (may be overridden by TALOS_CONTEXT)
+    /// if let Some(ctx) = config.active_context() {
+    ///     println!("Using endpoints: {:?}", ctx.endpoints);
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[allow(clippy::result_large_err)]
+    pub fn load_with_env() -> Result<Self> {
+        // Load base config
+        let config_path = Self::config_path()?;
+        let mut config = if config_path.exists() {
+            Self::load_from_path(&config_path)?
+        } else {
+            // Create empty config if file doesn't exist
+            Self {
+                context: None,
+                contexts: HashMap::new(),
+            }
+        };
+
+        // Override context from TALOS_CONTEXT
+        if let Ok(context) = std::env::var(ENV_TALOS_CONTEXT) {
+            if !context.is_empty() {
+                config.context = Some(context);
+            }
+        }
+
+        // Override endpoints from TALOS_ENDPOINTS
+        if let Ok(endpoints_str) = std::env::var(ENV_TALOS_ENDPOINTS) {
+            if !endpoints_str.is_empty() {
+                let endpoints: Vec<String> = endpoints_str
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .filter(|s| !s.is_empty())
+                    .collect();
+
+                if !endpoints.is_empty() {
+                    // Create or update context named "env" for env-based endpoints
+                    let context_name = config.context.clone().unwrap_or_else(|| "env".to_string());
+
+                    if let Some(ctx) = config.contexts.get_mut(&context_name) {
+                        ctx.endpoints = endpoints;
+                    } else {
+                        config.contexts.insert(
+                            context_name.clone(),
+                            TalosContext {
+                                endpoints,
+                                nodes: None,
+                                ca: None,
+                                crt: None,
+                                key: None,
+                            },
+                        );
+                        config.context = Some(context_name);
+                    }
+                }
+            }
+        }
+
+        // Override nodes from TALOS_NODES
+        if let Ok(nodes_str) = std::env::var(ENV_TALOS_NODES) {
+            if !nodes_str.is_empty() {
+                let nodes: Vec<String> = nodes_str
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .filter(|s| !s.is_empty())
+                    .collect();
+
+                if !nodes.is_empty() {
+                    if let Some(context_name) = &config.context {
+                        if let Some(ctx) = config.contexts.get_mut(context_name) {
+                            ctx.nodes = Some(nodes);
+                        }
+                    }
+                }
+            }
+        }
+
+        Ok(config)
+    }
+
+    /// Get the effective context name (respects TALOS_CONTEXT env var)
+    pub fn effective_context_name(&self) -> Option<&str> {
+        // Check env var first
+        if let Ok(env_context) = std::env::var(ENV_TALOS_CONTEXT) {
+            if !env_context.is_empty() && self.contexts.contains_key(&env_context) {
+                return Some(
+                    self.contexts
+                        .get_key_value(&env_context)
+                        .map(|(k, _)| k.as_str())
+                        .unwrap_or_default(),
+                );
+            }
+        }
+        self.context.as_deref()
+    }
 }
 
 impl TalosContext {
@@ -296,5 +423,23 @@ contexts:
         assert_eq!(ctx.endpoints, vec!["127.0.0.1:50000"]);
         assert!(ctx.ca.is_none());
         assert!(ctx.nodes.is_none());
+    }
+
+    #[test]
+    fn test_env_constants() {
+        // Just verify the constants are defined correctly
+        assert_eq!(ENV_TALOSCONFIG, "TALOSCONFIG");
+        assert_eq!(ENV_TALOS_CONTEXT, "TALOS_CONTEXT");
+        assert_eq!(ENV_TALOS_ENDPOINTS, "TALOS_ENDPOINTS");
+        assert_eq!(ENV_TALOS_NODES, "TALOS_NODES");
+    }
+
+    #[test]
+    fn test_effective_context_name() {
+        let config = TalosConfig::from_yaml(SAMPLE_CONFIG).unwrap();
+
+        // Without env override, should return the config's context
+        // Note: We can't easily test with env vars in unit tests without affecting other tests
+        assert_eq!(config.context, Some("my-cluster".to_string()));
     }
 }

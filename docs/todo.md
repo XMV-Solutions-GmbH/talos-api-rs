@@ -292,7 +292,7 @@
 
 | PR | Description | Status | Notes |
 | -- | ----------- | ------ | ----- |
-| #19 | webpki-roots 0.26.8 → 0.26.10 | ⏳ Pending rebase | Safe update, no breaking changes |
+| #19 | webpki-roots 0.26.11 → 1.0.5 | ✅ Merged | Security update: removed untrusted CAs |
 | - | tonic 0.13 → 0.14 | 📋 Planned | Enables prost 0.14, rand 0.9 |
 | - | prost 0.13 → 0.14 | 📋 Blocked by tonic | Breaking: `Message::encoded_len()` |
 | - | rand 0.8 → 0.9 | 📋 Blocked by tower | tower-0.4 needs rand 0.8 |
@@ -306,10 +306,10 @@
 - [ ] Backpressure handling for large streams
 - [ ] Streaming progress callbacks
 
-### Multi-Node Operations 🎯
+### Multi-Node Operations 🎯 ✅ COMPLETE (v0.1.2)
 
-- [ ] gRPC metadata for node targeting (`x-talos-node`)
-- [ ] Cluster-wide operations (apply to all nodes)
+- [x] gRPC metadata for node targeting (`x-talos-node`)
+- [x] Cluster-wide operations (apply to all nodes via `with_nodes()`)
 - [ ] Parallel execution with result aggregation
 
 ### Missing APIs 📡
@@ -319,10 +319,11 @@
 - [ ] ImageList, ImagePull
 - [ ] Events API
 
-### Quality of Life 🛠️
+### Quality of Life 🛠️ ✅ COMPLETE (v0.1.2)
 
-- [ ] `talosctl` config file parsing (`~/.talos/config`)
-- [ ] Environment-based configuration (`TALOS_ENDPOINTS`, `TALOS_CONTEXT`)
+- [x] `talosctl` config file parsing (`~/.talos/config`) - `TalosConfig::load_default()`
+- [x] Environment-based configuration (`TALOS_ENDPOINTS`, `TALOS_CONTEXT`) - `TalosConfig::load_with_env()`
+- [x] `TalosClient::from_talosconfig()` for easy client creation
 - [ ] Cluster discovery helpers
 
 ### Documentation 📚

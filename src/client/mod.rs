@@ -1,5 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+mod node_target;
+pub mod pool;
+#[cfg(test)]
+mod tests;
+
+pub use node_target::{NodeTarget, NODE_METADATA_KEY};
+
 use crate::api::machine::machine_service_client::MachineServiceClient;
 use crate::api::machine::ApplyConfigurationRequest as ProtoApplyConfigRequest;
 use crate::api::machine::BootstrapRequest as ProtoBootstrapRequest;
@@ -262,6 +269,8 @@ pub struct TalosClient {
     #[allow(dead_code)] // TODO: Remove when config is used
     config: TalosClientConfig,
     channel: Channel,
+    /// Current node target for API calls
+    node_target: NodeTarget,
 }
 
 impl TalosClient {
@@ -281,7 +290,140 @@ impl TalosClient {
             Self::create_mtls_channel(&config).await?
         };
 
-        Ok(Self { config, channel })
+        Ok(Self {
+            config,
+            channel,
+            node_target: NodeTarget::Default,
+        })
+    }
+
+    /// Create a client from a TalosConfig context
+    ///
+    /// This loads credentials from the talosconfig and connects to the first endpoint.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api_rs::{TalosClient, config::TalosConfig};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = TalosConfig::load_with_env()?;
+    /// let client = TalosClient::from_talosconfig(&config, None).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
+    /// # Arguments
+    ///
+    /// * `config` - The loaded TalosConfig
+    /// * `context_name` - Optional context name to use (defaults to active context)
+    pub async fn from_talosconfig(
+        config: &crate::config::TalosConfig,
+        context_name: Option<&str>,
+    ) -> Result<Self> {
+        let context = if let Some(name) = context_name {
+            config.get_context(name).ok_or_else(|| {
+                crate::error::TalosError::Config(format!("Context '{}' not found", name))
+            })?
+        } else {
+            config.active_context().ok_or_else(|| {
+                crate::error::TalosError::Config("No active context in talosconfig".to_string())
+            })?
+        };
+
+        let endpoint = context.first_endpoint().ok_or_else(|| {
+            crate::error::TalosError::Config("No endpoints in context".to_string())
+        })?;
+
+        // Build endpoint URL
+        let endpoint_url = if endpoint.contains("://") {
+            endpoint.clone()
+        } else if endpoint.contains(':') {
+            format!("https://{}", endpoint)
+        } else {
+            format!("https://{}:50000", endpoint)
+        };
+
+        // Build client config
+        let mut client_config = TalosClientConfig::new(&endpoint_url);
+
+        // Write certs to temp files if provided inline
+        if let (Some(ca), Some(crt), Some(key)) = (&context.ca, &context.crt, &context.key) {
+            let temp_dir = std::env::temp_dir().join("talos-api-rs");
+            std::fs::create_dir_all(&temp_dir).map_err(|e| {
+                crate::error::TalosError::Config(format!("Failed to create temp dir: {}", e))
+            })?;
+
+            let ca_path = temp_dir.join("ca.crt");
+            let crt_path = temp_dir.join("client.crt");
+            let key_path = temp_dir.join("client.key");
+
+            std::fs::write(&ca_path, ca).map_err(|e| {
+                crate::error::TalosError::Config(format!("Failed to write CA cert: {}", e))
+            })?;
+            std::fs::write(&crt_path, crt).map_err(|e| {
+                crate::error::TalosError::Config(format!("Failed to write client cert: {}", e))
+            })?;
+            std::fs::write(&key_path, key).map_err(|e| {
+                crate::error::TalosError::Config(format!("Failed to write client key: {}", e))
+            })?;
+
+            client_config = client_config
+                .with_ca(ca_path.to_string_lossy().to_string())
+                .with_client_cert(crt_path.to_string_lossy().to_string())
+                .with_client_key(key_path.to_string_lossy().to_string());
+        }
+
+        let mut client = Self::new(client_config).await?;
+
+        // Set node target from context if available
+        if let Some(nodes) = &context.nodes {
+            if !nodes.is_empty() {
+                client.node_target = NodeTarget::from(nodes.clone());
+            }
+        }
+
+        Ok(client)
+    }
+
+    /// Create a new client targeting a specific node
+    ///
+    /// # Example
+    ///
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig};
+    /// use talos_api_rs::client::NodeTarget;
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let client = TalosClient::new(TalosClientConfig::default()).await?;
+    ///
+    /// // Target a specific node for API calls
+    /// let targeted = client.with_node(NodeTarget::single("192.168.1.10"));
+    /// let hostname = targeted.hostname().await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[must_use]
+    pub fn with_node(&self, target: NodeTarget) -> Self {
+        Self {
+            config: self.config.clone(),
+            channel: self.channel.clone(),
+            node_target: target,
+        }
+    }
+
+    /// Create a new client targeting multiple nodes
+    ///
+    /// Convenience method for cluster-wide operations.
+    #[must_use]
+    pub fn with_nodes(&self, nodes: impl IntoIterator<Item = impl Into<String>>) -> Self {
+        self.with_node(NodeTarget::multiple(nodes))
+    }
+
+    /// Get the current node target
+    #[must_use]
+    pub fn node_target(&self) -> &NodeTarget {
+        &self.node_target
     }
 
     /// Create a plain HTTP channel (no TLS)
@@ -549,6 +691,12 @@ impl TalosClient {
         MachineServiceClient::new(self.channel.clone())
     }
 
+    /// Create a gRPC request with node targeting applied
+    fn make_request<T>(&self, inner: T) -> tonic::Request<T> {
+        self.node_target
+            .apply_to_request(tonic::Request::new(inner))
+    }
+
     // ========================================================================
     // High-level convenience methods
     // ========================================================================
@@ -590,9 +738,10 @@ impl TalosClient {
         request: ApplyConfigurationRequest,
     ) -> Result<ApplyConfigurationResponse> {
         let proto_request: ProtoApplyConfigRequest = request.into();
+        let grpc_request = self.make_request(proto_request);
         let response = self
             .machine()
-            .apply_configuration(proto_request)
+            .apply_configuration(grpc_request)
             .await?
             .into_inner();
         Ok(response.into())
@@ -670,7 +819,8 @@ impl TalosClient {
     /// - Network/connection issues
     pub async fn bootstrap(&self, request: BootstrapRequest) -> Result<BootstrapResponse> {
         let proto_request: ProtoBootstrapRequest = request.into();
-        let response = self.machine().bootstrap(proto_request).await?.into_inner();
+        let grpc_request = self.make_request(proto_request);
+        let response = self.machine().bootstrap(grpc_request).await?.into_inner();
         Ok(response.into())
     }
 
@@ -1387,9 +1537,4 @@ impl rustls::client::danger::ServerCertVerifier for NoVerifier {
     }
 }
 
-mod pool;
-
 pub use pool::{ConnectionPool, ConnectionPoolConfig, EndpointHealth, HealthStatus, LoadBalancer};
-
-#[cfg(test)]
-mod tests;
