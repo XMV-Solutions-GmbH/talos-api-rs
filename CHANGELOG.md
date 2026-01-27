@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Logging Interceptor** - Structured logging for gRPC requests
+  - `LoggingInterceptor` for tonic interceptor integration
+  - `RequestLogger` for manual request/response logging with timing
+  - `LogLevel` configuration (Trace, Debug, Info, Warn, Error, Off)
+  - `LoggingConfig` with sensitive header redaction
+  - `InterceptorMetrics` for request counting and success rates
+  - Verbose and quiet configuration presets
 - **Circuit Breaker** - Resilience pattern for protecting against cascading failures
   - `CircuitBreaker` with configurable thresholds and timeouts
   - States: `Closed`, `Open`, `HalfOpen`
