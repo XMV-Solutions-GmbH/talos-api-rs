@@ -195,13 +195,13 @@
 ### 🔴 Critical
 
 | Issue | Description | Status | Blocks |
-|-------|-------------|--------|--------|
+| ----- | ----------- | ------ | ------ |
 | ED25519 mTLS | Talos ED25519 certs not working with rustls | Open | Phase 2 Alpha |
 
 ### 🟡 Medium
 
 | Issue | Description | Status |
-|-------|-------------|--------|
+| ----- | ----------- | ------ |
 | Server-streaming APIs | gRPC streaming not implemented | Open |
 | Client-streaming | EtcdRecover needs client streaming | Open |
 | Multi-node targeting | gRPC metadata for node selection | Open |
@@ -209,7 +209,7 @@
 ### 🟢 Low
 
 | Issue | Description | Status |
-|-------|-------------|--------|
+| ----- | ----------- | ------ |
 | Error granularity | Parse google.rpc.Status details | Open |
 | Generated code size | machine.rs is ~6000 lines | Acceptable |
 
@@ -220,7 +220,7 @@
 ### Unit Tests (Phase 1) ✅
 
 | Area | Tests | Status |
-|------|-------|--------|
+| ----- | ------- | -------- |
 | TalosClientConfig | default, validation | ✅ |
 | TalosClient::new | invalid cert, insecure | ✅ |
 | Version API | mock server call | ✅ |
@@ -230,7 +230,7 @@
 ### Integration Tests (Phase 1) ✅
 
 | Area | Tests | Status |
-|------|-------|--------|
+| ----- | ------- | -------- |
 | Cluster lifecycle | create, connect, destroy | ✅ |
 | Version API | real cluster call | ✅ |
 | Hostname API | real cluster call | ⚠️ (mTLS blocked) |

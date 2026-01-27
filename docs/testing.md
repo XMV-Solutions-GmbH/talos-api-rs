@@ -5,7 +5,7 @@
 ## Test Coverage Summary
 
 | Feature | Unit Tests | Integration Test |
-|---------|------------|------------------|
+| ------- | ---------- | ---------------- |
 | TalosClient (core) | 6 tests | ✅ Connection test |
 | ApplyConfiguration | 11 tests | ✅ Dry-run mode |
 | Bootstrap | 6 tests | ✅ Rejection on bootstrapped cluster |
