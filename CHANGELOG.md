@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.2.0] - 2026-01-27
 
+### Added
+
+- **Container Image APIs**
+  - `ImageListRequest` - List container images with namespace filtering
+  - `ImageInfo` - Detailed image information (name, digest, size, created_at)
+  - Helper methods: `size_human()`, `repository()`, `tag()`, `is_digest_reference()`
+  - `ImagePullRequest` - Pull container images with builder pattern
+  - `ContainerdNamespace` enum (Unknown, System, Cri)
+  - `image_list()` and `image_pull()` methods on `TalosClient`
+
+- **Cluster Discovery Helpers**
+  - `ClusterDiscovery` - Discover and health-check cluster members
+  - `ClusterDiscoveryBuilder` - Fluent configuration for discovery
+  - `ClusterMember` - Information about discovered nodes
+  - `ClusterHealth` / `NodeHealth` - Health status tracking
+  - `NodeRole` enum (ControlPlane, Worker, Unknown)
+  - Methods: `discover_members()`, `check_cluster_health()`, `get_cluster_versions()`
+
 ### Changed
 
 - **BREAKING: MSRV increased** - Minimum Supported Rust Version is now 1.82 (was 1.75)

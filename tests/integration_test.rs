@@ -638,6 +638,105 @@ cluster:
         }
     }
 
+    // 19. Test ImageList API
+    println!("\n--- Container API: ImageList ---");
+    use talos_api_rs::ImageListRequest;
+
+    let image_list_req = ImageListRequest::system();
+
+    match client.image_list(image_list_req).await {
+        Ok(images) => {
+            println!(
+                "✓ ImageList retrieved {} image(s) from system namespace",
+                images.len()
+            );
+            for image in images.iter().take(5) {
+                println!(
+                    "  {} ({}) - {}",
+                    image.repository(),
+                    image.tag().unwrap_or("<none>"),
+                    image.size_human()
+                );
+            }
+            if images.len() > 5 {
+                println!("  ... and {} more images", images.len() - 5);
+            }
+        }
+        Err(e) => {
+            println!("  image_list() returned error: {}", e);
+        }
+    }
+
+    // Test CRI namespace as well
+    let cri_image_req = ImageListRequest::cri();
+    match client.image_list(cri_image_req).await {
+        Ok(images) => {
+            println!(
+                "✓ ImageList retrieved {} image(s) from CRI namespace",
+                images.len()
+            );
+        }
+        Err(e) => {
+            println!("  image_list(cri) returned error: {}", e);
+        }
+    }
+
+    // 20. Test ClusterDiscovery API
+    println!("\n--- Discovery API: ClusterDiscovery ---");
+    use talos_api_rs::client::discovery::ClusterDiscovery;
+
+    let discovery = ClusterDiscovery::from_endpoint(&cluster.endpoint)
+        .with_ca_cert(cluster.ca_path.to_string_lossy())
+        .with_client_cert(
+            cluster.crt_path.to_string_lossy(),
+            cluster.key_path.to_string_lossy(),
+        )
+        .build();
+
+    match discovery.discover_members().await {
+        Ok(members) => {
+            println!("✓ Discovered {} cluster member(s)", members.len());
+            for member in &members {
+                println!(
+                    "  {} ({}) - etcd: {}",
+                    member.name, member.role, member.is_etcd_member
+                );
+                println!("    endpoint: {}", member.endpoint);
+            }
+        }
+        Err(e) => {
+            println!("  discover_members() returned error: {}", e);
+        }
+    }
+
+    // Test cluster health check using the actual reachable endpoint
+    // Note: In Docker-based clusters, the etcd member endpoints are internal IPs
+    // that aren't reachable from the host. So we test with the actual cluster endpoint.
+    println!("\n--- Discovery API: ClusterHealth (direct endpoint) ---");
+    match discovery
+        .check_endpoints_health(std::slice::from_ref(&cluster.endpoint))
+        .await
+    {
+        Ok(health) => {
+            println!(
+                "✓ Cluster health: {}/{} nodes healthy",
+                health.healthy_count(),
+                health.total_count()
+            );
+            if let Some(avg_ms) = health.avg_response_time_ms() {
+                println!("  Average response time: {}ms", avg_ms);
+            }
+            for node in &health.nodes {
+                let status = if node.is_healthy { "✓" } else { "✗" };
+                let version = node.version.as_deref().unwrap_or("unknown");
+                println!("  {} {} ({})", status, node.name, version);
+            }
+        }
+        Err(e) => {
+            println!("  check_endpoints_health() returned error: {}", e);
+        }
+    }
+
     println!("\n========================================");
     println!("  Integration Tests Complete");
     println!("  Tested APIs:");
@@ -648,5 +747,7 @@ cluster:
     println!("    - Diagnostics: Dmesg");
     println!("    - Files: List, Read");
     println!("    - Advanced: Netstat");
+    println!("    - Container: ImageList");
+    println!("    - Discovery: ClusterDiscovery, ClusterHealth");
     println!("========================================");
 }

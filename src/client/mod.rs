@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
+pub mod discovery;
 mod node_target;
 pub mod pool;
 #[cfg(test)]
 mod tests;
 
+pub use discovery::{ClusterDiscovery, ClusterHealth, ClusterMember, NodeHealth, NodeRole};
 pub use node_target::{NodeTarget, NODE_METADATA_KEY};
 
 use crate::api::machine::machine_service_client::MachineServiceClient;
@@ -18,6 +20,8 @@ use crate::api::machine::EtcdLeaveClusterRequest as ProtoEtcdLeaveClusterRequest
 use crate::api::machine::EtcdMemberListRequest as ProtoEtcdMemberListRequest;
 use crate::api::machine::EtcdRemoveMemberByIdRequest as ProtoEtcdRemoveMemberByIdRequest;
 use crate::api::machine::GenerateClientConfigurationRequest as ProtoGenerateClientConfigRequest;
+use crate::api::machine::ImageListRequest as ProtoImageListRequest;
+use crate::api::machine::ImagePullRequest as ProtoImagePullRequest;
 use crate::api::machine::ListRequest as ProtoListRequest;
 use crate::api::machine::LogsRequest as ProtoLogsRequest;
 use crate::api::machine::NetstatRequest as ProtoNetstatRequest;
@@ -39,10 +43,11 @@ use crate::resources::{
     EtcdLeaveClusterRequest, EtcdLeaveClusterResponse, EtcdMemberListRequest,
     EtcdMemberListResponse, EtcdRemoveMemberByIdRequest, EtcdRemoveMemberByIdResponse,
     EtcdStatusResponse, FileInfo, GenerateClientConfigurationRequest,
-    GenerateClientConfigurationResponse, KubeconfigResponse, ListRequest, ListResponse,
-    LoadAvgResponse, LogsRequest, LogsResponse, MemoryResponse, MountsResponse, NetstatRequest,
-    NetstatResponse, NetworkDeviceStatsResponse, PacketCaptureRequest, PacketCaptureResponse,
-    ProcessesResponse, ReadRequest, ReadResponse, ResetRequest, ResetResponse, RollbackResponse,
+    GenerateClientConfigurationResponse, ImageInfo, ImageListRequest, ImagePullRequest,
+    ImagePullResponse, KubeconfigResponse, ListRequest, ListResponse, LoadAvgResponse, LogsRequest,
+    LogsResponse, MemoryResponse, MountsResponse, NetstatRequest, NetstatResponse,
+    NetworkDeviceStatsResponse, PacketCaptureRequest, PacketCaptureResponse, ProcessesResponse,
+    ReadRequest, ReadResponse, ResetRequest, ResetResponse, RollbackResponse,
     ServiceRestartRequest, ServiceRestartResponse, ServiceStartRequest, ServiceStartResponse,
     ServiceStopRequest, ServiceStopResponse, UpgradeRequest, UpgradeResponse,
 };
@@ -266,7 +271,8 @@ impl TalosClientConfigBuilder {
 
 #[derive(Clone)]
 pub struct TalosClient {
-    #[allow(dead_code)] // TODO: Remove when config is used
+    /// Client configuration (retained for debugging and introspection)
+    #[allow(dead_code)]
     config: TalosClientConfig,
     channel: Channel,
     /// Current node target for API calls
@@ -1481,6 +1487,95 @@ impl TalosClient {
         let inner = response.into_inner();
 
         Ok(NetstatResponse::from(inner))
+    }
+
+    // ========================= Container Image APIs =========================
+
+    /// List container images in the specified containerd namespace.
+    ///
+    /// Returns a list of images from the node's containerd registry.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - The image list request specifying the namespace to query.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use talos_api_rs::client::{TalosClient, TalosClientConfig};
+    /// # use talos_api_rs::resources::ImageListRequest;
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = TalosClientConfig::new("https://192.168.1.100:50000");
+    /// let client = TalosClient::new(config).await?;
+    ///
+    /// // List all system images
+    /// let images = client.image_list(ImageListRequest::system()).await?;
+    /// for image in images {
+    ///     println!("{}: {}", image.name, image.size_human());
+    /// }
+    ///
+    /// // List Kubernetes images
+    /// let cri_images = client.image_list(ImageListRequest::cri()).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn image_list(&self, request: ImageListRequest) -> Result<Vec<ImageInfo>> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+        let proto_request: ProtoImageListRequest = request.into();
+        let response = client.image_list(proto_request).await?;
+
+        let mut stream = response.into_inner();
+        let mut images = Vec::new();
+
+        // Each item in the stream is a single image
+        while let Some(item) = stream.next().await {
+            let item = item?;
+            // Check for errors in metadata
+            if let Some(ref metadata) = item.metadata {
+                if !metadata.error.is_empty() {
+                    return Err(crate::error::TalosError::Validation(metadata.error.clone()));
+                }
+            }
+            images.push(ImageInfo::from(item));
+        }
+
+        Ok(images)
+    }
+
+    /// Pull a container image into the node's containerd registry.
+    ///
+    /// Downloads and stores the specified image so it's available locally.
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - The image pull request specifying the image reference and namespace.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # use talos_api_rs::client::{TalosClient, TalosClientConfig};
+    /// # use talos_api_rs::resources::ImagePullRequest;
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = TalosClientConfig::new("https://192.168.1.100:50000");
+    /// let client = TalosClient::new(config).await?;
+    ///
+    /// // Pull a specific image
+    /// let response = client.image_pull(
+    ///     ImagePullRequest::new("docker.io/library/nginx:latest")
+    /// ).await?;
+    /// println!("Pulled images: {:?}", response.images);
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn image_pull(&self, request: ImagePullRequest) -> Result<ImagePullResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+        let proto_request: ProtoImagePullRequest = request.into();
+        let response = client.image_pull(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(ImagePullResponse::from(inner))
     }
 }
 
