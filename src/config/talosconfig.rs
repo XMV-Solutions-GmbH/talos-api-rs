@@ -168,8 +168,8 @@ impl TalosConfig {
     }
 
     /// List all available context names
-    pub fn context_names(&self) -> Vec<&String> {
-        self.contexts.keys().collect()
+    pub fn context_names(&self) -> Vec<&str> {
+        self.contexts.keys().map(|s| s.as_str()).collect()
     }
 }
 
