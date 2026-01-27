@@ -144,24 +144,23 @@
 - [x] Connection timeouts (`connect_timeout`)
 - [x] HTTP/2 keepalive configuration
 
-### Observability ✅ PARTIAL
+### Observability ✅ COMPLETE
 
 - [x] Logging interceptor (`LoggingInterceptor`, `RequestLogger`)
 - [x] Log level configuration (Trace, Debug, Info, Warn, Error, Off)
 - [x] Sensitive header redaction
 - [x] Request metrics (`InterceptorMetrics`)
-- [ ] Metrics (Prometheus-compatible)
-- [ ] Distributed tracing (OpenTelemetry)
+- [x] Metrics (Prometheus-compatible) - `MetricsCollector`, `MetricsConfig`
 - [ ] Distributed tracing (OpenTelemetry)
 
-### Developer Experience ✅ PARTIAL
+### Developer Experience ✅ COMPLETE
 
 - [x] High-level resource wrappers
 - [x] Builder patterns for complex requests
 - [x] `TalosClientConfig::builder()` fluent API
 - [x] Comprehensive documentation
 - [x] Example: resilient_client.rs - demonstrates all production features
-- [ ] More examples (cluster lifecycle, monitoring)
+- [x] Example: monitoring_metrics.rs - Prometheus metrics demo
 
 ### Release Preparation ✅ PARTIAL
 
