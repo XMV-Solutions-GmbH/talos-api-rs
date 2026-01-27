@@ -442,4 +442,96 @@ contexts:
         // Note: We can't easily test with env vars in unit tests without affecting other tests
         assert_eq!(config.context, Some("my-cluster".to_string()));
     }
+
+    #[test]
+    fn test_effective_context_name_without_config_context() {
+        // Config without a context field set
+        let yaml = r#"
+contexts:
+  ctx1:
+    endpoints:
+      - 10.0.0.1
+  ctx2:
+    endpoints:
+      - 10.0.0.2
+"#;
+        let config = TalosConfig::from_yaml(yaml).unwrap();
+        // effective_context_name returns None when no context is set
+        assert_eq!(config.effective_context_name(), None);
+    }
+
+    #[test]
+    fn test_active_context_returns_configured_context() {
+        let config = TalosConfig::from_yaml(SAMPLE_CONFIG).unwrap();
+
+        // active_context should return the configured context (my-cluster)
+        let ctx = config.active_context();
+        assert!(ctx.is_some());
+        let ctx = ctx.unwrap();
+        // my-cluster's first endpoint is 10.0.0.2
+        assert!(ctx.endpoints.contains(&"10.0.0.2".to_string()));
+    }
+
+    #[test]
+    fn test_get_context_explicit_name() {
+        let config = TalosConfig::from_yaml(SAMPLE_CONFIG).unwrap();
+
+        // Can get another-cluster by explicit name
+        let ctx = config.get_context("another-cluster");
+        assert!(ctx.is_some());
+        let ctx = ctx.unwrap();
+        assert_eq!(ctx.endpoints, vec!["192.168.1.10"]);
+    }
+
+    #[test]
+    fn test_get_context_nonexistent() {
+        let config = TalosConfig::from_yaml(SAMPLE_CONFIG).unwrap();
+
+        // Nonexistent context should return None
+        let ctx = config.get_context("does-not-exist");
+        assert!(ctx.is_none());
+    }
+
+    #[test]
+    fn test_from_yaml_empty_contexts() {
+        let yaml = r#"
+contexts: {}
+"#;
+        let config = TalosConfig::from_yaml(yaml).unwrap();
+        assert!(config.contexts.is_empty());
+    }
+
+    #[test]
+    fn test_context_with_all_optional_fields() {
+        let yaml = r#"
+context: full-context
+contexts:
+  full-context:
+    endpoints:
+      - https://192.168.1.1:50000
+    nodes:
+      - 192.168.1.1
+      - 192.168.1.2
+    ca: |
+      -----BEGIN CERTIFICATE-----
+      MIIB...
+      -----END CERTIFICATE-----
+    crt: |
+      -----BEGIN CERTIFICATE-----
+      MIIB...
+      -----END CERTIFICATE-----
+    key: |
+      -----BEGIN ED25519 PRIVATE KEY-----
+      MC4...
+      -----END ED25519 PRIVATE KEY-----
+"#;
+        let config = TalosConfig::from_yaml(yaml).unwrap();
+        let ctx = config.get_context("full-context").unwrap();
+
+        assert!(ctx.ca.is_some());
+        assert!(ctx.crt.is_some());
+        assert!(ctx.key.is_some());
+        assert!(ctx.nodes.is_some());
+        assert_eq!(ctx.nodes.as_ref().unwrap().len(), 2);
+    }
 }
