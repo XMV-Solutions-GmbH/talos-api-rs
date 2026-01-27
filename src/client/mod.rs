@@ -1387,5 +1387,9 @@ impl rustls::client::danger::ServerCertVerifier for NoVerifier {
     }
 }
 
+mod pool;
+
+pub use pool::{ConnectionPool, ConnectionPoolConfig, EndpointHealth, HealthStatus, LoadBalancer};
+
 #[cfg(test)]
 mod tests;

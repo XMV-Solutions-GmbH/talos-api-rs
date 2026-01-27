@@ -3,10 +3,12 @@
 //! Runtime utilities for resilience and observability.
 //!
 //! This module provides production-ready features like retry policies,
-//! timeouts, and logging interceptors for the Talos API client.
+//! circuit breakers, and timeouts for the Talos API client.
 
+mod circuit_breaker;
 mod retry;
 
+pub use circuit_breaker::{CircuitBreaker, CircuitBreakerConfig, CircuitState};
 pub use retry::{
     BackoffStrategy, CustomRetryPolicy, DefaultRetryPolicy, ExponentialBackoff, FixedBackoff,
     LinearBackoff, NoBackoff, NoRetryPolicy, RetryConfig, RetryConfigBuilder, RetryPolicy,

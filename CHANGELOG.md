@@ -8,6 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **Circuit Breaker** - Resilience pattern for protecting against cascading failures
+  - `CircuitBreaker` with configurable thresholds and timeouts
+  - States: `Closed`, `Open`, `HalfOpen`
+  - Automatic recovery with configurable success threshold
+  - Metrics: failure rate, total calls, rejections
+- **Connection Pool** - Multi-endpoint support with health-based routing
+  - `ConnectionPool` for managing connections to multiple Talos nodes
+  - `EndpointHealth` tracking with failure/success metrics
+  - Load balancing strategies: `RoundRobin`, `Random`, `LeastFailures`, `Failover`
+  - Automatic health checks and endpoint recovery
+- **New Error Type** - `TalosError::Connection` for connection-related errors
+- **New Error Type** - `TalosError::CircuitOpen` for circuit breaker rejections
 - **Retry Policies** - Configurable retry logic with backoff strategies
   - `RetryConfig` with `ExponentialBackoff`, `LinearBackoff`, `FixedBackoff`, `NoBackoff`
   - `DefaultRetryPolicy` - retry on transient gRPC errors (Unavailable, Unknown, etc.)
