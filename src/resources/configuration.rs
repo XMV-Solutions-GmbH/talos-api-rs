@@ -71,8 +71,8 @@ impl std::fmt::Display for ApplyMode {
 /// # Example
 ///
 /// ```no_run
-/// use talos_api::resources::ApplyConfigurationRequest;
-/// use talos_api::resources::ApplyMode;
+/// use talos_api_rs::resources::ApplyConfigurationRequest;
+/// use talos_api_rs::resources::ApplyMode;
 ///
 /// let request = ApplyConfigurationRequest::builder()
 ///     .config_yaml("machine:\n  type: worker")

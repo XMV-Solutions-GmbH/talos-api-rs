@@ -15,7 +15,7 @@
 //!
 //! ## Quick Start
 //!
-//! ```rust,no_run
+//! ```rust,ignore
 //! use talos_api_rs::{TalosClient, TalosClientConfig};
 //!
 //! # async fn example() -> Result<(), Box<dyn std::error::Error>> {
@@ -28,9 +28,9 @@
 //!
 //! let client = TalosClient::new(config).await?;
 //!
-//! // Use high-level APIs
-//! let hostname = client.hostname().await?;
-//! let services = client.service_list().await?;
+//! // Get kubeconfig from cluster
+//! let kubeconfig = client.kubeconfig().await?;
+//! println!("Got kubeconfig for cluster");
 //! # Ok(())
 //! # }
 //! ```

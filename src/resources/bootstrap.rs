@@ -18,7 +18,7 @@ use crate::api::machine::{
 /// # Example
 ///
 /// ```no_run
-/// use talos_api::resources::BootstrapRequest;
+/// use talos_api_rs::resources::BootstrapRequest;
 ///
 /// // Standard bootstrap (new cluster)
 /// let request = BootstrapRequest::new();

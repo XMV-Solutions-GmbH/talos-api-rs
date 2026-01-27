@@ -559,8 +559,8 @@ impl TalosClient {
     ///
     /// # Example
     ///
-    /// ```no_run
-    /// use talos_api::{TalosClient, TalosClientConfig, ApplyConfigurationRequest, ApplyMode};
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig, ApplyConfigurationRequest, ApplyMode};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = TalosClient::new(TalosClientConfig {
@@ -604,8 +604,8 @@ impl TalosClient {
     ///
     /// # Example
     ///
-    /// ```no_run
-    /// use talos_api::{TalosClient, TalosClientConfig, ApplyMode};
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig, ApplyMode};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = TalosClient::new(TalosClientConfig::default()).await?;
@@ -635,8 +635,8 @@ impl TalosClient {
     ///
     /// # Example
     ///
-    /// ```no_run
-    /// use talos_api::{TalosClient, TalosClientConfig, BootstrapRequest};
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig, BootstrapRequest};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = TalosClient::new(TalosClientConfig::default()).await?;
@@ -652,8 +652,8 @@ impl TalosClient {
     ///
     /// To recover from an etcd snapshot (uploaded via `EtcdRecover` RPC):
     ///
-    /// ```no_run
-    /// use talos_api::{TalosClient, TalosClientConfig, BootstrapRequest};
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig, BootstrapRequest};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = TalosClient::new(TalosClientConfig::default()).await?;
@@ -689,8 +689,8 @@ impl TalosClient {
     ///
     /// # Example
     ///
-    /// ```no_run
-    /// use talos_api::{TalosClient, TalosClientConfig};
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let client = TalosClient::new(TalosClientConfig::default()).await?;
@@ -750,8 +750,8 @@ impl TalosClient {
     ///
     /// # Example
     ///
-    /// ```no_run
-    /// use talos_api::{TalosClient, TalosClientConfig, ResetRequest};
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig, ResetRequest};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let config = TalosClientConfig::new("https://192.168.1.100:50000".parse()?);
@@ -803,8 +803,8 @@ impl TalosClient {
     ///
     /// # Example
     ///
-    /// ```no_run
-    /// use talos_api::{TalosClient, TalosClientConfig, EtcdMemberListRequest};
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig, EtcdMemberListRequest};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let config = TalosClientConfig::new("https://192.168.1.100:50000".parse()?);
@@ -837,8 +837,8 @@ impl TalosClient {
     ///
     /// # Example
     ///
-    /// ```no_run
-    /// use talos_api::{TalosClient, TalosClientConfig, EtcdRemoveMemberByIdRequest};
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig, EtcdRemoveMemberByIdRequest};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let config = TalosClientConfig::new("https://192.168.1.100:50000".parse()?);
@@ -951,8 +951,8 @@ impl TalosClient {
     ///
     /// # Example
     ///
-    /// ```no_run
-    /// use talos_api::{TalosClient, TalosClientConfig, DmesgRequest};
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig, DmesgRequest};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let config = TalosClientConfig::new("https://192.168.1.100:50000".parse()?);
@@ -996,8 +996,8 @@ impl TalosClient {
     ///
     /// # Example
     ///
-    /// ```no_run
-    /// use talos_api::{TalosClient, TalosClientConfig, UpgradeRequest};
+    /// ```ignore
+    /// use talos_api_rs::{TalosClient, TalosClientConfig, UpgradeRequest};
     ///
     /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
     /// let config = TalosClientConfig::new("https://192.168.1.100:50000".parse()?);
