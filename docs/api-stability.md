@@ -27,7 +27,7 @@ During the 0.x development phase:
 These APIs are considered stable and will not change without a MAJOR version bump after 1.0:
 
 | Module | Items |
-|--------|-------|
+| ------ | ----- |
 | `client` | `TalosClient`, `TalosClientConfig`, `TalosClientConfigBuilder` |
 | `error` | `TalosError` |
 | `runtime` | `RetryConfig`, `CircuitBreakerConfig`, `LoggingConfig` |
@@ -37,7 +37,7 @@ These APIs are considered stable and will not change without a MAJOR version bum
 These APIs are relatively stable but may see non-breaking changes:
 
 | Module | Items |
-|--------|-------|
+| ------ | ----- |
 | `resources::*` | All typed resource wrappers |
 | `runtime` | `MetricsCollector`, `TracingConfig`, `SpanFactory` |
 | `client::pool` | `ConnectionPool`, `ConnectionPoolConfig` |
@@ -47,7 +47,7 @@ These APIs are relatively stable but may see non-breaking changes:
 These APIs may change significantly:
 
 | Module | Items |
-|--------|-------|
+| ------ | ----- |
 | `api::generated` | All generated protobuf types |
 | Internal modules | Any module not re-exported from `lib.rs` |
 
