@@ -317,7 +317,295 @@ cluster:
     println!("⚠ Skipping actual reset execution (would destroy test cluster)");
     println!("  Run manual reset tests against a disposable cluster");
 
-    // 10. Show cluster status via talosctl (visual feedback)
+    // 10. Test etcd APIs (control plane only)
+    println!("\n--- etcd API: Member List ---");
+    use talos_api_rs::EtcdMemberListRequest;
+
+    match client.etcd_member_list(EtcdMemberListRequest::new()).await {
+        Ok(response) => {
+            let members = response.all_members();
+            println!("✓ etcd cluster has {} member(s)", members.len());
+            for member in members {
+                println!(
+                    "  Member: {} (ID: {}, learner: {})",
+                    member.hostname, member.id, member.is_learner
+                );
+            }
+        }
+        Err(e) => {
+            println!("  etcd_member_list returned error: {}", e);
+        }
+    }
+
+    println!("\n--- etcd API: Status ---");
+    match client.etcd_status().await {
+        Ok(response) => {
+            if let Some(status) = response.first() {
+                println!("✓ etcd status retrieved");
+                println!("  Member ID: {}", status.member_id);
+                println!("  Protocol: {}", status.protocol_version);
+                println!("  DB Size: {}", status.db_size_human());
+                println!(
+                    "  Leader: {} (is_leader: {})",
+                    status.leader,
+                    status.is_leader()
+                );
+            }
+        }
+        Err(e) => {
+            println!("  etcd_status returned error: {}", e);
+        }
+    }
+
+    println!("\n--- etcd API: Alarm List ---");
+    match client.etcd_alarm_list().await {
+        Ok(response) => {
+            if response.has_alarms() {
+                println!("⚠ Active alarms found:");
+                for alarm in response.active_alarms() {
+                    println!("  Member {}: {}", alarm.member_id, alarm.alarm);
+                }
+            } else {
+                println!("✓ No active etcd alarms");
+            }
+        }
+        Err(e) => {
+            println!("  etcd_alarm_list returned error: {}", e);
+        }
+    }
+
+    // 11. Test System Information APIs
+    println!("\n--- System API: Memory ---");
+    match client.memory().await {
+        Ok(response) => {
+            if let Some(mem) = response.first() {
+                println!("✓ Memory info retrieved");
+                println!("  Total: {} bytes", mem.total());
+                println!("  Used: {} bytes", mem.used());
+                println!("  Available: {} bytes", mem.available());
+                println!("  Usage: {:.1}%", mem.usage_percent());
+            }
+        }
+        Err(e) => {
+            println!("  memory() returned error: {}", e);
+        }
+    }
+
+    println!("\n--- System API: CPU Info ---");
+    match client.cpu_info().await {
+        Ok(response) => {
+            println!(
+                "✓ CPU info retrieved - {} CPU(s) total",
+                response.total_cpus()
+            );
+            if let Some(result) = response.first() {
+                for cpu in result.cpus.iter().take(2) {
+                    println!(
+                        "  Processor {}: {} @ {} MHz",
+                        cpu.processor, cpu.model_name, cpu.cpu_mhz
+                    );
+                }
+            }
+        }
+        Err(e) => {
+            println!("  cpu_info() returned error: {}", e);
+        }
+    }
+
+    println!("\n--- System API: Load Average ---");
+    match client.load_avg().await {
+        Ok(response) => {
+            if let Some(load) = response.first() {
+                println!("✓ Load average retrieved");
+                println!("  1 min:  {:.2}", load.load1);
+                println!("  5 min:  {:.2}", load.load5);
+                println!("  15 min: {:.2}", load.load15);
+            }
+        }
+        Err(e) => {
+            println!("  load_avg() returned error: {}", e);
+        }
+    }
+
+    println!("\n--- System API: Disk Stats ---");
+    match client.disk_stats().await {
+        Ok(response) => {
+            if let Some(result) = response.first() {
+                println!(
+                    "✓ Disk stats retrieved - {} device(s)",
+                    result.devices.len()
+                );
+                for disk in result.devices.iter().take(3) {
+                    println!(
+                        "  Device: {} - read: {}, write: {}",
+                        disk.name, disk.read_sectors, disk.write_sectors
+                    );
+                }
+            }
+        }
+        Err(e) => {
+            println!("  disk_stats() returned error: {}", e);
+        }
+    }
+
+    println!("\n--- System API: Mounts ---");
+    match client.mounts().await {
+        Ok(response) => {
+            if let Some(result) = response.first() {
+                println!("✓ Mounts retrieved - {} mount(s)", result.stats.len());
+                for mount in result.stats.iter().take(3) {
+                    println!(
+                        "  {} -> {} ({:.1}% used)",
+                        mount.filesystem,
+                        mount.mounted_on,
+                        mount.usage_percent()
+                    );
+                }
+            }
+        }
+        Err(e) => {
+            println!("  mounts() returned error: {}", e);
+        }
+    }
+
+    println!("\n--- System API: Network Device Stats ---");
+    match client.network_device_stats().await {
+        Ok(response) => {
+            if let Some(result) = response.first() {
+                println!(
+                    "✓ Network device stats retrieved - {} device(s)",
+                    result.devices.len()
+                );
+                for dev in result.devices.iter().take(3) {
+                    println!(
+                        "  {}: rx={} bytes, tx={} bytes",
+                        dev.name, dev.rx_bytes, dev.tx_bytes
+                    );
+                }
+            }
+        }
+        Err(e) => {
+            println!("  network_device_stats() returned error: {}", e);
+        }
+    }
+
+    println!("\n--- System API: Processes ---");
+    match client.processes().await {
+        Ok(response) => {
+            println!(
+                "✓ Processes retrieved - {} process(es) total",
+                response.total_processes()
+            );
+            if let Some(result) = response.first() {
+                for proc in result.processes.iter().take(5) {
+                    println!("  PID {}: {} ({})", proc.pid, proc.command, proc.state);
+                }
+            }
+        }
+        Err(e) => {
+            println!("  processes() returned error: {}", e);
+        }
+    }
+
+    // 12. Test Service Management (read-only - list services)
+    println!("\n--- Services API: Service List (already tested above) ---");
+    println!("✓ Service list was tested in step 4");
+
+    // 13. Test Dmesg (kernel messages)
+    println!("\n--- Diagnostics API: Dmesg ---");
+    use talos_api_rs::DmesgRequest;
+
+    // Get only recent messages with tail
+    let dmesg_req = DmesgRequest::builder().tail(true).build();
+
+    match client.dmesg(dmesg_req).await {
+        Ok(response) => {
+            println!("✓ Dmesg retrieved ({} bytes)", response.len());
+            let lines = response.lines();
+            for line in lines.iter().take(3) {
+                println!("  {}", line);
+            }
+            if lines.len() > 3 {
+                println!("  ... and {} more lines", lines.len() - 3);
+            }
+        }
+        Err(e) => {
+            println!("  dmesg() returned error: {}", e);
+        }
+    }
+
+    // 14. Test File Operations (List)
+    println!("\n--- File API: List ---");
+    use talos_api_rs::ListRequest;
+
+    let list_req = ListRequest::new("/etc");
+
+    match client.list(list_req).await {
+        Ok(response) => {
+            println!("✓ Listed {} file(s) from /etc", response.entries.len());
+            for entry in response.entries.iter().take(5) {
+                println!("  {} ({} bytes)", entry.name, entry.size);
+            }
+        }
+        Err(e) => {
+            println!("  list() returned error: {}", e);
+        }
+    }
+
+    // 15. Test File Operations (Read)
+    println!("\n--- File API: Read ---");
+    use talos_api_rs::ReadRequest;
+
+    let read_req = ReadRequest::new("/etc/os-release");
+
+    match client.read(read_req).await {
+        Ok(response) => {
+            println!("✓ Read /etc/os-release ({} bytes)", response.len());
+            if let Some(content) = response.as_str() {
+                let lines: Vec<&str> = content.lines().take(3).collect();
+                for line in lines {
+                    println!("  {}", line);
+                }
+            }
+        }
+        Err(e) => {
+            println!("  read() returned error: {}", e);
+        }
+    }
+
+    // 16. Test Netstat
+    println!("\n--- Advanced API: Netstat ---");
+    use talos_api_rs::{L4ProtoFilter, NetstatFilter, NetstatRequest};
+
+    let netstat_req = NetstatRequest::builder()
+        .filter(NetstatFilter::Listening)
+        .l4proto(L4ProtoFilter::tcp_only())
+        .build();
+
+    match client.netstat(netstat_req).await {
+        Ok(response) => {
+            let count = response.total_connections();
+            println!("✓ Netstat retrieved {} connection(s)", count);
+            let listening = response.listening();
+            for conn in listening.iter().take(5) {
+                let proc_name = conn.process_name.as_deref().unwrap_or("-");
+                println!(
+                    "  {} {}:{} -> {}:{} ({:?})",
+                    proc_name,
+                    conn.local_ip,
+                    conn.local_port,
+                    conn.remote_ip,
+                    conn.remote_port,
+                    conn.state
+                );
+            }
+        }
+        Err(e) => {
+            println!("  netstat() returned error: {}", e);
+        }
+    }
+
+    // 17. Show cluster status via talosctl (visual feedback)
     println!("\n--- Cluster Status (via talosctl) ---");
     let talosconfig_str = cluster.talosconfig_path.to_string_lossy();
     if let Ok(output) = std::process::Command::new("talosctl")
@@ -336,7 +624,7 @@ cluster:
         }
     }
 
-    // 11. Show running services via talosctl
+    // 18. Show running services via talosctl
     println!("\n--- Services Status (via talosctl) ---");
     if let Ok(output) = std::process::Command::new("talosctl")
         .args(["--talosconfig", &talosconfig_str])
@@ -356,5 +644,13 @@ cluster:
 
     println!("\n========================================");
     println!("  Integration Tests Complete");
+    println!("  Tested APIs:");
+    println!("    - Version, Hostname, ServiceList, SystemStat");
+    println!("    - ApplyConfiguration, Bootstrap, Kubeconfig, Reset");
+    println!("    - etcd: MemberList, Status, AlarmList");
+    println!("    - System: Memory, CPU, LoadAvg, Disks, Mounts, Network, Processes");
+    println!("    - Diagnostics: Dmesg");
+    println!("    - Files: List, Read");
+    println!("    - Advanced: Netstat");
     println!("========================================");
 }

@@ -3,12 +3,41 @@
 use crate::api::machine::machine_service_client::MachineServiceClient;
 use crate::api::machine::ApplyConfigurationRequest as ProtoApplyConfigRequest;
 use crate::api::machine::BootstrapRequest as ProtoBootstrapRequest;
+use crate::api::machine::CopyRequest as ProtoCopyRequest;
+use crate::api::machine::DiskUsageRequest as ProtoDiskUsageRequest;
+use crate::api::machine::DmesgRequest as ProtoDmesgRequest;
+use crate::api::machine::EtcdForfeitLeadershipRequest as ProtoEtcdForfeitLeadershipRequest;
+use crate::api::machine::EtcdLeaveClusterRequest as ProtoEtcdLeaveClusterRequest;
+use crate::api::machine::EtcdMemberListRequest as ProtoEtcdMemberListRequest;
+use crate::api::machine::EtcdRemoveMemberByIdRequest as ProtoEtcdRemoveMemberByIdRequest;
+use crate::api::machine::GenerateClientConfigurationRequest as ProtoGenerateClientConfigRequest;
+use crate::api::machine::ListRequest as ProtoListRequest;
+use crate::api::machine::LogsRequest as ProtoLogsRequest;
+use crate::api::machine::NetstatRequest as ProtoNetstatRequest;
+use crate::api::machine::PacketCaptureRequest as ProtoPacketCaptureRequest;
+use crate::api::machine::ReadRequest as ProtoReadRequest;
 use crate::api::machine::ResetRequest as ProtoResetRequest;
+use crate::api::machine::RollbackRequest as ProtoRollbackRequest;
+use crate::api::machine::ServiceRestartRequest as ProtoServiceRestartRequest;
+use crate::api::machine::ServiceStartRequest as ProtoServiceStartRequest;
+use crate::api::machine::ServiceStopRequest as ProtoServiceStopRequest;
+use crate::api::machine::UpgradeRequest as ProtoUpgradeRequest;
 use crate::api::version::version_service_client::VersionServiceClient;
 use crate::error::Result;
 use crate::resources::{
     ApplyConfigurationRequest, ApplyConfigurationResponse, BootstrapRequest, BootstrapResponse,
-    KubeconfigResponse, ResetRequest, ResetResponse,
+    CopyRequest, CopyResponse, CpuInfoResponse, DiskStatsResponse, DiskUsageInfo, DiskUsageRequest,
+    DiskUsageResponse, DmesgRequest, DmesgResponse, EtcdAlarmDisarmResponse, EtcdAlarmListResponse,
+    EtcdDefragmentResponse, EtcdForfeitLeadershipRequest, EtcdForfeitLeadershipResponse,
+    EtcdLeaveClusterRequest, EtcdLeaveClusterResponse, EtcdMemberListRequest,
+    EtcdMemberListResponse, EtcdRemoveMemberByIdRequest, EtcdRemoveMemberByIdResponse,
+    EtcdStatusResponse, FileInfo, GenerateClientConfigurationRequest,
+    GenerateClientConfigurationResponse, KubeconfigResponse, ListRequest, ListResponse,
+    LoadAvgResponse, LogsRequest, LogsResponse, MemoryResponse, MountsResponse, NetstatRequest,
+    NetstatResponse, NetworkDeviceStatsResponse, PacketCaptureRequest, PacketCaptureResponse,
+    ProcessesResponse, ReadRequest, ReadResponse, ResetRequest, ResetResponse, RollbackResponse,
+    ServiceRestartRequest, ServiceRestartResponse, ServiceStartRequest, ServiceStartResponse,
+    ServiceStopRequest, ServiceStopResponse, UpgradeRequest, UpgradeResponse,
 };
 use hyper_util::rt::TokioIo;
 use rustls::pki_types::{CertificateDer, PrivateKeyDer, ServerName};
@@ -540,6 +569,544 @@ impl TalosClient {
     /// For more control, use [`reset`](Self::reset) with a custom [`ResetRequest`].
     pub async fn reset_graceful(&self) -> Result<ResetResponse> {
         self.reset(ResetRequest::graceful()).await
+    }
+
+    // =========================================================================
+    // etcd Operations
+    // =========================================================================
+
+    /// List etcd cluster members.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api::{TalosClient, TalosClientConfig, EtcdMemberListRequest};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = TalosClientConfig::new("https://192.168.1.100:50000".parse()?);
+    /// let client = TalosClient::new(config).await?;
+    ///
+    /// let response = client.etcd_member_list(EtcdMemberListRequest::new()).await?;
+    /// for member in response.all_members() {
+    ///     println!("{}: {}", member.id, member.hostname);
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn etcd_member_list(
+        &self,
+        request: EtcdMemberListRequest,
+    ) -> Result<EtcdMemberListResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoEtcdMemberListRequest = request.into();
+        let response = client.etcd_member_list(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(EtcdMemberListResponse::from(inner))
+    }
+
+    /// Remove an etcd member by ID.
+    ///
+    /// Use this to remove members that no longer have an associated Talos node.
+    /// For nodes that are still running, use [`etcd_leave_cluster`](Self::etcd_leave_cluster).
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api::{TalosClient, TalosClientConfig, EtcdRemoveMemberByIdRequest};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = TalosClientConfig::new("https://192.168.1.100:50000".parse()?);
+    /// let client = TalosClient::new(config).await?;
+    ///
+    /// // First, find the member ID
+    /// let members = client.etcd_member_list(Default::default()).await?;
+    /// if let Some(member) = members.find_by_hostname("old-node") {
+    ///     client.etcd_remove_member_by_id(
+    ///         EtcdRemoveMemberByIdRequest::new(member.id)
+    ///     ).await?;
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn etcd_remove_member_by_id(
+        &self,
+        request: EtcdRemoveMemberByIdRequest,
+    ) -> Result<EtcdRemoveMemberByIdResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoEtcdRemoveMemberByIdRequest = request.into();
+        let response = client.etcd_remove_member_by_id(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(EtcdRemoveMemberByIdResponse::from(inner))
+    }
+
+    /// Make a node leave the etcd cluster gracefully.
+    ///
+    /// This should be called on the node that is being removed.
+    pub async fn etcd_leave_cluster(
+        &self,
+        request: EtcdLeaveClusterRequest,
+    ) -> Result<EtcdLeaveClusterResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoEtcdLeaveClusterRequest = request.into();
+        let response = client.etcd_leave_cluster(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(EtcdLeaveClusterResponse::from(inner))
+    }
+
+    /// Forfeit etcd leadership.
+    ///
+    /// Causes the current leader to step down and trigger a new election.
+    pub async fn etcd_forfeit_leadership(
+        &self,
+        request: EtcdForfeitLeadershipRequest,
+    ) -> Result<EtcdForfeitLeadershipResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoEtcdForfeitLeadershipRequest = request.into();
+        let response = client.etcd_forfeit_leadership(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(EtcdForfeitLeadershipResponse::from(inner))
+    }
+
+    /// Get etcd status for the current member.
+    pub async fn etcd_status(&self) -> Result<EtcdStatusResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.etcd_status(()).await?;
+        let inner = response.into_inner();
+
+        Ok(EtcdStatusResponse::from(inner))
+    }
+
+    /// List etcd alarms.
+    pub async fn etcd_alarm_list(&self) -> Result<EtcdAlarmListResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.etcd_alarm_list(()).await?;
+        let inner = response.into_inner();
+
+        Ok(EtcdAlarmListResponse::from(inner))
+    }
+
+    /// Disarm etcd alarms.
+    pub async fn etcd_alarm_disarm(&self) -> Result<EtcdAlarmDisarmResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.etcd_alarm_disarm(()).await?;
+        let inner = response.into_inner();
+
+        Ok(EtcdAlarmDisarmResponse::from(inner))
+    }
+
+    /// Defragment etcd storage.
+    ///
+    /// **Warning**: This is a resource-heavy operation.
+    pub async fn etcd_defragment(&self) -> Result<EtcdDefragmentResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.etcd_defragment(()).await?;
+        let inner = response.into_inner();
+
+        Ok(EtcdDefragmentResponse::from(inner))
+    }
+
+    // =========================================================================
+    // Diagnostics
+    // =========================================================================
+
+    /// Get kernel message buffer (dmesg).
+    ///
+    /// This is a server-streaming RPC that returns kernel messages.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api::{TalosClient, TalosClientConfig, DmesgRequest};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = TalosClientConfig::new("https://192.168.1.100:50000".parse()?);
+    /// let client = TalosClient::new(config).await?;
+    ///
+    /// let dmesg = client.dmesg(DmesgRequest::new()).await?;
+    /// println!("{}", dmesg.as_string_lossy());
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn dmesg(&self, request: DmesgRequest) -> Result<DmesgResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoDmesgRequest = request.into();
+        let response = client.dmesg(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut data = Vec::new();
+        let mut node = None;
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            if node.is_none() {
+                if let Some(metadata) = &chunk.metadata {
+                    node = Some(metadata.hostname.clone());
+                }
+            }
+            data.extend(chunk.bytes);
+        }
+
+        Ok(DmesgResponse::new(data, node))
+    }
+
+    // =========================================================================
+    // Upgrade
+    // =========================================================================
+
+    /// Upgrade a Talos node to a new version.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use talos_api::{TalosClient, TalosClientConfig, UpgradeRequest};
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = TalosClientConfig::new("https://192.168.1.100:50000".parse()?);
+    /// let client = TalosClient::new(config).await?;
+    ///
+    /// // Upgrade to a specific version
+    /// let response = client.upgrade(
+    ///     UpgradeRequest::new("ghcr.io/siderolabs/installer:v1.6.0")
+    /// ).await?;
+    ///
+    /// // Staged upgrade (downloads but doesn't apply until reboot)
+    /// let response = client.upgrade(
+    ///     UpgradeRequest::builder("ghcr.io/siderolabs/installer:v1.6.0")
+    ///         .stage(true)
+    ///         .preserve(true)
+    ///         .build()
+    /// ).await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn upgrade(&self, request: UpgradeRequest) -> Result<UpgradeResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoUpgradeRequest = request.into();
+        let response = client.upgrade(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(UpgradeResponse::from(inner))
+    }
+
+    // =========================================================================
+    // Service Management
+    // =========================================================================
+
+    /// Start a service.
+    pub async fn service_start(
+        &self,
+        request: ServiceStartRequest,
+    ) -> Result<ServiceStartResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoServiceStartRequest = request.into();
+        let response = client.service_start(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(ServiceStartResponse::from(inner))
+    }
+
+    /// Stop a service.
+    pub async fn service_stop(&self, request: ServiceStopRequest) -> Result<ServiceStopResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoServiceStopRequest = request.into();
+        let response = client.service_stop(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(ServiceStopResponse::from(inner))
+    }
+
+    /// Restart a service.
+    pub async fn service_restart(
+        &self,
+        request: ServiceRestartRequest,
+    ) -> Result<ServiceRestartResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoServiceRestartRequest = request.into();
+        let response = client.service_restart(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(ServiceRestartResponse::from(inner))
+    }
+
+    /// Get service/container logs (server-streaming).
+    pub async fn logs(&self, request: LogsRequest) -> Result<LogsResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoLogsRequest = request.into();
+        let response = client.logs(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut data = Vec::new();
+        let mut node = None;
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            if node.is_none() {
+                if let Some(metadata) = &chunk.metadata {
+                    node = Some(metadata.hostname.clone());
+                }
+            }
+            data.extend(chunk.bytes);
+        }
+
+        Ok(LogsResponse::new(data, node))
+    }
+
+    // =========================================================================
+    // System Information
+    // =========================================================================
+
+    /// Get system load averages.
+    pub async fn load_avg(&self) -> Result<LoadAvgResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.load_avg(()).await?;
+        let inner = response.into_inner();
+
+        Ok(LoadAvgResponse::from(inner))
+    }
+
+    /// Get memory information.
+    pub async fn memory(&self) -> Result<MemoryResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.memory(()).await?;
+        let inner = response.into_inner();
+
+        Ok(MemoryResponse::from(inner))
+    }
+
+    /// Get CPU information.
+    pub async fn cpu_info(&self) -> Result<CpuInfoResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.cpu_info(()).await?;
+        let inner = response.into_inner();
+
+        Ok(CpuInfoResponse::from(inner))
+    }
+
+    /// Get disk statistics.
+    pub async fn disk_stats(&self) -> Result<DiskStatsResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.disk_stats(()).await?;
+        let inner = response.into_inner();
+
+        Ok(DiskStatsResponse::from(inner))
+    }
+
+    /// Get network device statistics.
+    pub async fn network_device_stats(&self) -> Result<NetworkDeviceStatsResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.network_device_stats(()).await?;
+        let inner = response.into_inner();
+
+        Ok(NetworkDeviceStatsResponse::from(inner))
+    }
+
+    /// Get mount points.
+    pub async fn mounts(&self) -> Result<MountsResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.mounts(()).await?;
+        let inner = response.into_inner();
+
+        Ok(MountsResponse::from(inner))
+    }
+
+    /// Get process list.
+    pub async fn processes(&self) -> Result<ProcessesResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.processes(()).await?;
+        let inner = response.into_inner();
+
+        Ok(ProcessesResponse::from(inner))
+    }
+
+    // =========================================================================
+    // File Operations
+    // =========================================================================
+
+    /// List directory contents (server-streaming).
+    pub async fn list(&self, request: ListRequest) -> Result<ListResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoListRequest = request.into();
+        let response = client.list(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut entries = Vec::new();
+        while let Some(info) = stream.next().await {
+            let info = info?;
+            entries.push(FileInfo::from(info));
+        }
+
+        Ok(ListResponse::new(entries))
+    }
+
+    /// Read a file (server-streaming).
+    pub async fn read(&self, request: ReadRequest) -> Result<ReadResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoReadRequest = request.into();
+        let response = client.read(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut data = Vec::new();
+        let mut node = None;
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            if node.is_none() {
+                if let Some(metadata) = &chunk.metadata {
+                    node = Some(metadata.hostname.clone());
+                }
+            }
+            data.extend(chunk.bytes);
+        }
+
+        Ok(ReadResponse::new(data, node))
+    }
+
+    /// Copy a file or directory as tar archive (server-streaming).
+    pub async fn copy(&self, request: CopyRequest) -> Result<CopyResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoCopyRequest = request.into();
+        let response = client.copy(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut data = Vec::new();
+        let mut node = None;
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            if node.is_none() {
+                if let Some(metadata) = &chunk.metadata {
+                    node = Some(metadata.hostname.clone());
+                }
+            }
+            data.extend(chunk.bytes);
+        }
+
+        Ok(CopyResponse::new(data, node))
+    }
+
+    /// Get disk usage (server-streaming).
+    pub async fn disk_usage(&self, request: DiskUsageRequest) -> Result<DiskUsageResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoDiskUsageRequest = request.into();
+        let response = client.disk_usage(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut entries = Vec::new();
+        while let Some(info) = stream.next().await {
+            let info = info?;
+            entries.push(DiskUsageInfo::from(info));
+        }
+
+        Ok(DiskUsageResponse::new(entries))
+    }
+
+    // =========================================================================
+    // Advanced APIs
+    // =========================================================================
+
+    /// Rollback a Talos node to the previous installed version.
+    pub async fn rollback(&self) -> Result<RollbackResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.rollback(ProtoRollbackRequest {}).await?;
+        let inner = response.into_inner();
+
+        Ok(RollbackResponse::from(inner))
+    }
+
+    /// Generate client configuration (talosconfig).
+    pub async fn generate_client_configuration(
+        &self,
+        request: GenerateClientConfigurationRequest,
+    ) -> Result<GenerateClientConfigurationResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoGenerateClientConfigRequest = request.into();
+        let response = client.generate_client_configuration(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(GenerateClientConfigurationResponse::from(inner))
+    }
+
+    /// Capture packets on a network interface (server-streaming).
+    pub async fn packet_capture(
+        &self,
+        request: PacketCaptureRequest,
+    ) -> Result<PacketCaptureResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoPacketCaptureRequest = request.into();
+        let response = client.packet_capture(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut data = Vec::new();
+        let mut node = None;
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            if node.is_none() {
+                if let Some(metadata) = &chunk.metadata {
+                    node = Some(metadata.hostname.clone());
+                }
+            }
+            data.extend(chunk.bytes);
+        }
+
+        Ok(PacketCaptureResponse::new(data, node))
+    }
+
+    /// Get network connection information (netstat).
+    pub async fn netstat(&self, request: NetstatRequest) -> Result<NetstatResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoNetstatRequest = request.into();
+        let response = client.netstat(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(NetstatResponse::from(inner))
     }
 }
 
