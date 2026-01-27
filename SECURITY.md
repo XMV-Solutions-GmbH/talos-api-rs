@@ -12,7 +12,7 @@ If you discover a security vulnerability, please do **not** open a public issue.
 
 ### How to Report
 
-1. **Email**: Send details to **security@xmv.de**
+1. **Email**: Send details to **<security@xmv.de>**
 2. **Subject**: `[SECURITY] talos-api-rs: <brief description>`
 3. **Include**:
    - Description of the vulnerability
@@ -36,11 +36,16 @@ If you discover a security vulnerability, please do **not** open a public issue.
 
 When using `talos-api-rs`:
 
-1. **Use mTLS in production** — Never use `insecure: true` outside development
-2. **Protect credentials** — Store certificates and keys securely
-3. **Rotate certificates** — Follow your organization's certificate rotation policy
-4. **Network isolation** — Restrict access to Talos API ports (50000)
-5. **Audit logging** — Enable logging to track API calls
+1. **Use mTLS for configured nodes** — After initial configuration, always use mTLS
+2. **Maintenance Mode is an exception** — Talos nodes in maintenance mode (fresh boot,
+   no config) require `insecure: true` because they don't have certificates yet. This
+   is the "first machine to connect wins" bootstrap pattern and is a legitimate
+   production use case. Secure your network during this phase!
+3. **Protect credentials** — Store certificates and keys securely
+4. **Rotate certificates** — Follow your organization's certificate rotation policy
+5. **Network isolation** — Restrict access to Talos API ports (50000), especially
+   critical during maintenance mode bootstrap
+6. **Audit logging** — Enable logging to track API calls
 
 ## Known Security Considerations
 

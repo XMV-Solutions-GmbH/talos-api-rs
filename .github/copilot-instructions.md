@@ -178,6 +178,31 @@ Rust Docs
 	•	cargo doc --no-deps must succeed
   • SPDX headers MUST also be present in non-Rust files where applicable (Markdown, YAML, TOML)
 
+Markdown Formatting Rules (MANDATORY)
+
+All Markdown files MUST follow these formatting rules:
+
+1. **Blank line after headings** — Always add one blank line after `#`, `##`, `###`, etc.
+2. **Table formatting** — Use spaces around pipe characters: `| text |` not `|text|`
+3. **List indentation** — Use consistent indentation (2 or 4 spaces)
+4. **Trailing newline** — Every file ends with exactly one newline
+5. **No trailing whitespace** — Remove trailing spaces from lines
+6. **Blank lines around code blocks** — Add blank line before and after fenced code blocks
+
+Example table formatting:
+```markdown
+| Column 1 | Column 2 |
+| -------- | -------- |
+| value    | value    |
+```
+
+NOT:
+```markdown
+|Column 1|Column 2|
+|--------|--------|
+|value|value|
+```
+
 ⸻
 
 8. Open Source Governance

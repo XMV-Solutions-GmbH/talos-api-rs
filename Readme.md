@@ -33,7 +33,7 @@ Prometheus metrics, and OpenTelemetry tracing. Inspired by [`kube-rs`](https://g
 ## API Coverage
 
 | Category | APIs | Status |
-|----------|------|--------|
+| -------- | ---- | ------ |
 | **Machine** | Version, Hostname, Reboot, Shutdown, Upgrade, Rollback | ✅ |
 | **Configuration** | ApplyConfiguration, GenerateConfiguration | ✅ |
 | **Cluster** | Bootstrap, Kubeconfig, Reset | ✅ |
