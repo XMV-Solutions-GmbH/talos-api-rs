@@ -47,7 +47,7 @@ base64 = "0.22.1"
 tempfile = "3.10"
 
 [build-dependencies]
-tonic-build = "0.12"
+tonic-build = "0.14"
 
 [dev-dependencies]
 tokio-test = "0.4"
