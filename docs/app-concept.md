@@ -1,361 +1,274 @@
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
 # Application Concept
 
 A typed, async, idiomatic Rust client for the Talos Linux gRPC API.
 
-## Core Design
+## Overview
 
-- **One Client**: A central `TalosClient` manages connection pooling, authentication, and configuration.
-- **Typed APIs**: All gRPC methods are exposed via strongly-typed Rust methods, hiding raw Protobuf details where possible.
-- **Async-First**: Built on `tokio` and `tonic`.
-- **No CLI Wrapper**: Does not call `talosctl` internally; uses pure gRPC.
+`talos-api-rs` provides a production-grade Rust client for interacting with [Talos Linux](https://www.talos.dev/) clusters via gRPC. It's designed for building automation tools, operators, and desktop applications that manage Talos infrastructure.
 
-## Authentication & Security
+### What This Library Does
 
-The client supports:
+- **Pure gRPC Client** — Direct communication with Talos API (port 50000)
+- **Typed APIs** — Strongly-typed Rust wrappers over raw Protobuf
+- **Production-Ready** — Connection pooling, retries, circuit breakers, metrics, tracing
+- **mTLS Support** — Full ED25519 certificate support (Talos default)
 
-- **mTLS**: Mutual TLS using Client Certificate, Client Key, and CA Certificate.
-- **Insecure Mode**: A specific flag (`insecure: true`) to bypass TLS verification (useful for bootstrap or maintenance).
-- **Endpoint validation**: Hostname verification (default on, disabled in insecure mode).
+### What This Library Does NOT Do
 
-## Modules
-
-- `client`: Connection and auth logic.
-- `api`: Generated gRPC code (via `tonic` + `prost`).
-- `resources`: High-level wrappers for Talos resources.
-- `testkit`: Integration testing harness using local Talos clusters.
+- ❌ Not a replacement for `talosctl`
+- ❌ No config generation (`talosctl gen config` is local CLI)
+- ❌ No opinionated workflows or orchestration logic
+- ❌ No YAML/UI abstractions
 
 ---
 
-## Development Phases
-
-> **Note**: Phases reprioritized based on cluster-lifecycle-manager requirements (2026-01-26).
-
-### Phase 1: Core Foundation ✅ COMPLETE
-
-**Goal**: Establish a working client with basic connectivity and essential APIs.
-
-| Feature | Status | Notes |
-| ------- | ------ | ----- |
-| Project scaffolding | ✅ | Cargo workspace, CI/CD |
-| TalosClient core | ✅ | Connection management |
-| TLS/mTLS config | ✅ | Certificate loading |
-| Insecure mode | ✅ | Custom TLS verifier |
-| Version API | ✅ | Health check capability |
-| Machine API (basic) | ✅ | ServiceList, Hostname, SystemStat, Reboot, Shutdown |
-| Unit tests | ✅ | 6 tests covering core functionality |
-| Integration harness | ✅ | Docker-based Talos cluster |
-
----
-
-### Phase 2: Alpha Release (Cluster Lifecycle Core) 🔄 IN PROGRESS
-
-**Goal**: Enable core cluster lifecycle operations for the Tauri app.
-
-> Based on `talosctl` commands analysis for cluster-lifecycle-manager.
-
-#### Priority 1: Absolute Core (Alpha-Blocking)
-
-| # | Feature | mTLS | Status | Description |
-| - | ------- | ---- | ------ | ----------- |
-| 1 | `gen config` | ❌ | ❌ | Machine config generation (NOT gRPC - CLI only) |
-| 2 | `ApplyConfiguration --insecure` | ❌ | ❌ | Initial config in maintenance mode |
-| 3 | `Bootstrap` | ✅ | ❌ | Initialize etcd on first control-plane |
-| 4 | `Kubeconfig` (streaming) | ✅ | ❌ | Retrieve kubeconfig |
-| 5 | `Reset --graceful` | ✅ | ❌ | Graceful node teardown |
-
-**Critical Blocker**: ED25519 mTLS must work for Bootstrap, Kubeconfig, Reset.
-
-#### Priority 2: Beta Operations
-
-| # | Feature | mTLS | Status | Description |
-| - | ------- | ---- | ------ | ----------- |
-| 6 | Health check API | ✅ | ❌ | Pre-flight checks, monitoring |
-| 7 | `EtcdRemoveMember` | ✅ | ❌ | Control-plane scale-down |
-| 8 | `Dmesg` (streaming) | ✅ | ❌ | Kernel logs for diagnostics |
-
-#### Priority 3: Production Day-2
-
-| # | Feature | mTLS | Status | Description |
-| - | ------- | ---- | ------ | ----------- |
-| 9 | `Upgrade` | ✅ | ❌ | Talos version upgrades |
-| 10 | `Version` (remote) | ✅ | ✅ | Remote version check |
-
-#### Non-gRPC Operations (Out of Scope for Library)
-
-These are **local CLI operations**, not gRPC APIs:
-
-| Operation | Notes |
-| --------- | ----- |
-| `gen config` | Generates YAML files locally (consider separate helper) |
-| `config endpoint` | Manipulates local talosconfig |
-| `config node` | Manipulates local talosconfig |
-| `cluster create/destroy` | Docker provider (test harness only) |
-
----
-
-### Phase 3: Extended APIs
-
-**Goal**: Complete API coverage for advanced operations.
-
-| Feature | Priority | Description |
-| ------- | -------- | ----------- |
-| Service Control | 🟡 High | Start, Stop, Restart services |
-| Logs API | 🟡 High | Service log streaming |
-| Events API | 🟡 High | Cluster event stream |
-| etcd Snapshot | 🟡 High | Backup etcd data |
-| etcd Recover | 🟡 High | Restore from snapshot |
-| File Operations | 🟢 Medium | Read, List, Copy, DiskUsage |
-| System Info | 🟢 Medium | Memory, CPU, Disk, Network stats |
-| Process List | 🟢 Medium | Running processes |
-| Packet Capture | 🟢 Low | Network debugging |
-| Netstat | 🟢 Low | Network connections |
-
----
-
-### Phase 4: Production Readiness & crates.io
-
-**Goal**: Production-grade library with public release.
-
-| Feature | Description |
-| ------- | ----------- |
-| Connection pooling | Multiple endpoint support with failover |
-| Retry policies | Configurable retry with exponential backoff |
-| Timeouts | Per-request and global timeouts |
-| Interceptors | Logging, metrics, tracing hooks |
-| Resource wrappers | High-level Rust types over Protobuf |
-| Builder patterns | Fluent API for complex requests |
-| Full documentation | docs.rs ready, examples |
-| crates.io release | Public package publication |
-| MSRV policy | Minimum Supported Rust Version |
-
----
-
-## mTLS Requirement Summary
+## Core Architecture
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
-│  mTLS NOT required (--insecure or local ops):               │
-│  • ApplyConfiguration (maintenance mode with --insecure)    │
-│  • gen config (local CLI, not gRPC)                         │
-│  • config endpoint/node (local talosconfig manipulation)    │
-│  • cluster create/destroy (Docker provider)                 │
-│  • version --client (local CLI)                             │
+│                     Your Application                        │
 ├─────────────────────────────────────────────────────────────┤
-│  mTLS REQUIRED (post-bootstrap operations):                 │
-│  • Bootstrap, Kubeconfig, Reset, Health                     │
-│  • EtcdRemoveMember, Upgrade, Dmesg, Logs                   │
-│  • All remote API calls after bootstrap                     │
+│                      TalosClient                            │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐ │
+│  │ NodeTarget  │  │ Config      │  │ ConnectionPool      │ │
+│  │ (multi-node)│  │ (talosconfig)│ │ (health routing)    │ │
+│  └─────────────┘  └─────────────┘  └─────────────────────┘ │
+├─────────────────────────────────────────────────────────────┤
+│                    Resource Wrappers                        │
+│  Bootstrap │ Config │ Etcd │ Services │ Files │ System    │
+├─────────────────────────────────────────────────────────────┤
+│                    Runtime Layer                            │
+│  RetryConfig │ CircuitBreaker │ Metrics │ Tracing          │
+├─────────────────────────────────────────────────────────────┤
+│                    gRPC (tonic + prost)                     │
+│                    TLS (rustls + ring)                      │
 └─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+                    Talos API (port 50000)
 ```
 
 ---
 
-## Known Issues & Technical Debt
+## Authentication
 
-### 🔴 Critical: ED25519 Certificate Support
+### mTLS (Production)
 
-**Problem**: Talos generates ED25519 client certificates by default. The current rustls configuration does not properly handle ED25519 for client authentication.
+Talos requires mutual TLS for all post-bootstrap API calls. This library fully supports Talos ED25519 certificates via the `ring` crypto provider.
 
-**Symptoms**:
-
-```text
-mTLS connection failed: Transport error: transport error
-received fatal alert: CertificateRequired
+```rust
+let client = TalosClient::from_talosconfig(None, None).await?;
+// or
+let config = TalosClientConfig::builder("https://10.0.0.1:50000")
+    .ca_cert("/path/to/ca.crt")
+    .client_cert("/path/to/client.crt")
+    .client_key("/path/to/client.key")
+    .build();
 ```
 
-**Root Cause**:
+### Insecure Mode (Maintenance)
 
-- Talos uses `ED25519` for all PKI (Signature Algorithm: ED25519)
-- `tonic`'s default TLS config expects RSA/ECDSA certificates
-- PEM parsing works, but the TLS handshake fails during client cert presentation
+For nodes in maintenance mode (no config yet), TLS verification can be skipped:
 
-**Potential Solutions**:
-
-1. **Configure rustls with ED25519 support** - Requires proper `CryptoProvider` setup
-2. **Use `ring` crypto provider** - May have better ED25519 support
-3. **Alternative: `native-tls`** - Switch from rustls to OpenSSL-based TLS
-4. **Workaround: RSA certs** - Generate Talos cluster with RSA (non-standard)
-
-**Impact**: Full mTLS authentication is blocked until resolved.
+```rust
+let config = TalosClientConfig {
+    endpoint: "https://192.168.1.100:50000".to_string(),
+    insecure: true,
+    ..Default::default()
+};
+```
 
 ---
 
-### 🟡 Medium: Streaming gRPC Methods
+## API Coverage
 
-**Problem**: Several Talos APIs use server-streaming gRPC (Logs, Events, Kubeconfig, etcd Snapshot, etc.). These require different handling than unary calls.
+**43 of 52 Machine Service methods implemented (83%)**
 
-**Current State**: Not implemented.
+### Cluster Lifecycle
 
-**Required Changes**:
+| API | Description |
+| --- | ----------- |
+| `ApplyConfiguration` | Apply machine config (dry-run, reboot modes) |
+| `Bootstrap` | Initialize etcd cluster |
+| `Kubeconfig` | Retrieve kubeconfig (streaming) |
+| `Reset` | Reset node (graceful, force, halt) |
+| `Upgrade` | Upgrade Talos version |
+| `Rollback` | Rollback to previous config |
 
-- Return `tonic::Streaming<T>` instead of `Response<T>`
-- Handle stream lifecycle (cancellation, errors, completion)
-- Provide async iterator/stream wrapper for ergonomic usage
+### etcd Operations
 
-**Affected APIs**:
+| API | Description |
+| --- | ----------- |
+| `EtcdMemberList` | List cluster members |
+| `EtcdRemoveMemberByID` | Remove member |
+| `EtcdLeaveCluster` | Node leaves cluster |
+| `EtcdForfeitLeadership` | Force leader election |
+| `EtcdStatus` | Cluster health |
+| `EtcdAlarmList/Disarm` | Alarm management |
+| `EtcdDefragment` | Defragment database |
 
-- `Logs`, `LogsContainers`
-- `Events`
-- `Dmesg`
-- `Kubeconfig`
-- `EtcdSnapshot`
-- `Copy`, `Read`
-- `List` (file listing)
-- `DiskUsage`
-- `PacketCapture`
+### System Information
 
----
+| API | Description |
+| --- | ----------- |
+| `Version` | Talos version |
+| `Hostname` | Node hostname |
+| `Memory`, `CPUInfo`, `LoadAvg` | Resource stats |
+| `DiskStats`, `Mounts` | Storage info |
+| `NetworkDeviceStats` | Network interfaces |
+| `Processes` | Running processes |
+| `SystemStat` | System statistics |
 
-### 🟡 Medium: Client-Streaming gRPC Methods
+### Services & Logs
 
-**Problem**: Some APIs require client-to-server streaming (e.g., `EtcdRecover`).
+| API | Description |
+| --- | ----------- |
+| `ServiceList` | List services |
+| `ServiceStart/Stop/Restart` | Control services |
+| `Logs` | Service logs (streaming) |
+| `Dmesg` | Kernel logs (streaming) |
 
-**Current State**: Not implemented.
+### File Operations
 
-**Required Changes**:
+| API | Description |
+| --- | ----------- |
+| `List` | Directory listing |
+| `Read` | File content |
+| `Copy` | Copy files (tar) |
+| `DiskUsage` | Disk usage |
 
-- Accept `impl Stream<Item = T>` as input
-- Handle backpressure and flow control
+### Container Images
 
-**Affected APIs**:
+| API | Description |
+| --- | ----------- |
+| `ImageList` | List images |
+| `ImagePull` | Pull images |
 
-- `EtcdRecover` (upload snapshot)
+### Diagnostics
 
----
+| API | Description |
+| --- | ----------- |
+| `Netstat` | Network connections |
+| `PacketCapture` | Network capture |
+| `GenerateClientConfiguration` | Generate talosconfig |
 
-### 🟢 Low: Multi-Node Targeting
+### Not Implemented
 
-**Problem**: Talos API supports targeting multiple nodes in a single request via metadata. Current implementation targets single endpoints.
-
-**Current State**: Single-endpoint only.
-
-**Required Changes**:
-
-- Implement gRPC metadata for node targeting
-- Handle multi-node responses (responses contain per-node results)
-- Consider connection multiplexing
-
----
-
-### 🟢 Low: Error Handling Granularity
-
-**Problem**: Current error types are basic. Talos returns rich error information that should be preserved.
-
-**Current State**: Generic `TalosError` enum.
-
-**Required Changes**:
-
-- Parse `google.rpc.Status` details
-- Expose node-specific errors from multi-node responses
-- Categorize errors (retriable vs permanent)
-
----
-
-### 🟢 Low: Generated Code Organization
-
-**Problem**: Generated Protobuf code is large (~6000 lines for machine.rs alone). IDE performance may suffer.
-
-**Observation**: The `machine.proto` generates extensive code because it includes 60+ RPC methods.
-
-**Potential Improvements**:
-
-- Split into feature-gated modules
-- Lazy loading of sub-clients
-- Consider code generation optimizations
-
----
-
-## API Surface Tracking
-
-### Machine Service (machine.proto)
-
-| Method | Phase | Implemented | Tested |
-| ------ | ----- | ----------- | ------ |
-| ApplyConfiguration | 2 | ❌ | ❌ |
-| Bootstrap | 3 | ❌ | ❌ |
-| Containers | 2 | ❌ | ❌ |
-| Copy | 2 | ❌ | ❌ |
-| CPUFreqStats | 2 | ❌ | ❌ |
-| CPUInfo | 2 | ❌ | ❌ |
-| DiskStats | 2 | ❌ | ❌ |
-| Dmesg | 2 | ❌ | ❌ |
-| Events | 2 | ❌ | ❌ |
-| EtcdMemberList | 3 | ❌ | ❌ |
-| EtcdRemoveMemberByID | 3 | ❌ | ❌ |
-| EtcdLeaveCluster | 3 | ❌ | ❌ |
-| EtcdForfeitLeadership | 3 | ❌ | ❌ |
-| EtcdRecover | 3 | ❌ | ❌ |
-| EtcdSnapshot | 3 | ❌ | ❌ |
-| EtcdAlarmList | 3 | ❌ | ❌ |
-| EtcdAlarmDisarm | 3 | ❌ | ❌ |
-| EtcdDefragment | 3 | ❌ | ❌ |
-| EtcdStatus | 3 | ❌ | ❌ |
-| Hostname | 1 | ✅ | ✅ |
-| Kubeconfig | 3 | ❌ | ❌ |
-| List | 2 | ❌ | ❌ |
-| DiskUsage | 2 | ❌ | ❌ |
-| LoadAvg | 2 | ❌ | ❌ |
-| Logs | 2 | ❌ | ❌ |
-| LogsContainers | 2 | ❌ | ❌ |
-| Memory | 2 | ❌ | ❌ |
-| Mounts | 2 | ❌ | ❌ |
-| NetworkDeviceStats | 2 | ❌ | ❌ |
-| Processes | 2 | ❌ | ❌ |
-| Read | 2 | ❌ | ❌ |
-| Reboot | 1 | ✅ | ✅ |
-| Restart | 2 | ❌ | ❌ |
-| Rollback | 2 | ❌ | ❌ |
-| Reset | 2 | ❌ | ❌ |
-| ServiceList | 1 | ✅ | ✅ |
-| ServiceRestart | 2 | ❌ | ❌ |
-| ServiceStart | 2 | ❌ | ❌ |
-| ServiceStop | 2 | ❌ | ❌ |
-| Shutdown | 1 | ✅ | ✅ |
-| Stats | 2 | ❌ | ❌ |
-| SystemStat | 1 | ✅ | ✅ |
-| Upgrade | 2 | ❌ | ❌ |
-| Version | 1 | ✅ | ✅ |
-| GenerateClientConfiguration | 3 | ❌ | ❌ |
-| PacketCapture | 3 | ❌ | ❌ |
-| Netstat | 3 | ❌ | ❌ |
-| MetaWrite | 3 | ❌ | ❌ |
-| MetaDelete | 3 | ❌ | ❌ |
-| ImageList | 2 | ❌ | ❌ |
-| ImagePull | 2 | ❌ | ❌ |
-
-### Version Service (version.proto)
-
-| Method | Phase | Implemented | Tested |
-| ------ | ----- | ----------- | ------ |
-| Version | 1 | ✅ | ✅ |
+| API | Reason |
+| --- | ------ |
+| `Events` | Server-streaming complexity |
+| `EtcdSnapshot` | Server-streaming complexity |
+| `EtcdRecover` | Client-streaming required |
+| `Containers`, `LogsContainers` | Low demand |
+| `CPUFreqStats`, `Stats`, `Restart` | Low demand |
+| `MetaWrite`, `MetaDelete` | Advanced use case |
 
 ---
 
-## Dependencies & Version Tracking
+## Multi-Node Operations
 
-| Dependency | Current | Purpose | Notes |
-| ---------- | ------- | ------- | ----- |
-| tonic | 0.12 | gRPC framework | |
-| prost | 0.13 | Protobuf codegen | |
-| tokio | 1.x | Async runtime | |
-| rustls | 0.23 | TLS implementation | ED25519 issue |
-| tokio-rustls | 0.26 | Async TLS | |
-| hyper-util | 0.1 | HTTP utilities | Custom connector |
+Target specific nodes in a cluster:
 
-### Talos Protobuf Sources
+```rust
+// Single node
+let client = client.with_node("10.0.0.5");
 
-| Proto | Source | Version |
-| ----- | ------ | ------- |
-| machine.proto | github.com/siderolabs/talos | main |
-| common.proto | github.com/siderolabs/talos | main |
-| version.proto | github.com/siderolabs/talos | main |
-| google/rpc/status.proto | googleapis | - |
+// Multiple nodes
+let client = client.with_nodes(vec!["10.0.0.5", "10.0.0.6"]);
+```
 
-**Update Process**:
+### Cluster Discovery
 
-1. Check Talos releases for API changes
-2. Download updated protos
-3. Regenerate Rust code (`cargo build`)
-4. Update API surface tracking table
-5. Implement new methods
-6. Update version in docs
+Discover cluster members and check health:
+
+```rust
+let discovery = ClusterDiscovery::from_endpoint("https://10.0.0.1:50000")
+    .ca_cert("/path/to/ca.crt")
+    .client_cert("/path/to/client.crt")
+    .client_key("/path/to/client.key")
+    .build()
+    .await?;
+
+let members = discovery.discover_members().await?;
+let health = discovery.check_cluster_health().await?;
+```
+
+---
+
+## Production Features
+
+### Connection Pool
+
+```rust
+let pool_config = ConnectionPoolConfig::builder()
+    .max_endpoints(5)
+    .health_check_interval(Duration::from_secs(30))
+    .load_balancer(LoadBalancer::LeastFailures)
+    .build();
+```
+
+### Retry & Circuit Breaker
+
+```rust
+let retry = RetryConfig::builder()
+    .max_retries(3)
+    .backoff(BackoffStrategy::Exponential { base: Duration::from_millis(100) })
+    .build();
+
+let circuit_breaker = CircuitBreakerConfig::builder()
+    .failure_threshold(5)
+    .recovery_timeout(Duration::from_secs(30))
+    .build();
+```
+
+### Observability
+
+```rust
+// Prometheus metrics
+let metrics = MetricsCollector::new(MetricsConfig::default());
+metrics.record_request("Version", "10.0.0.1:50000", true, Duration::from_millis(42));
+println!("{}", metrics.to_prometheus_text());
+
+// OpenTelemetry tracing
+let span = TalosSpan::new("machine.Version", "10.0.0.1:50000");
+```
+
+---
+
+## Dependencies
+
+| Dependency | Version | Purpose |
+| ---------- | ------- | ------- |
+| tonic | 0.14 | gRPC framework |
+| tonic-prost | 0.14 | Prost integration |
+| prost | 0.14 | Protobuf codegen |
+| tokio | 1.x | Async runtime |
+| rustls | 0.23 | TLS (ring provider for ED25519) |
+
+### Talos Compatibility
+
+- **Minimum**: Talos 1.9.x
+- **Protobuf Source**: github.com/siderolabs/talos
+
+---
+
+## Non-Goals & Out of Scope
+
+These operations are **local CLI functions**, not gRPC APIs:
+
+| Operation | Alternative |
+| --------- | ----------- |
+| `talosctl gen config` | Generate YAML locally |
+| `talosctl config endpoint` | Manipulate local talosconfig |
+| `talosctl cluster create` | Docker provider (test only) |
+| Config validation | Consider separate schema library |
+
+---
+
+## Further Reading
+
+- [Architecture](architecture.md) — Technical implementation details
+- [API Stability](api-stability.md) — Versioning and stability guarantees
+- [Testing Guide](testing.md) — How to run tests
+- [Talos Documentation](https://www.talos.dev/docs/) — Official Talos docs

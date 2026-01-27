@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
 # Contributing to talos-api-rs
 
 Thank you for your interest in contributing! This document provides guidelines
@@ -11,7 +12,7 @@ By participating in this project, you agree to abide by our [Code of Conduct](CO
 
 ### Prerequisites
 
-- Rust 1.75+ (see `rust-version` in Cargo.toml)
+- Rust 1.82+ (see `rust-version` in Cargo.toml)
 - Docker (for integration tests)
 - `talosctl` CLI (for integration tests)
 

@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
 # talos-api-rs
 
 ![Crates.io](https://img.shields.io/crates/v/talos-api-rs)
