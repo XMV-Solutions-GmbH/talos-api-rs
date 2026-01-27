@@ -36,6 +36,7 @@ pub use resources::{
 };
 pub use runtime::{
     BackoffStrategy, CircuitBreaker, CircuitBreakerConfig, CircuitState, CustomRetryPolicy,
-    DefaultRetryPolicy, ExponentialBackoff, FixedBackoff, LinearBackoff, NoBackoff, NoRetryPolicy,
-    RetryConfig, RetryConfigBuilder, RetryPolicy,
+    DefaultRetryPolicy, ExponentialBackoff, FixedBackoff, InterceptorMetrics, LinearBackoff,
+    LogLevel, LoggingConfig, LoggingInterceptor, NoBackoff, NoRetryPolicy, RequestLogger,
+    RequestSpan, RetryConfig, RetryConfigBuilder, RetryPolicy,
 };
