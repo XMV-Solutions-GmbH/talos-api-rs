@@ -1,6 +1,6 @@
 # TODO
 
-> **Updated**: 2025-01-27 - v0.1.0 Released! 🎉 Next: v0.2.0 Roadmap
+> **Updated**: 2026-01-27 - v0.2.0 Released! 🎉 Next: v0.3.0 Roadmap
 
 ## Phase 1: Core Foundation ✅ COMPLETE
 
