@@ -169,20 +169,14 @@ mod tests {
 
     #[test]
     fn test_dmesg_request_builder() {
-        let req = DmesgRequest::builder()
-            .follow(true)
-            .tail(true)
-            .build();
+        let req = DmesgRequest::builder().follow(true).tail(true).build();
         assert!(req.follow);
         assert!(req.tail);
     }
 
     #[test]
     fn test_proto_conversion() {
-        let req = DmesgRequest::builder()
-            .follow(true)
-            .tail(false)
-            .build();
+        let req = DmesgRequest::builder().follow(true).tail(false).build();
         let proto: ProtoDmesgRequest = req.into();
         assert!(proto.follow);
         assert!(!proto.tail);

@@ -319,7 +319,7 @@ cluster:
 
     // 10. Test etcd APIs (control plane only)
     println!("\n--- etcd API: Member List ---");
-    use talos_api_rs::{EtcdMemberListRequest};
+    use talos_api_rs::EtcdMemberListRequest;
 
     match client.etcd_member_list(EtcdMemberListRequest::new()).await {
         Ok(response) => {
@@ -345,7 +345,11 @@ cluster:
                 println!("  Member ID: {}", status.member_id);
                 println!("  Protocol: {}", status.protocol_version);
                 println!("  DB Size: {}", status.db_size_human());
-                println!("  Leader: {} (is_leader: {})", status.leader, status.is_leader());
+                println!(
+                    "  Leader: {} (is_leader: {})",
+                    status.leader,
+                    status.is_leader()
+                );
             }
         }
         Err(e) => {

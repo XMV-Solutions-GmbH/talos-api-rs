@@ -194,7 +194,11 @@ pub struct UpgradeResponse {
 impl From<ProtoUpgradeResponse> for UpgradeResponse {
     fn from(proto: ProtoUpgradeResponse) -> Self {
         Self {
-            results: proto.messages.into_iter().map(UpgradeResult::from).collect(),
+            results: proto
+                .messages
+                .into_iter()
+                .map(UpgradeResult::from)
+                .collect(),
         }
     }
 }

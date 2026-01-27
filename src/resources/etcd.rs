@@ -8,16 +8,15 @@
 use crate::api::generated::machine::{
     EtcdAlarm as ProtoEtcdAlarm, EtcdAlarmDisarm as ProtoEtcdAlarmDisarm,
     EtcdAlarmDisarmResponse as ProtoEtcdAlarmDisarmResponse,
-    EtcdAlarmListResponse as ProtoEtcdAlarmListResponse,
-    EtcdDefragment as ProtoEtcdDefragment, EtcdDefragmentResponse as ProtoEtcdDefragmentResponse,
+    EtcdAlarmListResponse as ProtoEtcdAlarmListResponse, EtcdDefragment as ProtoEtcdDefragment,
+    EtcdDefragmentResponse as ProtoEtcdDefragmentResponse,
     EtcdForfeitLeadership as ProtoEtcdForfeitLeadership,
     EtcdForfeitLeadershipRequest as ProtoEtcdForfeitLeadershipRequest,
     EtcdForfeitLeadershipResponse as ProtoEtcdForfeitLeadershipResponse,
     EtcdLeaveCluster as ProtoEtcdLeaveCluster,
     EtcdLeaveClusterRequest as ProtoEtcdLeaveClusterRequest,
-    EtcdLeaveClusterResponse as ProtoEtcdLeaveClusterResponse,
-    EtcdMember as ProtoEtcdMember, EtcdMemberAlarm as ProtoEtcdMemberAlarm,
-    EtcdMemberListRequest as ProtoEtcdMemberListRequest,
+    EtcdLeaveClusterResponse as ProtoEtcdLeaveClusterResponse, EtcdMember as ProtoEtcdMember,
+    EtcdMemberAlarm as ProtoEtcdMemberAlarm, EtcdMemberListRequest as ProtoEtcdMemberListRequest,
     EtcdMemberListResponse as ProtoEtcdMemberListResponse,
     EtcdMemberStatus as ProtoEtcdMemberStatus, EtcdMembers as ProtoEtcdMembers,
     EtcdRemoveMemberByIdRequest as ProtoEtcdRemoveMemberByIdRequest,
@@ -560,9 +559,11 @@ impl EtcdAlarmListResponse {
     /// Check if there are any active alarms.
     #[must_use]
     pub fn has_alarms(&self) -> bool {
-        self.results
-            .iter()
-            .any(|r| r.member_alarms.iter().any(|a| a.alarm != EtcdAlarmType::None))
+        self.results.iter().any(|r| {
+            r.member_alarms
+                .iter()
+                .any(|a| a.alarm != EtcdAlarmType::None)
+        })
     }
 
     /// Get all active alarms.

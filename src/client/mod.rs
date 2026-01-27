@@ -3,13 +3,21 @@
 use crate::api::machine::machine_service_client::MachineServiceClient;
 use crate::api::machine::ApplyConfigurationRequest as ProtoApplyConfigRequest;
 use crate::api::machine::BootstrapRequest as ProtoBootstrapRequest;
+use crate::api::machine::CopyRequest as ProtoCopyRequest;
+use crate::api::machine::DiskUsageRequest as ProtoDiskUsageRequest;
 use crate::api::machine::DmesgRequest as ProtoDmesgRequest;
 use crate::api::machine::EtcdForfeitLeadershipRequest as ProtoEtcdForfeitLeadershipRequest;
 use crate::api::machine::EtcdLeaveClusterRequest as ProtoEtcdLeaveClusterRequest;
 use crate::api::machine::EtcdMemberListRequest as ProtoEtcdMemberListRequest;
 use crate::api::machine::EtcdRemoveMemberByIdRequest as ProtoEtcdRemoveMemberByIdRequest;
+use crate::api::machine::GenerateClientConfigurationRequest as ProtoGenerateClientConfigRequest;
+use crate::api::machine::ListRequest as ProtoListRequest;
 use crate::api::machine::LogsRequest as ProtoLogsRequest;
+use crate::api::machine::NetstatRequest as ProtoNetstatRequest;
+use crate::api::machine::PacketCaptureRequest as ProtoPacketCaptureRequest;
+use crate::api::machine::ReadRequest as ProtoReadRequest;
 use crate::api::machine::ResetRequest as ProtoResetRequest;
+use crate::api::machine::RollbackRequest as ProtoRollbackRequest;
 use crate::api::machine::ServiceRestartRequest as ProtoServiceRestartRequest;
 use crate::api::machine::ServiceStartRequest as ProtoServiceStartRequest;
 use crate::api::machine::ServiceStopRequest as ProtoServiceStopRequest;
@@ -18,14 +26,18 @@ use crate::api::version::version_service_client::VersionServiceClient;
 use crate::error::Result;
 use crate::resources::{
     ApplyConfigurationRequest, ApplyConfigurationResponse, BootstrapRequest, BootstrapResponse,
-    DmesgRequest, DmesgResponse, EtcdAlarmDisarmResponse, EtcdAlarmListResponse,
+    CopyRequest, CopyResponse, CpuInfoResponse, DiskStatsResponse, DiskUsageInfo, DiskUsageRequest,
+    DiskUsageResponse, DmesgRequest, DmesgResponse, EtcdAlarmDisarmResponse, EtcdAlarmListResponse,
     EtcdDefragmentResponse, EtcdForfeitLeadershipRequest, EtcdForfeitLeadershipResponse,
     EtcdLeaveClusterRequest, EtcdLeaveClusterResponse, EtcdMemberListRequest,
     EtcdMemberListResponse, EtcdRemoveMemberByIdRequest, EtcdRemoveMemberByIdResponse,
-    EtcdStatusResponse, KubeconfigResponse, LogsRequest, LogsResponse, ResetRequest,
-    ResetResponse, ServiceRestartRequest, ServiceRestartResponse, ServiceStartRequest,
-    ServiceStartResponse, ServiceStopRequest, ServiceStopResponse, UpgradeRequest,
-    UpgradeResponse,
+    EtcdStatusResponse, FileInfo, GenerateClientConfigurationRequest,
+    GenerateClientConfigurationResponse, KubeconfigResponse, ListRequest, ListResponse,
+    LoadAvgResponse, LogsRequest, LogsResponse, MemoryResponse, MountsResponse, NetstatRequest,
+    NetstatResponse, NetworkDeviceStatsResponse, PacketCaptureRequest, PacketCaptureResponse,
+    ProcessesResponse, ReadRequest, ReadResponse, ResetRequest, ResetResponse, RollbackResponse,
+    ServiceRestartRequest, ServiceRestartResponse, ServiceStartRequest, ServiceStartResponse,
+    ServiceStopRequest, ServiceStopResponse, UpgradeRequest, UpgradeResponse,
 };
 use hyper_util::rt::TokioIo;
 use rustls::pki_types::{CertificateDer, PrivateKeyDer, ServerName};
@@ -797,7 +809,10 @@ impl TalosClient {
     // =========================================================================
 
     /// Start a service.
-    pub async fn service_start(&self, request: ServiceStartRequest) -> Result<ServiceStartResponse> {
+    pub async fn service_start(
+        &self,
+        request: ServiceStartRequest,
+    ) -> Result<ServiceStartResponse> {
         let mut client = MachineServiceClient::new(self.channel.clone());
 
         let proto_request: ProtoServiceStartRequest = request.into();
@@ -856,6 +871,242 @@ impl TalosClient {
         }
 
         Ok(LogsResponse::new(data, node))
+    }
+
+    // =========================================================================
+    // System Information
+    // =========================================================================
+
+    /// Get system load averages.
+    pub async fn load_avg(&self) -> Result<LoadAvgResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.load_avg(()).await?;
+        let inner = response.into_inner();
+
+        Ok(LoadAvgResponse::from(inner))
+    }
+
+    /// Get memory information.
+    pub async fn memory(&self) -> Result<MemoryResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.memory(()).await?;
+        let inner = response.into_inner();
+
+        Ok(MemoryResponse::from(inner))
+    }
+
+    /// Get CPU information.
+    pub async fn cpu_info(&self) -> Result<CpuInfoResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.cpu_info(()).await?;
+        let inner = response.into_inner();
+
+        Ok(CpuInfoResponse::from(inner))
+    }
+
+    /// Get disk statistics.
+    pub async fn disk_stats(&self) -> Result<DiskStatsResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.disk_stats(()).await?;
+        let inner = response.into_inner();
+
+        Ok(DiskStatsResponse::from(inner))
+    }
+
+    /// Get network device statistics.
+    pub async fn network_device_stats(&self) -> Result<NetworkDeviceStatsResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.network_device_stats(()).await?;
+        let inner = response.into_inner();
+
+        Ok(NetworkDeviceStatsResponse::from(inner))
+    }
+
+    /// Get mount points.
+    pub async fn mounts(&self) -> Result<MountsResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.mounts(()).await?;
+        let inner = response.into_inner();
+
+        Ok(MountsResponse::from(inner))
+    }
+
+    /// Get process list.
+    pub async fn processes(&self) -> Result<ProcessesResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.processes(()).await?;
+        let inner = response.into_inner();
+
+        Ok(ProcessesResponse::from(inner))
+    }
+
+    // =========================================================================
+    // File Operations
+    // =========================================================================
+
+    /// List directory contents (server-streaming).
+    pub async fn list(&self, request: ListRequest) -> Result<ListResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoListRequest = request.into();
+        let response = client.list(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut entries = Vec::new();
+        while let Some(info) = stream.next().await {
+            let info = info?;
+            entries.push(FileInfo::from(info));
+        }
+
+        Ok(ListResponse::new(entries))
+    }
+
+    /// Read a file (server-streaming).
+    pub async fn read(&self, request: ReadRequest) -> Result<ReadResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoReadRequest = request.into();
+        let response = client.read(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut data = Vec::new();
+        let mut node = None;
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            if node.is_none() {
+                if let Some(metadata) = &chunk.metadata {
+                    node = Some(metadata.hostname.clone());
+                }
+            }
+            data.extend(chunk.bytes);
+        }
+
+        Ok(ReadResponse::new(data, node))
+    }
+
+    /// Copy a file or directory as tar archive (server-streaming).
+    pub async fn copy(&self, request: CopyRequest) -> Result<CopyResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoCopyRequest = request.into();
+        let response = client.copy(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut data = Vec::new();
+        let mut node = None;
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            if node.is_none() {
+                if let Some(metadata) = &chunk.metadata {
+                    node = Some(metadata.hostname.clone());
+                }
+            }
+            data.extend(chunk.bytes);
+        }
+
+        Ok(CopyResponse::new(data, node))
+    }
+
+    /// Get disk usage (server-streaming).
+    pub async fn disk_usage(&self, request: DiskUsageRequest) -> Result<DiskUsageResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoDiskUsageRequest = request.into();
+        let response = client.disk_usage(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut entries = Vec::new();
+        while let Some(info) = stream.next().await {
+            let info = info?;
+            entries.push(DiskUsageInfo::from(info));
+        }
+
+        Ok(DiskUsageResponse::new(entries))
+    }
+
+    // =========================================================================
+    // Advanced APIs
+    // =========================================================================
+
+    /// Rollback a Talos node to the previous installed version.
+    pub async fn rollback(&self) -> Result<RollbackResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let response = client.rollback(ProtoRollbackRequest {}).await?;
+        let inner = response.into_inner();
+
+        Ok(RollbackResponse::from(inner))
+    }
+
+    /// Generate client configuration (talosconfig).
+    pub async fn generate_client_configuration(
+        &self,
+        request: GenerateClientConfigurationRequest,
+    ) -> Result<GenerateClientConfigurationResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoGenerateClientConfigRequest = request.into();
+        let response = client.generate_client_configuration(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(GenerateClientConfigurationResponse::from(inner))
+    }
+
+    /// Capture packets on a network interface (server-streaming).
+    pub async fn packet_capture(
+        &self,
+        request: PacketCaptureRequest,
+    ) -> Result<PacketCaptureResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoPacketCaptureRequest = request.into();
+        let response = client.packet_capture(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut data = Vec::new();
+        let mut node = None;
+
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            if node.is_none() {
+                if let Some(metadata) = &chunk.metadata {
+                    node = Some(metadata.hostname.clone());
+                }
+            }
+            data.extend(chunk.bytes);
+        }
+
+        Ok(PacketCaptureResponse::new(data, node))
+    }
+
+    /// Get network connection information (netstat).
+    pub async fn netstat(&self, request: NetstatRequest) -> Result<NetstatResponse> {
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoNetstatRequest = request.into();
+        let response = client.netstat(proto_request).await?;
+        let inner = response.into_inner();
+
+        Ok(NetstatResponse::from(inner))
     }
 }
 
