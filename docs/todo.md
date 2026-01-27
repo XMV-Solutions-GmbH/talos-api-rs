@@ -144,32 +144,31 @@
 - [x] Connection timeouts (`connect_timeout`)
 - [x] HTTP/2 keepalive configuration
 
-### Observability ✅ PARTIAL
+### Observability ✅ COMPLETE
 
 - [x] Logging interceptor (`LoggingInterceptor`, `RequestLogger`)
 - [x] Log level configuration (Trace, Debug, Info, Warn, Error, Off)
 - [x] Sensitive header redaction
 - [x] Request metrics (`InterceptorMetrics`)
-- [ ] Metrics (Prometheus-compatible)
-- [ ] Distributed tracing (OpenTelemetry)
-- [ ] Distributed tracing (OpenTelemetry)
+- [x] Metrics (Prometheus-compatible) - `MetricsCollector`, `MetricsConfig`
+- [x] Distributed tracing (OpenTelemetry) - `TalosSpan`, `SpanFactory`, `TracingConfig`
 
-### Developer Experience ✅ PARTIAL
+### Developer Experience ✅ COMPLETE
 
 - [x] High-level resource wrappers
 - [x] Builder patterns for complex requests
 - [x] `TalosClientConfig::builder()` fluent API
 - [x] Comprehensive documentation
 - [x] Example: resilient_client.rs - demonstrates all production features
-- [ ] More examples (cluster lifecycle, monitoring)
+- [x] Example: monitoring_metrics.rs - Prometheus metrics demo
 
-### Release Preparation ✅ PARTIAL
+### Release Preparation ✅ COMPLETE
 
-- [ ] crates.io publication
+- [ ] crates.io publication (requires CRATES_IO_TOKEN secret)
 - [x] Semantic versioning
 - [x] CHANGELOG.md
-- [ ] Changelog automation
-- [ ] API stability guarantees
+- [x] Release automation (GitHub Actions)
+- [x] API stability guarantees - `docs/api-stability.md`
 - [x] MSRV (Minimum Supported Rust Version) policy - Rust 1.75+
 - [x] docs.rs documentation metadata
 
@@ -184,10 +183,10 @@
 - [x] CODE_OF_CONDUCT.md
 - [x] SECURITY.md
 - [x] CI pipelines (Tests/Lint)
-- [ ] Release pipelines (Build/Publish)
-- [ ] Automated dependency updates (Dependabot)
+- [x] Release pipelines (Build/Publish) - `.github/workflows/release.yml`
+- [x] Automated dependency updates (Dependabot) - `.github/dependabot.yml`
 - [x] CHANGELOG.md
-- [ ] Release checklist documentation
+- [x] Release checklist documentation - `docs/release-checklist.md`
 
 ---
 
@@ -196,13 +195,13 @@
 ### 🔴 Critical
 
 | Issue | Description | Status | Blocks |
-|-------|-------------|--------|--------|
+| ----- | ----------- | ------ | ------ |
 | ED25519 mTLS | Talos ED25519 certs not working with rustls | Open | Phase 2 Alpha |
 
 ### 🟡 Medium
 
 | Issue | Description | Status |
-|-------|-------------|--------|
+| ----- | ----------- | ------ |
 | Server-streaming APIs | gRPC streaming not implemented | Open |
 | Client-streaming | EtcdRecover needs client streaming | Open |
 | Multi-node targeting | gRPC metadata for node selection | Open |
@@ -210,7 +209,7 @@
 ### 🟢 Low
 
 | Issue | Description | Status |
-|-------|-------------|--------|
+| ----- | ----------- | ------ |
 | Error granularity | Parse google.rpc.Status details | Open |
 | Generated code size | machine.rs is ~6000 lines | Acceptable |
 
@@ -221,7 +220,7 @@
 ### Unit Tests (Phase 1) ✅
 
 | Area | Tests | Status |
-|------|-------|--------|
+| ----- | ------- | -------- |
 | TalosClientConfig | default, validation | ✅ |
 | TalosClient::new | invalid cert, insecure | ✅ |
 | Version API | mock server call | ✅ |
@@ -231,7 +230,7 @@
 ### Integration Tests (Phase 1) ✅
 
 | Area | Tests | Status |
-|------|-------|--------|
+| ----- | ------- | -------- |
 | Cluster lifecycle | create, connect, destroy | ✅ |
 | Version API | real cluster call | ✅ |
 | Hostname API | real cluster call | ⚠️ (mTLS blocked) |

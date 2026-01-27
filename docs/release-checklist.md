@@ -164,7 +164,7 @@ This enables feature-gated documentation on docs.rs.
 ## Badge Status Levels
 
 | Badge | Meaning | Requirements |
-|-------|---------|--------------|
+| ----- | ------- | ------------ |
 | 🔴 Experimental | API unstable, use at own risk | Basic functionality |
 | 🟡 Alpha | Core features work, API may change | Tests, basic docs |
 | 🟢 Beta | Feature complete, API stabilizing | Full docs, examples |

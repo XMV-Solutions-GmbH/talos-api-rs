@@ -59,11 +59,13 @@ TalosClientConfig {
 ```
 
 **Key Components**:
+
 - `TalosClient::new()` - Async constructor with TLS setup
 - `NoVerifier` - Custom rustls verifier for insecure mode
 - Custom `tower::service_fn` connector for manual TLS handling
 
 **Current Limitations**:
+
 - ED25519 certificates not fully supported (see Known Issues in app-concept.md)
 - Single-endpoint only (no multi-node targeting yet)
 
@@ -72,10 +74,12 @@ TalosClientConfig {
 Pure generated code from Protobuf. **NEVER EDIT MANUALLY**.
 
 **Generated Clients**:
+
 - `VersionServiceClient` - Health/version checks
 - `MachineServiceClient` - Machine operations (60+ methods)
 
 **Access Pattern**:
+
 ```rust
 let client = TalosClient::new(config).await?;
 let mut version = client.version();
@@ -110,6 +114,7 @@ pub struct TalosCluster {
 ```
 
 **Workflow**:
+
 1. `TalosCluster::create()` - Provisions cluster via `talosctl cluster create docker`
 2. Extracts certificates from generated talosconfig
 3. Provides endpoint for client testing
@@ -117,7 +122,7 @@ pub struct TalosCluster {
 
 ## Data Flow
 
-```
+```text
 User Code
     │
     ▼
@@ -147,6 +152,7 @@ channel_builder = channel_builder.tls_config(tls)?;
 ### Insecure Mode
 
 For testing where TLS verification should be skipped:
+
 - Uses custom rustls connector with `NoVerifier`
 - Still encrypted, but no certificate verification
 - Talos rejects connection (requires mTLS)
@@ -154,11 +160,13 @@ For testing where TLS verification should be skipped:
 ## Testing Strategy
 
 ### Unit Tests
+
 - Mock gRPC servers using tonic
 - No external dependencies
 - Fast execution
 
 ### Integration Tests
+
 - Require `TALOS_DEV_TESTS=1`
 - Provision real Docker-based Talos cluster
 - Automatic cleanup via Drop

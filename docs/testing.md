@@ -5,7 +5,7 @@
 ## Test Coverage Summary
 
 | Feature | Unit Tests | Integration Test |
-|---------|------------|------------------|
+| ------- | ---------- | ---------------- |
 | TalosClient (core) | 6 tests | ✅ Connection test |
 | ApplyConfiguration | 11 tests | ✅ Dry-run mode |
 | Bootstrap | 6 tests | ✅ Rejection on bootstrapped cluster |
@@ -48,7 +48,7 @@ This will:
 
 **Expected Output:**
 
-```
+```text
 ========================================
   Talos Integration Test Suite
 ========================================
@@ -120,7 +120,7 @@ TALOS_DEV_TESTS=1 cargo test --test integration_test -- --nocapture
 The integration test (`tests/integration_test.rs`) covers:
 
 | API | Status | Notes |
-|-----|--------|-------|
+| --- | ------ | ----- |
 | Version API | ✓ | Returns "Unimplemented" (expected) |
 | Hostname | ✓ | Returns node hostname |
 | ServiceList | ✓ | Lists all running services |

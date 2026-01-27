@@ -35,7 +35,7 @@ The client supports:
 **Goal**: Establish a working client with basic connectivity and essential APIs.
 
 | Feature | Status | Notes |
-|---------|--------|-------|
+| ------- | ------ | ----- |
 | Project scaffolding | ✅ | Cargo workspace, CI/CD |
 | TalosClient core | ✅ | Connection management |
 | TLS/mTLS config | ✅ | Certificate loading |
@@ -56,7 +56,7 @@ The client supports:
 #### Priority 1: Absolute Core (Alpha-Blocking)
 
 | # | Feature | mTLS | Status | Description |
-|---|---------|------|--------|-------------|
+| - | ------- | ---- | ------ | ----------- |
 | 1 | `gen config` | ❌ | ❌ | Machine config generation (NOT gRPC - CLI only) |
 | 2 | `ApplyConfiguration --insecure` | ❌ | ❌ | Initial config in maintenance mode |
 | 3 | `Bootstrap` | ✅ | ❌ | Initialize etcd on first control-plane |
@@ -68,7 +68,7 @@ The client supports:
 #### Priority 2: Beta Operations
 
 | # | Feature | mTLS | Status | Description |
-|---|---------|------|--------|-------------|
+| - | ------- | ---- | ------ | ----------- |
 | 6 | Health check API | ✅ | ❌ | Pre-flight checks, monitoring |
 | 7 | `EtcdRemoveMember` | ✅ | ❌ | Control-plane scale-down |
 | 8 | `Dmesg` (streaming) | ✅ | ❌ | Kernel logs for diagnostics |
@@ -76,7 +76,7 @@ The client supports:
 #### Priority 3: Production Day-2
 
 | # | Feature | mTLS | Status | Description |
-|---|---------|------|--------|-------------|
+| - | ------- | ---- | ------ | ----------- |
 | 9 | `Upgrade` | ✅ | ❌ | Talos version upgrades |
 | 10 | `Version` (remote) | ✅ | ✅ | Remote version check |
 
@@ -85,7 +85,7 @@ The client supports:
 These are **local CLI operations**, not gRPC APIs:
 
 | Operation | Notes |
-|-----------|-------|
+| --------- | ----- |
 | `gen config` | Generates YAML files locally (consider separate helper) |
 | `config endpoint` | Manipulates local talosconfig |
 | `config node` | Manipulates local talosconfig |
@@ -98,7 +98,7 @@ These are **local CLI operations**, not gRPC APIs:
 **Goal**: Complete API coverage for advanced operations.
 
 | Feature | Priority | Description |
-|---------|----------|-------------|
+| ------- | -------- | ----------- |
 | Service Control | 🟡 High | Start, Stop, Restart services |
 | Logs API | 🟡 High | Service log streaming |
 | Events API | 🟡 High | Cluster event stream |
@@ -117,7 +117,7 @@ These are **local CLI operations**, not gRPC APIs:
 **Goal**: Production-grade library with public release.
 
 | Feature | Description |
-|---------|-------------|
+| ------- | ----------- |
 | Connection pooling | Multiple endpoint support with failover |
 | Retry policies | Configurable retry with exponential backoff |
 | Timeouts | Per-request and global timeouts |
@@ -132,19 +132,19 @@ These are **local CLI operations**, not gRPC APIs:
 
 ## mTLS Requirement Summary
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
-│  mTLS NOT required (--insecure or local ops):              │
-│  • ApplyConfiguration (maintenance mode with --insecure)   │
-│  • gen config (local CLI, not gRPC)                        │
-│  • config endpoint/node (local talosconfig manipulation)   │
-│  • cluster create/destroy (Docker provider)                │
-│  • version --client (local CLI)                            │
+│  mTLS NOT required (--insecure or local ops):               │
+│  • ApplyConfiguration (maintenance mode with --insecure)    │
+│  • gen config (local CLI, not gRPC)                         │
+│  • config endpoint/node (local talosconfig manipulation)    │
+│  • cluster create/destroy (Docker provider)                 │
+│  • version --client (local CLI)                             │
 ├─────────────────────────────────────────────────────────────┤
-│  mTLS REQUIRED (post-bootstrap operations):                │
-│  • Bootstrap, Kubeconfig, Reset, Health                    │
-│  • EtcdRemoveMember, Upgrade, Dmesg, Logs                 │
-│  • All remote API calls after bootstrap                    │
+│  mTLS REQUIRED (post-bootstrap operations):                 │
+│  • Bootstrap, Kubeconfig, Reset, Health                     │
+│  • EtcdRemoveMember, Upgrade, Dmesg, Logs                   │
+│  • All remote API calls after bootstrap                     │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -158,7 +158,7 @@ These are **local CLI operations**, not gRPC APIs:
 
 **Symptoms**:
 
-```
+```text
 mTLS connection failed: Transport error: transport error
 received fatal alert: CertificateRequired
 ```
@@ -270,7 +270,7 @@ received fatal alert: CertificateRequired
 ### Machine Service (machine.proto)
 
 | Method | Phase | Implemented | Tested |
-|--------|-------|-------------|--------|
+| ------ | ----- | ----------- | ------ |
 | ApplyConfiguration | 2 | ❌ | ❌ |
 | Bootstrap | 3 | ❌ | ❌ |
 | Containers | 2 | ❌ | ❌ |
@@ -326,7 +326,7 @@ received fatal alert: CertificateRequired
 ### Version Service (version.proto)
 
 | Method | Phase | Implemented | Tested |
-|--------|-------|-------------|--------|
+| ------ | ----- | ----------- | ------ |
 | Version | 1 | ✅ | ✅ |
 
 ---
@@ -334,7 +334,7 @@ received fatal alert: CertificateRequired
 ## Dependencies & Version Tracking
 
 | Dependency | Current | Purpose | Notes |
-|------------|---------|---------|-------|
+| ---------- | ------- | ------- | ----- |
 | tonic | 0.12 | gRPC framework | |
 | prost | 0.13 | Protobuf codegen | |
 | tokio | 1.x | Async runtime | |
@@ -345,7 +345,7 @@ received fatal alert: CertificateRequired
 ### Talos Protobuf Sources
 
 | Proto | Source | Version |
-|-------|--------|---------|
+| ----- | ------ | ------- |
 | machine.proto | github.com/siderolabs/talos | main |
 | common.proto | github.com/siderolabs/talos | main |
 | version.proto | github.com/siderolabs/talos | main |

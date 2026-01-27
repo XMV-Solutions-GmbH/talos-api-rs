@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **OpenTelemetry Tracing** - Distributed tracing support
+  - `TalosSpan` for creating spans with OpenTelemetry semantic conventions
+  - `SpanFactory` for consistent span creation across the client
+  - `TracingConfig` for configuring tracing behavior
+  - W3C Trace Context compatible attributes
+  - `instrument_talos!` macro for easy instrumentation
+- **Prometheus Metrics** - Production-grade observability
+  - `MetricsCollector` for collecting request metrics
+  - `MetricsConfig` with configurable namespace, labels, and histogram buckets
+  - Request counters with method/endpoint/status labels
+  - Response time histograms
+  - Circuit breaker state and rejection metrics
+  - Connection pool health metrics
+  - Prometheus text format export (`to_prometheus_text()`)
+  - `MetricsSnapshot` for programmatic access
+- **New Example** - `monitoring_metrics.rs` demonstrating Prometheus metrics
 - **Logging Interceptor** - Structured logging for gRPC requests
   - `LoggingInterceptor` for tonic interceptor integration
   - `RequestLogger` for manual request/response logging with timing
