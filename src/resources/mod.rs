@@ -11,6 +11,7 @@ mod configuration;
 mod dmesg;
 mod etcd;
 mod files;
+mod images;
 mod kubeconfig;
 mod logs;
 mod reset;
@@ -68,4 +69,9 @@ pub use advanced::{
     GenerateClientConfigurationResult, L4ProtoFilter, NetstatFilter, NetstatRequest,
     NetstatRequestBuilder, NetstatResponse, NetstatResult, PacketCaptureRequest,
     PacketCaptureRequestBuilder, PacketCaptureResponse, RollbackResponse, RollbackResult,
+};
+
+pub use images::{
+    ContainerdNamespace, ImageInfo, ImageListRequest, ImagePullRequest, ImagePullResponse,
+    ImagePullResult,
 };

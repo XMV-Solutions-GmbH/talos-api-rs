@@ -1,32 +1,28 @@
 <!-- SPDX-License-Identifier: MIT OR Apache-2.0 -->
-GitHub Copilot Instructions – Talos Rust Client
+# GitHub Copilot Instructions – Talos Rust Client
 
 You are acting as a senior Rust engineer and open-source maintainer. This repository hosts a Talos Linux API client written in Rust. The goal is to build a professional, production-grade client library, following the same architectural and quality principles as kube-rs, but NOT replacing talosctl.
 
 This document is binding for all Copilot contributions.
 
-⸻
-
-1. Project Goal & Scope
+## 1. Project Goal & Scope
 
 Goal
 
 Provide a typed, async, idiomatic Rust client for the Talos gRPC API, suitable for:
-	•	cluster lifecycle tooling
-	•	operators / controllers
-	•	automation & integration
-	•	desktop tools (via Rust backend)
+-	cluster lifecycle tooling
+-	operators / controllers
+-	automation & integration
+-	desktop tools (via Rust backend)
 
 Explicit Non-Goals
-	•	❌ No CLI replacement for talosctl
-	•	❌ No opinionated workflows (bootstrap, upgrade orchestration)
-	•	❌ No YAML/UX abstractions
+-	❌ No CLI replacement for talosctl
+-	❌ No opinionated workflows (bootstrap, upgrade orchestration)
+-	❌ No YAML/UX abstractions
 
 The library is a thin, correct, observable API client.
 
-⸻
-
-2. High-Level Architecture (kube-rs inspired)
+## 2. High-Level Architecture (kube-rs inspired)
 
 crate
 ├── client/          # TalosClient, connection, auth, TLS
@@ -39,21 +35,19 @@ crate
 └── docs/
 
 Core Principles
-	•	Async-first (tokio)
-	•	Typed APIs, no stringly-typed calls
-	•	Explicit error handling
-	•	Minimal magic
-	•	Stable public API
+-	Async-first (tokio)
+-	Typed APIs, no stringly-typed calls
+-	Explicit error handling
+-	Minimal magic
+-	Stable public API
 
-⸻
-
-3. Programming Approach
+## 3. Programming Approach
 
 gRPC & Protobuf
-	•	Use tonic + prost
-	•	Protobufs are sourced from official Talos repositories only
-	•	Generated code lives in api::generated
-	•	NEVER manually edit generated files
+-	Use tonic + prost
+-	Protobufs are sourced from official Talos repositories only
+-	Generated code lives in api::generated
+-	NEVER manually edit generated files
 
 Client Design
 
@@ -62,9 +56,9 @@ let client = TalosClient::new(config).await?;
 let machines = client.machines().list().await?;
 
 Rules:
-	•	One shared TalosClient
-	•	API groups exposed as sub-clients
-	•	Explicit auth & endpoint config
+-	One shared TalosClient
+-	API groups exposed as sub-clients
+-	Explicit auth & endpoint config
 
 Project Initialization (MANDATORY)
 
@@ -80,38 +74,34 @@ Rules:
 Existing non-code files (CODE_OF_CONDUCT.md, CONTRIBUTING.md, LICENSE*, README.md, SECURITY.md)
 MUST be preserved and not overwritten.
 
-⸻
-
-4. Supported API Surface (Phased)
+## 4. Supported API Surface (Phased)
 
 Phase 1 – Critical / Core
-	•	Connection & authentication
-	•	Version / health APIs
-	•	Machine list / status
-	•	Node reboot / shutdown
+-	Connection & authentication
+-	Version / health APIs
+-	Machine list / status
+-	Node reboot / shutdown
 
 Phase 2 – Common Operations
-	•	Machine config get/set
-	•	Upgrade status
-	•	Logs & diagnostics
-	•	Cluster info
+-	Machine config get/set
+-	Upgrade status
+-	Logs & diagnostics
+-	Cluster info
 
 Phase 3 – Full Coverage
-	•	Bootstrap APIs
-	•	Certificate APIs
-	•	Maintenance mode
-	•	Advanced diagnostics
+-	Bootstrap APIs
+-	Certificate APIs
+-	Maintenance mode
+-	Advanced diagnostics
 
 All phases must be tracked in /docs/todo.md.
 
-⸻
-
-5. Testing Strategy (MANDATORY)
+## 5. Testing Strategy (MANDATORY)
 
 Unit Tests
-	•	Every public function
-	•	Mock gRPC services where possible
-	•	Deterministic, fast
+-	Every public function
+-	Mock gRPC services where possible
+-	Deterministic, fast
 
 Dev / Integration Tests (MANDATORY PER FEATURE)
 
@@ -130,11 +120,11 @@ talosctl cluster create --name talos-dev
 talosctl cluster destroy --name talos-dev
 
 Rules:
-	•	Integration tests live under tests/integration_test.rs
-	•	Tests must auto-skip if talosctl is missing
-	•	Use env-guard (TALOS_DEV_TESTS=1)
-	•	**Every new API feature MUST have an integration test**
-	•	**Integration tests MUST be run before every PR**
+-	Integration tests live under tests/integration_test.rs
+-	Tests must auto-skip if talosctl is missing
+-	Use env-guard (TALOS_DEV_TESTS=1)
+-	**Every new API feature MUST have an integration test**
+-	**Integration tests MUST be run before every PR**
 
 Run Integration Tests:
 ```bash
@@ -142,38 +132,34 @@ TALOS_DEV_TESTS=1 cargo test --test integration_test -- --nocapture
 ```
 
 For Unsupported Features
-	•	Use talosctl via subprocess ONLY in tests
-	•	Never in library runtime code
+-	Use talosctl via subprocess ONLY in tests
+-	Never in library runtime code
 
-⸻
-
-6. Code Hygiene Rules
-	•	Rust 2021 edition
-	•	#![deny(warnings)]
-	•	clippy::pedantic enabled
-	•	No unwrap() in library code
-	•	No todo!() or unimplemented!()
-	•	Public API changes require changelog entry
+## 6. Code Hygiene Rules
+-	Rust 2021 edition
+-	#![deny(warnings)]
+-	clippy::pedantic enabled
+-	No unwrap() in library code
+-	No todo!() or unimplemented!()
+-	Public API changes require changelog entry
   • Every source file MUST start with an SPDX header:
     `// SPDX-License-Identifier: MIT OR Apache-2.0`
   • This rule applies to ALL `.rs` files, including generated code
   • Generated code MUST additionally include a `DO NOT EDIT` notice
 
-⸻
-
-7. Documentation Requirements
+## 7. Documentation Requirements
 
 Mandatory Docs
-	•	README.md
-	•	docs/app-concept.md
-	•	docs/todo.md
-	•	docs/architecture.md
-	•	docs/testing.md
+-	README.md
+-	docs/app-concept.md
+-	docs/todo.md
+-	docs/architecture.md
+-	docs/testing.md
 
 Rust Docs
-	•	All public structs & functions documented
-	•	Examples compile
-	•	cargo doc --no-deps must succeed
+-	All public structs & functions documented
+-	Examples compile
+-	cargo doc --no-deps must succeed
   • SPDX headers MUST also be present in non-Rust files where applicable (Markdown, YAML, TOML)
 
 Markdown Formatting Rules (MANDATORY)
@@ -201,18 +187,16 @@ NOT:
 |value|value|
 ```
 
-⸻
-
-8. Open Source Governance
+## 8. Open Source Governance
 
 License
-	•	Dual license: MIT OR Apache-2.0
-	•	Include LICENSE-MIT and LICENSE-APACHE
+-	Dual license: MIT OR Apache-2.0
+-	Include LICENSE-MIT and LICENSE-APACHE
 
 Required Files
-	•	CODE_OF_CONDUCT.md
-	•	CONTRIBUTING.md
-	•	SECURITY.md
+-	CODE_OF_CONDUCT.md
+-	CONTRIBUTING.md
+-	SECURITY.md
 
 Risk Mitigation Texts
 
@@ -222,34 +206,30 @@ This project is NOT affiliated with Sidero Labs or Talos Linux.
 Provided AS-IS without warranty.
 
 
-⸻
-
-9. Release & Maintenance Process
+## 9. Release & Maintenance Process
 
 Version Updates
 
 When a new Talos version is released:
-	1.	Fetch updated protobufs
-	2.	Diff APIs vs implemented surface
-	3.	Update /docs/app-concept.md
-	4.	Update /docs/todo.md
-	5.	Implement missing APIs
-	6.	Add unit & integration tests
-	7.	Release minor/major version
+1.	Fetch updated protobufs
+2.	Diff APIs vs implemented surface
+3.	Update /docs/app-concept.md
+4.	Update /docs/todo.md
+5.	Implement missing APIs
+6.	Add unit & integration tests
+7.	Release minor/major version
 
 Copilot MUST perform all steps.
 
-⸻
-
-10. Contribution Workflow
+## 10. Contribution Workflow
 
 Copilot must maintain:
-	•	Conventional Commits
-	•	Semantic Versioning
-	•	CI with:
-	•	cargo fmt
-	•	cargo clippy
-	•	cargo test
+-	Conventional Commits
+-	Semantic Versioning
+-	CI with:
+-	cargo fmt
+-	cargo clippy
+-	cargo test
 
 **Before creating a PR (`/create-pr`) - MANDATORY:**
 1. Run `cargo fmt` to format all code
@@ -262,43 +242,23 @@ Copilot must maintain:
 **Integration Tests are MANDATORY for every feature that adds or modifies API functionality.**
 Skipping integration tests is NOT allowed unless explicitly approved by the user.
 
-⸻
+## 11. Changelog Management
 
-11. TODO.md (Initial)
+Copilot MUST maintain a `CHANGELOG.md` file with every release.
+Rules:
+-	Follow Keep a Changelog format
+-	Use Semantic Versioning
+-	Must include date of each release
+-	Must categorize changes under Added, Changed, Fixed, Removed, Deprecated, Security
+-	Must note breaking changes explicitly
+-	Must include migration guides for breaking changes
+- Link to live documantation <https://docs.rs/talos-api-rs/X.X.X/> (e.g. version 0.1.0: <https://docs.rs/talos-api-rs/0.1.0/>)
 
-# TODO
-
-## Phase 1
-- [ ] Project scaffolding
-- [ ] TalosClient core
-- [ ] Auth & TLS config
-- [ ] Health API
-- [ ] Machine list/status
-- [ ] Unit tests
-
-## Phase 2
-- [ ] Machine config APIs
-- [ ] Logs API
-- [ ] Diagnostics
-- [ ] Integration test harness
-
-## Phase 3
-- [ ] Bootstrap APIs
-- [ ] Certificates
-- [ ] Maintenance mode
-- [ ] Full coverage tests
-
-## OSS
-- [ ] README
-- [ ] CONTRIBUTING
-- [ ] CODE_OF_CONDUCT
-- [ ] SECURITY
-- [ ] CI pipelines
+- mention oldest version of talos gRPC API supported in each release (update Readme.md as well)
+- update todo and open points in documentation (/docs/...) before each release
 
 
-⸻
-
-12. Final Rule
+## 12. Final Rule
 
 If something is fundamentally unclear, you are allowed to stop and ask. But try to be self-sufficient first.
 

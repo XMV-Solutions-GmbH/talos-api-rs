@@ -315,15 +315,15 @@
 
 - [ ] EtcdRecover (client-streaming)
 - [ ] EtcdSnapshot (server-streaming)
-- [ ] ImageList, ImagePull
+- [x] ImageList, ImagePull ✅ v0.2.0
 - [ ] Events API
 
-### Quality of Life 🛠️ ✅ COMPLETE (v0.1.2)
+### Quality of Life 🛠️ ✅ COMPLETE (v0.1.2 / v0.2.0)
 
 - [x] `talosctl` config file parsing (`~/.talos/config`) - `TalosConfig::load_default()`
 - [x] Environment-based configuration (`TALOS_ENDPOINTS`, `TALOS_CONTEXT`) - `TalosConfig::load_with_env()`
 - [x] `TalosClient::from_talosconfig()` for easy client creation
-- [ ] Cluster discovery helpers
+- [x] Cluster discovery helpers ✅ v0.2.0 - `ClusterDiscovery`, `ClusterHealth`
 
 ### Documentation 📚
 
