@@ -246,3 +246,113 @@ fn test_machine_request_response_types() {
     let _reboot_resp = RebootResponse { messages: vec![] };
     let _shutdown_resp = ShutdownResponse { messages: vec![] };
 }
+
+/// Test TalosClient::with_node creates correct node targeting
+#[tokio::test]
+async fn test_with_node_creates_single_target() {
+    use crate::client::NodeTarget;
+
+    // Setup mock server
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+
+    let server_future = Server::builder()
+        .add_service(VersionServiceServer::new(MockVersion))
+        .serve_with_incoming(TcpListenerStream::new(listener));
+
+    tokio::spawn(server_future);
+
+    let config = TalosClientConfig {
+        endpoint: format!("http://{}", addr),
+        insecure: true,
+        ..Default::default()
+    };
+
+    let client = TalosClient::new(config)
+        .await
+        .expect("Failed to create client");
+
+    // Verify default is no targeting
+    assert!(matches!(client.node_target(), NodeTarget::Default));
+
+    // Create client with single node
+    let client_with_node = client.with_node(NodeTarget::single("192.168.1.10"));
+    assert!(matches!(
+        client_with_node.node_target(),
+        NodeTarget::Single(_)
+    ));
+}
+
+/// Test TalosClient::with_nodes creates correct multi-node targeting
+#[tokio::test]
+async fn test_with_nodes_creates_multiple_target() {
+    use crate::client::NodeTarget;
+
+    // Setup mock server
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+
+    let server_future = Server::builder()
+        .add_service(VersionServiceServer::new(MockVersion))
+        .serve_with_incoming(TcpListenerStream::new(listener));
+
+    tokio::spawn(server_future);
+
+    let config = TalosClientConfig {
+        endpoint: format!("http://{}", addr),
+        insecure: true,
+        ..Default::default()
+    };
+
+    let client = TalosClient::new(config)
+        .await
+        .expect("Failed to create client");
+
+    // Create client with multiple nodes
+    let nodes = vec!["192.168.1.10", "192.168.1.11", "192.168.1.12"];
+    let client_with_nodes = client.with_nodes(nodes);
+    assert!(matches!(
+        client_with_nodes.node_target(),
+        NodeTarget::Multiple(_)
+    ));
+}
+
+/// Test that with_node and with_nodes can be chained
+#[tokio::test]
+async fn test_node_targeting_override() {
+    use crate::client::NodeTarget;
+
+    let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+
+    let server_future = Server::builder()
+        .add_service(VersionServiceServer::new(MockVersion))
+        .serve_with_incoming(TcpListenerStream::new(listener));
+
+    tokio::spawn(server_future);
+
+    let config = TalosClientConfig {
+        endpoint: format!("http://{}", addr),
+        insecure: true,
+        ..Default::default()
+    };
+
+    let client = TalosClient::new(config)
+        .await
+        .expect("Failed to create client");
+
+    // Start with single node
+    let client = client.with_node(NodeTarget::single("192.168.1.10"));
+    assert!(matches!(client.node_target(), NodeTarget::Single(_)));
+
+    // Override with multiple nodes
+    let client = client.with_nodes(vec!["10.0.0.1", "10.0.0.2"]);
+    assert!(matches!(client.node_target(), NodeTarget::Multiple(_)));
+
+    // Override back to single
+    let client = client.with_node(NodeTarget::single("10.0.0.3"));
+    match client.node_target() {
+        NodeTarget::Single(node) => assert_eq!(node, "10.0.0.3"),
+        _ => panic!("Expected Single node target"),
+    }
+}
