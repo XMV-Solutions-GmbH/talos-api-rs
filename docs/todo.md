@@ -1,6 +1,6 @@
 # TODO
 
-> **Updated**: 2025-01-27 - Phase 4 Production Readiness - Logging Interceptor added.
+> **Updated**: 2025-01-27 - v0.1.0 Released! 🎉 Next: v0.2.0 Roadmap
 
 ## Phase 1: Core Foundation ✅ COMPLETE
 
@@ -283,3 +283,59 @@
 - [x] Prometheus metrics
 - [x] OpenTelemetry tracing
 - [x] API stability commitment (`docs/api-stability.md`)
+
+---
+
+## v0.2.0 Roadmap - Next Release
+
+### Dependency Updates 🔧
+
+| PR | Description | Status | Notes |
+| -- | ----------- | ------ | ----- |
+| #19 | webpki-roots 0.26.8 → 0.26.10 | ⏳ Pending rebase | Safe update, no breaking changes |
+| - | tonic 0.13 → 0.14 | 📋 Planned | Enables prost 0.14, rand 0.9 |
+| - | prost 0.13 → 0.14 | 📋 Blocked by tonic | Breaking: `Message::encoded_len()` |
+| - | rand 0.8 → 0.9 | 📋 Blocked by tower | tower-0.4 needs rand 0.8 |
+| - | tonic-build 0.13 → 0.14 | 📋 Blocked by tonic | Breaking: `build_transport()` removed |
+
+**Note:** Major dependency updates (tonic/prost/rand) require coordinated upgrade. Wait for ecosystem to stabilize.
+
+### Streaming API Improvements 🚀
+
+- [ ] True async streaming for `Kubeconfig`, `Dmesg`, `Logs`
+- [ ] Backpressure handling for large streams
+- [ ] Streaming progress callbacks
+
+### Multi-Node Operations 🎯
+
+- [ ] gRPC metadata for node targeting (`x-talos-node`)
+- [ ] Cluster-wide operations (apply to all nodes)
+- [ ] Parallel execution with result aggregation
+
+### Missing APIs 📡
+
+- [ ] EtcdRecover (client-streaming)
+- [ ] EtcdSnapshot (server-streaming)
+- [ ] ImageList, ImagePull
+- [ ] Events API
+
+### Quality of Life 🛠️
+
+- [ ] `talosctl` config file parsing (`~/.talos/config`)
+- [ ] Environment-based configuration (`TALOS_ENDPOINTS`, `TALOS_CONTEXT`)
+- [ ] Cluster discovery helpers
+
+### Documentation 📚
+
+- [ ] More examples (cluster upgrade workflow)
+- [ ] Tutorial: Building a Talos operator
+- [ ] API coverage matrix vs talosctl
+
+---
+
+## Future Considerations (v0.3.0+)
+
+- [ ] Talos 1.10 API additions (when released)
+- [ ] SideroLink integration
+- [ ] Machine config validation (schema-based)
+- [ ] Async trait stabilization (when Rust stabilizes)
