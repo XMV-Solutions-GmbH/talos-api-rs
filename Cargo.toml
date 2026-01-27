@@ -35,7 +35,7 @@ http = "1.0"
 url = "2.5"
 bytes = "1.5"
 tracing = "0.1"
-rand = "0.8"
+rand = "0.9"
 rustls = { version = "0.23.36", features = ["logging", "ring", "std", "tls12"], default-features = false }
 tokio-rustls = { version = "0.26.4", features = ["logging", "ring", "tls12"], default-features = false }
 rustls-pemfile = "2.2"
