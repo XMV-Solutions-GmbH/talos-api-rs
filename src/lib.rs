@@ -38,6 +38,7 @@
 //! ## Module Overview
 //!
 //! - [`client`] — Core client and connection management
+//! - [`config`] — Configuration file parsing (talosctl config)
 //! - [`resources`] — Typed API request/response wrappers
 //! - [`runtime`] — Resilience (retry, circuit breaker) and observability
 //! - [`error`] — Error types
@@ -95,6 +96,7 @@
 
 pub mod api;
 pub mod client;
+pub mod config;
 pub mod error;
 pub mod resources;
 pub mod runtime;
@@ -104,6 +106,7 @@ pub use client::{
     ConnectionPool, ConnectionPoolConfig, EndpointHealth, HealthStatus, LoadBalancer, TalosClient,
     TalosClientConfig, TalosClientConfigBuilder,
 };
+pub use config::{TalosConfig, TalosContext};
 pub use error::TalosError;
 pub use resources::{
     ApplyConfigurationRequest, ApplyConfigurationResponse, ApplyConfigurationResult, ApplyMode,

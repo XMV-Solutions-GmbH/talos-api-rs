@@ -2,6 +2,7 @@
 
 use thiserror::Error;
 
+#[allow(clippy::result_large_err)]
 #[derive(Debug, Error)]
 pub enum TalosError {
     #[error("Configuration error: {0}")]
