@@ -1,6 +1,6 @@
 # TODO
 
-> **Updated**: 2025-01-26 - Priority 2-3 Beta features complete! All Extended APIs implemented.
+> **Updated**: 2025-01-26 - Phase 4 Production Readiness in progress.
 
 ## Phase 1: Core Foundation ✅ COMPLETE
 
@@ -134,13 +134,15 @@
 - [ ] Automatic reconnection
 - [ ] Load balancing across nodes
 
-### Resilience
+### Resilience ✅ PARTIAL
 
-- [ ] Configurable retry policies
-- [ ] Exponential backoff
+- [x] Configurable retry policies
+- [x] Exponential backoff (with jitter)
+- [x] Linear and fixed backoff strategies
 - [ ] Circuit breaker pattern
-- [ ] Per-request timeouts
-- [ ] Global timeouts
+- [x] Per-request timeouts (`request_timeout`)
+- [x] Connection timeouts (`connect_timeout`)
+- [x] HTTP/2 keepalive configuration
 
 ### Observability
 
@@ -148,21 +150,23 @@
 - [ ] Metrics (Prometheus-compatible)
 - [ ] Distributed tracing (OpenTelemetry)
 
-### Developer Experience
+### Developer Experience ✅ PARTIAL
 
-- [ ] High-level resource wrappers
-- [ ] Builder patterns for complex requests
-- [ ] Comprehensive documentation
+- [x] High-level resource wrappers
+- [x] Builder patterns for complex requests
+- [x] `TalosClientConfig::builder()` fluent API
+- [x] Comprehensive documentation
 - [ ] More examples
 
-### Release Preparation
+### Release Preparation ✅ PARTIAL
 
 - [ ] crates.io publication
-- [ ] Semantic versioning
+- [x] Semantic versioning
+- [x] CHANGELOG.md
 - [ ] Changelog automation
 - [ ] API stability guarantees
-- [ ] MSRV (Minimum Supported Rust Version) policy
-- [ ] docs.rs documentation
+- [x] MSRV (Minimum Supported Rust Version) policy - Rust 1.75+
+- [x] docs.rs documentation metadata
 
 ---
 
@@ -177,7 +181,7 @@
 - [x] CI pipelines (Tests/Lint)
 - [ ] Release pipelines (Build/Publish)
 - [ ] Automated dependency updates (Dependabot)
-- [ ] CHANGELOG.md
+- [x] CHANGELOG.md
 - [ ] Release checklist documentation
 
 ---
