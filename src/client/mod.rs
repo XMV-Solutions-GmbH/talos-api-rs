@@ -19,6 +19,8 @@ use crate::api::machine::EtcdForfeitLeadershipRequest as ProtoEtcdForfeitLeaders
 use crate::api::machine::EtcdLeaveClusterRequest as ProtoEtcdLeaveClusterRequest;
 use crate::api::machine::EtcdMemberListRequest as ProtoEtcdMemberListRequest;
 use crate::api::machine::EtcdRemoveMemberByIdRequest as ProtoEtcdRemoveMemberByIdRequest;
+use crate::api::machine::EtcdSnapshotRequest as ProtoEtcdSnapshotRequest;
+use crate::api::machine::EventsRequest as ProtoEventsRequest;
 use crate::api::machine::GenerateClientConfigurationRequest as ProtoGenerateClientConfigRequest;
 use crate::api::machine::ImageListRequest as ProtoImageListRequest;
 use crate::api::machine::ImagePullRequest as ProtoImagePullRequest;
@@ -42,14 +44,15 @@ use crate::resources::{
     EtcdDefragmentResponse, EtcdForfeitLeadershipRequest, EtcdForfeitLeadershipResponse,
     EtcdLeaveClusterRequest, EtcdLeaveClusterResponse, EtcdMemberListRequest,
     EtcdMemberListResponse, EtcdRemoveMemberByIdRequest, EtcdRemoveMemberByIdResponse,
-    EtcdStatusResponse, FileInfo, GenerateClientConfigurationRequest,
-    GenerateClientConfigurationResponse, ImageInfo, ImageListRequest, ImagePullRequest,
-    ImagePullResponse, KubeconfigResponse, ListRequest, ListResponse, LoadAvgResponse, LogsRequest,
-    LogsResponse, MemoryResponse, MountsResponse, NetstatRequest, NetstatResponse,
-    NetworkDeviceStatsResponse, PacketCaptureRequest, PacketCaptureResponse, ProcessesResponse,
-    ReadRequest, ReadResponse, ResetRequest, ResetResponse, RollbackResponse,
-    ServiceRestartRequest, ServiceRestartResponse, ServiceStartRequest, ServiceStartResponse,
-    ServiceStopRequest, ServiceStopResponse, UpgradeRequest, UpgradeResponse,
+    EtcdSnapshotRequest, EtcdSnapshotResponse, EtcdStatusResponse, Event, EventsRequest, FileInfo,
+    GenerateClientConfigurationRequest, GenerateClientConfigurationResponse, ImageInfo,
+    ImageListRequest, ImagePullRequest, ImagePullResponse, KubeconfigResponse, ListRequest,
+    ListResponse, LoadAvgResponse, LogsRequest, LogsResponse, MemoryResponse, MountsResponse,
+    NetstatRequest, NetstatResponse, NetworkDeviceStatsResponse, PacketCaptureRequest,
+    PacketCaptureResponse, ProcessesResponse, ReadRequest, ReadResponse, ResetRequest,
+    ResetResponse, RollbackResponse, ServiceRestartRequest, ServiceRestartResponse,
+    ServiceStartRequest, ServiceStartResponse, ServiceStopRequest, ServiceStopResponse,
+    UpgradeRequest, UpgradeResponse,
 };
 use hyper_util::rt::TokioIo;
 use rustls::pki_types::{CertificateDer, PrivateKeyDer, ServerName};
@@ -1095,6 +1098,98 @@ impl TalosClient {
         let inner = response.into_inner();
 
         Ok(EtcdDefragmentResponse::from(inner))
+    }
+
+    /// Create an etcd snapshot for backup.
+    ///
+    /// This is a server-streaming RPC that returns the snapshot data.
+    /// The snapshot can be used for disaster recovery with `etcd_recover`.
+    ///
+    /// # Example
+    ///
+    /// ```rust,no_run
+    /// use talos_api_rs::{TalosClient, TalosClientConfig};
+    /// use talos_api_rs::resources::EtcdSnapshotRequest;
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = TalosClientConfig::builder("https://10.0.0.1:50000")
+    ///     .insecure()
+    ///     .build();
+    /// let client = TalosClient::new(config).await?;
+    ///
+    /// let snapshot = client.etcd_snapshot(EtcdSnapshotRequest::new()).await?;
+    /// snapshot.write_to_file("etcd-backup.db")?;
+    /// println!("Snapshot saved: {}", snapshot.size_human());
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn etcd_snapshot(
+        &self,
+        request: EtcdSnapshotRequest,
+    ) -> Result<EtcdSnapshotResponse> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoEtcdSnapshotRequest = request.into();
+        let response = client.etcd_snapshot(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut data = Vec::new();
+        while let Some(chunk) = stream.next().await {
+            let chunk = chunk?;
+            data.extend_from_slice(&chunk.bytes);
+        }
+
+        Ok(EtcdSnapshotResponse::new(data))
+    }
+
+    // =========================================================================
+    // Events
+    // =========================================================================
+
+    /// Subscribe to Talos cluster events.
+    ///
+    /// This is a server-streaming RPC that returns cluster events.
+    /// Events provide visibility into machine state changes, service
+    /// lifecycle, and cluster activity.
+    ///
+    /// # Example
+    ///
+    /// ```rust,no_run
+    /// use talos_api_rs::{TalosClient, TalosClientConfig};
+    /// use talos_api_rs::resources::EventsRequest;
+    ///
+    /// # async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    /// let config = TalosClientConfig::builder("https://10.0.0.1:50000")
+    ///     .insecure()
+    ///     .build();
+    /// let client = TalosClient::new(config).await?;
+    ///
+    /// // Get the last 10 events
+    /// let events = client.events(EventsRequest::tail(10)).await?;
+    /// for event in &events {
+    ///     println!("Event {}: type={:?}", event.id, event.event_type());
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub async fn events(&self, request: EventsRequest) -> Result<Vec<Event>> {
+        use tonic::codegen::tokio_stream::StreamExt;
+
+        let mut client = MachineServiceClient::new(self.channel.clone());
+
+        let proto_request: ProtoEventsRequest = request.into();
+        let response = client.events(proto_request).await?;
+        let mut stream = response.into_inner();
+
+        let mut events = Vec::new();
+        while let Some(event) = stream.next().await {
+            let event = event?;
+            events.push(Event::from(event));
+        }
+
+        Ok(events)
     }
 
     // =========================================================================

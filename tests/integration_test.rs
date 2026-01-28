@@ -370,6 +370,37 @@ cluster:
         }
     }
 
+    // Test etcd snapshot (backup)
+    println!("\n--- etcd API: Snapshot ---");
+    use talos_api_rs::resources::EtcdSnapshotRequest;
+    match client.etcd_snapshot(EtcdSnapshotRequest::new()).await {
+        Ok(response) => {
+            println!("✓ Snapshot created successfully");
+            println!("  Size: {}", response.size_human());
+            println!("  Bytes: {}", response.len());
+        }
+        Err(e) => {
+            // Snapshot might fail if not on control plane
+            println!("  etcd_snapshot returned error: {}", e);
+        }
+    }
+
+    // Test Events API
+    println!("\n--- Events API: Recent Events ---");
+    use talos_api_rs::resources::EventsRequest;
+    match client.events(EventsRequest::tail(5)).await {
+        Ok(events) => {
+            println!("✓ Retrieved {} events", events.len());
+            for event in events.iter().take(3) {
+                let event_type = event.event_type().unwrap_or("unknown");
+                println!("  Event {}: type={}", event.id, event_type);
+            }
+        }
+        Err(e) => {
+            println!("  events returned error: {}", e);
+        }
+    }
+
     // 11. Test System Information APIs
     println!("\n--- System API: Memory ---");
     match client.memory().await {
@@ -742,12 +773,13 @@ cluster:
     println!("  Tested APIs:");
     println!("    - Version, Hostname, ServiceList, SystemStat");
     println!("    - ApplyConfiguration, Bootstrap, Kubeconfig, Reset");
-    println!("    - etcd: MemberList, Status, AlarmList");
+    println!("    - etcd: MemberList, Status, AlarmList, Snapshot");
     println!("    - System: Memory, CPU, LoadAvg, Disks, Mounts, Network, Processes");
     println!("    - Diagnostics: Dmesg");
     println!("    - Files: List, Read");
     println!("    - Advanced: Netstat");
     println!("    - Container: ImageList");
     println!("    - Discovery: ClusterDiscovery, ClusterHealth");
+    println!("    - Events: Events streaming");
     println!("========================================");
 }
