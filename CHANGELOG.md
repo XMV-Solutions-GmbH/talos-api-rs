@@ -6,6 +6,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `howto-oss.md` - Comprehensive guide for setting up professional OSS projects
+  - Repository structure best practices
+  - Required documents (CODE_OF_CONDUCT, CONTRIBUTING, SECURITY, CHANGELOG)
+  - Dual licensing (MIT OR Apache-2.0) with SPDX headers
+  - README badges including Coverage Status and Contributions Welcome
+  - GitHub configuration (CODEOWNERS, Dependabot, CI/CD workflows)
+  - Repository setup scripts for branch protection and team assignment
+
 ## [0.2.0] - 2026-01-27
 
 **Talos gRPC API**: v1.9.x (compatible with Talos Linux 1.9+)
