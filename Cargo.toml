@@ -46,7 +46,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 serde_yaml = "0.9.34"
 base64 = "0.22.1"
 tempfile = "3.10"
-dirs = "5.0"
+dirs = "6.0"
 
 [build-dependencies]
 tonic-prost-build = "0.14"
