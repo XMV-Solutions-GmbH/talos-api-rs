@@ -2,80 +2,12 @@
 
 # TODO
 
-> **Current**: v0.2.0 | **Target**: v1.0.0 Stable
-
-## Roadmap to v1.0.0
-
-### Missing APIs
-
-| API | Type | Blocker | Notes |
-| --- | ---- | ------- | ----- |
-| EtcdRecover | Client-streaming | v1.0 | Requires client-streaming support |
-
-### Streaming Improvements
-
-- [ ] True async iterators for streaming APIs (Kubeconfig, Dmesg, Logs, Files)
-- [ ] Backpressure handling for large streams
-- [ ] Streaming progress callbacks
-
-### Multi-Node Operations
-
-- [x] gRPC metadata for node targeting (`x-talos-node`)
-- [x] Cluster-wide operations (`with_nodes()`)
-- [ ] Parallel execution with result aggregation
-
-### Quality of Life
-
-- [ ] More examples (cluster upgrade workflow)
-- [ ] Tutorial: Building a Talos operator
-- [ ] API coverage matrix vs talosctl
-
-### Release Blockers
-
-- [ ] crates.io publication (requires `CRATES_IO_TOKEN` secret)
-
----
-
-## Known Issues
-
-### Medium Priority
-
-| Issue | Description |
-| ----- | ----------- |
-| Streaming collection | APIs collect full stream into memory, no true async iteration |
-| Client-streaming | EtcdRecover requires unimplemented client-streaming |
-
-### Low Priority
-
-| Issue | Description |
-| ----- | ----------- |
-| Error granularity | Could parse `google.rpc.Status` details for richer errors |
-| Generated code size | `machine.rs` is ~6000 lines (acceptable, just large) |
-
----
-
-## Future (v1.1.0+)
-
-- [ ] Talos 1.10 API additions (when released)
-- [ ] SideroLink integration
-- [ ] Machine config validation (schema-based)
-- [ ] Async trait stabilization (when Rust stabilizes)
-
----
-
-## Completed (v0.2.0)
-
-Summary of what's done - see [CHANGELOG.md](../CHANGELOG.md) for details.
-
-- [x] **43/52 Machine Service APIs** (83% coverage)
-- [x] **ED25519 mTLS** with ring crypto provider
-- [x] **Connection pooling** with load balancing strategies
-- [x] **Retry policies** (exponential, linear, fixed backoff)
-- [x] **Circuit breaker** pattern
-- [x] **Prometheus metrics** export
-- [x] **OpenTelemetry tracing** integration
-- [x] **talosconfig parsing** (`~/.talos/config`)
-- [x] **Cluster discovery** helpers
-- [x] **Full documentation** on docs.rs
-- [x] **Events API** for cluster event streaming
-- [x] **EtcdSnapshot API** for backups
+> **Frozen.** This file is no longer the source of truth for project work.
+>
+> Everything that was open here has been migrated to **GitHub Issues**:
+>
+> - **Open backlog (Roadmap to v1.0.0, Streaming Improvements, Multi-Node, QoL, Release Blockers, Future v1.1.0+):** see [Issues](https://github.com/XMV-Solutions-GmbH/talos-api-rs/issues) — the v1.0 blockers (incl. `EtcdRecover` client-streaming, true async iterators, crates.io publication) are filed individually.
+> - **Per-repo Project board** with everything aggregated: <https://github.com/orgs/XMV-Solutions-GmbH/projects/13>.
+> - **Completed work (v0.2.0 + earlier):** see [`CHANGELOG.md`](../CHANGELOG.md).
+>
+> File preserved for historical reference. New work goes into Issues.
