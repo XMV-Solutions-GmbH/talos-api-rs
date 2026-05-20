@@ -459,7 +459,12 @@ impl ConnectionPool {
                 healthy[idx].clone()
             }
             LoadBalancer::Random => {
-                let idx = rand::random::<usize>() % healthy.len();
+                // rand 0.10 dropped Distribution<usize> for StandardUniform, so
+                // rand::random::<usize>() no longer compiles. random_range is
+                // both the supported replacement and avoids the modulo bias
+                // we previously had against healthy.len().
+                use rand::Rng;
+                let idx = rand::rng().random_range(0..healthy.len());
                 healthy[idx].clone()
             }
             LoadBalancer::LeastFailures => {
